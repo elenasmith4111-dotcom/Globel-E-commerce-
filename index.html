@@ -10,35 +10,82 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-    body {
-      background-color: #0b0f17;
+    html, body {
+      width: 100%;
       min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      overflow-x: hidden;
     }
 
-    /* ==================== CUSTOMER MOBILE SHELL ==================== */
+    /* ==================== CUSTOMER FULL-FIT SHELL ==================== */
     .customer-outer {
       min-height: 100vh;
+      width: 100%;
       display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 14px;
-      background: radial-gradient(circle at top, #1e293b, #090d16);
+      align-items: flex-start;
+      background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
     }
 
     .mobile-container {
-      width: 395px;
-      height: 800px;
-      background-color: #f1f5f9;
-      border-radius: 34px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+      width: 100%;
+      max-width: 500px;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eef2ff 0%, #f5f3ff 50%, #f8fafc 100%);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
       overflow: hidden;
       position: relative;
       display: flex;
       flex-direction: column;
-      border: 8px solid #090b0e;
+    }
+
+    /* ==================== VERIFYING OVERLAY ==================== */
+    .verifying-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(145deg, #0f172a, #1e1b4b, #312e81);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .verify-ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.16);
+      border-top-color: #38bdf8;
+      border-right-color: #f59e0b;
+      animation: spinRing 0.9s linear infinite;
+      margin-bottom: 18px;
+    }
+
+    @keyframes spinRing {
+      to { transform: rotate(360deg); }
+    }
+
+    .verify-progress-bar {
+      width: 240px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .verify-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #fbbf24);
+      transition: width 1.6s ease-in-out;
     }
 
     /* ==================== ADMIN FULL DESKTOP SHELL ==================== */
@@ -64,18 +111,18 @@
     .admin-login-card {
       width: 100%;
       max-width: 420px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(129, 140, 248, 0.35);
       border-radius: 20px;
       padding: 32px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
     }
 
     .admin-dashboard-full {
       display: none;
       min-height: 100vh;
       width: 100%;
-      background: #f1f5f9;
+      background: #eef2ff;
     }
 
     .admin-layout {
@@ -86,8 +133,8 @@
 
     .admin-sidebar {
       width: 245px;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: #1e1b4b;
+      color: #e0e7ff;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -100,13 +147,8 @@
       align-items: center;
       gap: 10px;
       padding: 8px 10px 20px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      border-bottom: 1px solid rgba(224, 231, 255, 0.18);
       margin-bottom: 14px;
-    }
-
-    .admin-brand i {
-      font-size: 24px;
-      color: #fbbf24;
     }
 
     .admin-nav-btn {
@@ -118,7 +160,7 @@
       border-radius: 12px;
       border: none;
       background: transparent;
-      color: #cbd5e1;
+      color: #c7d2fe;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -133,7 +175,7 @@
     }
 
     .admin-nav-btn.active {
-      background: #4338ca;
+      background: #4f46e5;
       color: #fff;
     }
 
@@ -147,7 +189,7 @@
     .admin-topbar {
       background: #fff;
       padding: 16px 26px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid #c7d2fe;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -155,24 +197,24 @@
 
     .admin-content-area {
       padding: 22px;
-      max-width: 1320px;
+      max-width: 1360px;
       width: 100%;
     }
 
     .admin-grid-2 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
     }
 
     /* ==================== USER LINE IN ADMIN ==================== */
     .user-line-card {
       background: #fff;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #c7d2fe;
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 2px 10px rgba(30, 27, 75, 0.06);
     }
 
     .user-line-top {
@@ -189,7 +231,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 10px;
-      background: #f8fafc;
+      background: #eef2ff;
       padding: 12px;
       border-radius: 12px;
       margin: 12px 0;
@@ -208,19 +250,29 @@
       margin-top: 14px;
       padding: 14px;
       border-radius: 12px;
-      background: #f1f5f9;
+      background: #f8fafc;
       border: 1px solid #cbd5e1;
     }
 
     /* ================= SHARED AUTH & UI STYLES ================= */
     .auth-box {
       flex: 1;
-      background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      background: linear-gradient(155deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
       color: #fff;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 26px;
+      padding: 24px 20px;
+    }
+
+    .auth-card-inner {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 22px;
+      padding: 24px 20px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
     }
 
     .brand-logo {
@@ -228,106 +280,142 @@
       margin-bottom: 20px;
     }
 
-    .brand-logo i {
-      font-size: 42px;
-      color: #fbbf24;
-      margin-bottom: 8px;
+    .ge-svg-logo {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 6px 16px rgba(99, 102, 241, 0.45));
     }
 
     .auth-tabs {
       display: flex;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       padding: 4px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .auth-tab {
       flex: 1;
       text-align: center;
-      padding: 8px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 700;
       border-radius: 9px;
       cursor: pointer;
       color: #cbd5e1;
+      transition: 0.2s;
     }
 
     .auth-tab.active {
-      background: #fbbf24;
-      color: #111827;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      color: #fff;
     }
 
     .input-group {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .input-group label {
       display: block;
       font-size: 11px;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
       opacity: 0.92;
       font-weight: 600;
     }
 
     .input-group input, .input-group select, .input-group textarea {
       width: 100%;
-      padding: 9px 11px;
-      border-radius: 10px;
+      padding: 11px 12px;
+      border-radius: 11px;
       border: 1px solid #cbd5e1;
       outline: none;
       font-size: 13px;
       background: #fff;
-      color: #1e293b;
+      color: #0f172a;
     }
 
     .btn-primary {
       width: 100%;
-      padding: 11px;
+      padding: 12px;
       border-radius: 12px;
       border: none;
-      background: linear-gradient(90deg, #f59e0b, #fbbf24);
-      color: #111827;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      color: #fff;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
-      margin-top: 4px;
+      margin-top: 6px;
       text-decoration: none;
       display: inline-block;
       text-align: center;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+      transition: 0.2s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
     }
 
     .app-view {
       display: none;
       flex: 1;
       flex-direction: column;
-      height: 100%;
-      overflow: hidden;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eef2ff 0%, #f3e8ff 52%, #f8fafc 100%);
     }
 
     .top-header {
-      background: linear-gradient(90deg, #1e3a8a, #2563eb);
+      background: linear-gradient(90deg, #1e1b4b, #4338ca, #6d28d9);
       color: #fff;
-      padding: 14px 18px;
+      padding: 13px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: 0 4px 14px rgba(30, 27, 75, 0.25);
+    }
+
+    .header-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .lang-select-pill {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 20px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .lang-select-pill option {
+      background: #1e1b4b;
+      color: #fff;
     }
 
     .badge-tier {
-      background: #fbbf24;
-      color: #111;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      color: #111827;
       font-size: 11px;
       font-weight: 700;
       padding: 4px 10px;
       border-radius: 20px;
     }
 
+    /* COMPACT PAGES WRAPPER — NO EXTRA EMPTY SPACE */
     .pages-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px;
-      padding-bottom: 85px;
+      padding: 12px 14px 78px 14px;
+      display: block;
     }
 
     .page {
@@ -345,11 +433,12 @@
     }
 
     .hero-banner {
-      background: linear-gradient(135deg, #1e293b, #334155);
+      background: linear-gradient(135deg, #312e81, #4f46e5, #7c3aed);
       color: #fff;
       padding: 15px;
       border-radius: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
     }
 
     .status-banner-alert {
@@ -360,7 +449,7 @@
       border-radius: 12px;
       font-size: 11px;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .admin-push-notif {
@@ -370,7 +459,7 @@
       padding: 11px 12px;
       border-radius: 12px;
       font-size: 11px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -381,31 +470,32 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 9px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
     }
 
     .info-card {
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff, #f5f3ff);
       padding: 12px 6px;
       border-radius: 14px;
       text-align: center;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #ddd6fe;
       cursor: pointer;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.06);
     }
 
     .live-feed-box, .card-box {
-      background: #fff;
+      background: #ffffff;
       border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 14px;
-      border: 1px solid #e2e8f0;
+      padding: 14px;
+      box-shadow: 0 4px 14px rgba(30, 27, 75, 0.06);
+      margin-bottom: 11px;
+      border: 1px solid #e0e7ff;
     }
 
     .live-dot {
       height: 8px;
       width: 8px;
-      background-color: #16a34a;
+      background-color: #10b981;
       border-radius: 50%;
       display: inline-block;
       margin-right: 5px;
@@ -417,17 +507,81 @@
     .tx-row {
       display: flex;
       justify-content: space-between;
-      padding: 7px 0;
+      padding: 6px 0;
       border-bottom: 1px dashed #e2e8f0;
       font-size: 12px;
     }
 
+    /* ==================== 6 PARTNER CARDS GRID (3x2 COMPACT, NO GAP) ==================== */
+    .partners-section {
+      background: linear-gradient(180deg, #ffffff, #eef2ff);
+      border-radius: 16px;
+      padding: 13px;
+      border: 1px solid #c7d2fe;
+      box-shadow: 0 4px 14px rgba(30, 27, 75, 0.06);
+      margin-bottom: 6px;
+    }
+
+    .partners-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .partner-mini-card {
+      background: #ffffff;
+      border: 1px solid #e0e7ff;
+      border-radius: 13px;
+      padding: 11px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.05);
+      transition: 0.2s;
+    }
+
+    .partner-mini-card:hover {
+      border-color: #6366f1;
+      transform: translateY(-2px);
+    }
+
+    .partner-logo-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      font-size: 18px;
+      background: #f8fafc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .partner-mini-card h5 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .partner-mini-card span {
+      font-size: 9px;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    /* ==================== GRABBING VIEW ==================== */
     .grab-stats-card {
-      background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+      background: linear-gradient(135deg, #1e1b4b, #4338ca, #6d28d9);
       color: #fff;
       border-radius: 18px;
       padding: 14px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
+      box-shadow: 0 6px 18px rgba(67, 56, 202, 0.25);
     }
 
     .grab-sub-grid {
@@ -450,39 +604,46 @@
       margin-top: 2px;
     }
 
-    .product-preview {
-      background: #f8fafc;
-      border: 1px dashed #94a3b8;
-      border-radius: 14px;
-      padding: 14px;
-      margin: 8px 0 12px;
+    .grab-full-stage-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 15px;
+      border: 1px solid #c7d2fe;
       text-align: center;
+      box-shadow: 0 4px 14px rgba(30, 27, 75, 0.06);
+    }
+
+    .product-preview {
+      background: linear-gradient(180deg, #eef2ff, #f5f3ff);
+      border: 1.5px dashed #6366f1;
+      border-radius: 16px;
+      padding: 16px 14px;
+      margin-bottom: 12px;
     }
 
     .lucky-product-card {
       background: #fff1f2;
       border: 2px solid #e11d48;
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-      margin: 8px 0 12px;
+      border-radius: 16px;
+      padding: 15px 14px;
+      margin-bottom: 12px;
       cursor: pointer;
     }
 
     .negative-order-amt {
       color: #e11d48;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
       margin: 4px 0;
     }
 
     .prod-img {
-      width: 92px;
-      height: 92px;
+      width: 115px;
+      height: 115px;
       object-fit: cover;
-      border-radius: 12px;
-      border: 2px solid #e2e8f0;
-      margin: 0 auto 8px;
+      border-radius: 16px;
+      border: 2px solid #c7d2fe;
+      margin: 0 auto 10px;
       display: block;
       background: #fff;
     }
@@ -496,39 +657,95 @@
       flex-shrink: 0;
     }
 
+    /* ==================== PROFILE PAGE (COMPACT, EXPANDABLE ACCOUNT SETTINGS CARD) ==================== */
     .profile-top-card {
-      background: linear-gradient(135deg, #0f172a, #1e293b);
+      background: linear-gradient(135deg, #1e1b4b, #4338ca, #6d28d9);
       color: #fff;
       padding: 15px;
       border-radius: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
+      box-shadow: 0 6px 18px rgba(67, 56, 202, 0.22);
     }
 
     .action-3-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 9px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
     }
 
     .action-box {
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff, #eef2ff);
       padding: 12px 6px;
       border-radius: 14px;
       text-align: center;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #c7d2fe;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.05);
     }
 
-    .menu-row {
+    .account-settings-accordion {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #c7d2fe;
+      overflow: hidden;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 12px rgba(30, 27, 75, 0.06);
+    }
+
+    .acc-settings-header {
+      padding: 14px 15px;
+      background: linear-gradient(90deg, #eef2ff, #f3e8ff);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: #312e81;
+    }
+
+    .acc-settings-body {
+      display: none;
+      padding: 14px 15px;
+      background: #ffffff;
+      border-top: 1px solid #e0e7ff;
+    }
+
+    .acc-settings-body.open {
+      display: block;
+    }
+
+    .inline-pass-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 11px;
+      margin-bottom: 10px;
+    }
+
+    .logout-card-btn {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #dc2626;
+      border-radius: 14px;
       padding: 13px 15px;
-      border-bottom: 1px solid #f1f5f9;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
-      color: #1e293b;
+      font-weight: 700;
       cursor: pointer;
+    }
+
+    /* ==================== CUSTOMER SERVICE CARD ==================== */
+    .service-hero-card {
+      background: linear-gradient(180deg, #ffffff, #eef2ff);
+      border: 1px solid #c7d2fe;
+      border-radius: 18px;
+      padding: 22px 18px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(30, 27, 75, 0.08);
     }
 
     .switch {
@@ -543,7 +760,7 @@
       position: absolute;
       cursor: pointer;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #16a34a;
+      background-color: #10b981;
       transition: .3s;
       border-radius: 24px;
     }
@@ -576,7 +793,7 @@
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(15, 23, 42, 0.8);
       display: none;
       justify-content: center;
       align-items: center;
@@ -587,7 +804,7 @@
     .modal-box {
       background: #fff;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       max-height: 88%;
       overflow-y: auto;
       border-radius: 18px;
@@ -605,17 +822,20 @@
     }
 
     .bottom-nav {
-      position: absolute;
+      position: fixed;
       bottom: 0;
-      left: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
-      height: 66px;
+      max-width: 500px;
+      height: 64px;
       background: #ffffff;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid #c7d2fe;
       display: flex;
       justify-content: space-around;
       align-items: center;
       z-index: 100;
+      box-shadow: 0 -4px 16px rgba(30, 27, 75, 0.08);
     }
 
     .nav-item {
@@ -636,241 +856,355 @@
     }
 
     .nav-item.active {
-      color: #1d4ed8;
+      color: #4f46e5;
       font-weight: 700;
     }
 
     .nav-item.grab-tab i {
-      background: linear-gradient(135deg, #f59e0b, #fbbf24);
-      color: #111;
-      width: 42px;
-      height: 42px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
       margin-top: -18px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
     }
   </style>
 </head>
 <body>
 
+  <!-- VERIFYING SCREEN OVERLAY -->
+  <div id="verifying-overlay" class="verifying-overlay">
+    <div class="verify-ring"></div>
+    <h3 id="verify-title" style="font-size:19px; color:#38bdf8; margin-bottom:6px;">Verifying Account...</h3>
+    <p id="verify-sub" style="font-size:12px; color:#cbd5e1; max-width:280px;">Checking security credentials & syncing real-time merchant session...</p>
+    <div class="verify-progress-bar">
+      <div id="verify-progress-fill" class="verify-progress-fill"></div>
+    </div>
+  </div>
+
   <!-- =====================================================================
-       1. CUSTOMER MOBILE PAGE
+       1. CUSTOMER FULL-FIT PAGE
        ===================================================================== -->
   <div id="customer-outer" class="customer-outer">
     <div class="mobile-container">
 
+      <!-- AUTH SCREEN -->
       <div id="cust-auth-screen" class="auth-box">
-        <div class="brand-logo">
-          <i class="fa-solid fa-globe"></i>
-          <h2>Global E-Commerce</h2>
-          <p style="font-size:12px; opacity:0.8;">Customer Merchant Portal</p>
-        </div>
+        <div class="auth-card-inner">
+          <div class="brand-logo">
+            <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#38BDF8"/>
+                  <stop offset="50%" stop-color="#818CF8"/>
+                  <stop offset="100%" stop-color="#F59E0B"/>
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.16)"/>
+              <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
+              <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
+              <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
+              <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+            <h2 style="font-size:23px; letter-spacing:0.3px;">Global E-Commerce</h2>
+          </div>
 
-        <div class="auth-tabs">
-          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</div>
-          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</div>
-        </div>
+          <div class="auth-tabs">
+            <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn">Sign In</div>
+            <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
+          </div>
 
-        <div id="form-login">
-          <div class="input-group">
-            <label>Email Address</label>
-            <input type="email" id="login-email" value="sara.khan@email.com" />
+          <div id="form-login">
+            <div class="input-group">
+              <label data-i18n="emailLabel">Email Address</label>
+              <input type="email" id="login-email" value="sara.khan@email.com" />
+            </div>
+            <div class="input-group">
+              <label data-i18n="passLabel">Login Password</label>
+              <input type="password" id="login-pass" value="123456" />
+            </div>
+            <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
           </div>
-          <div class="input-group">
-            <label>Login Password</label>
-            <input type="password" id="login-pass" value="123456" />
-          </div>
-          <button class="btn-primary" onclick="handleCustLogin()">Sign In</button>
-        </div>
 
-        <div id="form-register" style="display:none;">
-          <div class="input-group">
-            <label>Full Name</label>
-            <input type="text" id="reg-name" placeholder="Enter full name" />
+          <div id="form-register" style="display:none;">
+            <div class="input-group">
+              <label data-i18n="fullName">Full Name</label>
+              <input type="text" id="reg-name" placeholder="Enter full name" />
+            </div>
+            <div class="input-group">
+              <label data-i18n="phoneNum">Phone Number</label>
+              <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
+            </div>
+            <div class="input-group">
+              <label data-i18n="emailLabel">Email Address</label>
+              <input type="email" id="reg-email" placeholder="Enter email address" />
+            </div>
+            <div class="input-group">
+              <label data-i18n="passLabel">Login Password</label>
+              <input type="password" id="reg-pass" placeholder="Create password" />
+            </div>
+            <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter">Register & Enter</button>
           </div>
-          <div class="input-group">
-            <label>Phone Number</label>
-            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
-          </div>
-          <div class="input-group">
-            <label>Email Address</label>
-            <input type="email" id="reg-email" placeholder="Enter email address" />
-          </div>
-          <div class="input-group">
-            <label>Login Password</label>
-            <input type="password" id="reg-pass" placeholder="Create password" />
-          </div>
-          <button class="btn-primary" onclick="handleCustRegister()">Register & Enter</button>
         </div>
       </div>
 
+      <!-- CUSTOMER DASHBOARD -->
       <div id="cust-app-screen" class="app-view">
         <div class="top-header">
-          <h3 id="cust-header-title">Global E-Commerce</h3>
-          <span class="badge-tier" id="cust-header-tier">Regular Account</span>
+          <div class="header-brand-wrap">
+            <svg width="26" height="26" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="44" stroke="#38BDF8" stroke-width="7"/>
+              <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24"/>
+            </svg>
+            <h3 style="font-size:16px; font-weight:700;">Global E-Commerce</h3>
+          </div>
+          <!-- 15 LIVE LANGUAGES SELECTOR -->
+          <select id="live-lang-select" class="lang-select-pill" onchange="changeLiveLanguage(this.value)">
+            <option value="en">🌐 English</option>
+            <option value="ur">🌐 اردو (Urdu)</option>
+            <option value="hi">🌐 हिन्दी (Hindi)</option>
+            <option value="ar">🌐 العربية (Arabic)</option>
+            <option value="es">🌐 Español</option>
+            <option value="fr">🌐 Français</option>
+            <option value="de">🌐 Deutsch</option>
+            <option value="tr">🌐 Türkçe</option>
+            <option value="zh">🌐 中文 (Chinese)</option>
+            <option value="ja">🌐 日本語 (Japanese)</option>
+            <option value="ko">🌐 한국어 (Korean)</option>
+            <option value="ru">🌐 Русский (Russian)</option>
+            <option value="pt">🌐 Português</option>
+            <option value="it">🌐 Italiano</option>
+            <option value="id">🌐 Bahasa Indonesia</option>
+          </select>
         </div>
 
         <div class="pages-wrapper">
           <div id="cust-admin-notif-area"></div>
           <div id="cust-account-status-banner"></div>
 
+          <!-- HOME PAGE (NO EXTRA WHITE GAP ANYWHERE) -->
           <div id="cust-page-home" class="page active">
             <div class="hero-banner">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 style="color:#fbbf24; font-size:15px;">Global E-Commerce</h4>
-                <span id="home-account-status-badge" style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:#16a34a; color:#fff;">Active</span>
+                <h4 style="color:#fde68a; font-size:15px;">Global E-Commerce</h4>
+                <span id="home-account-status-badge" style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:#10b981; color:#fff;">Active</span>
               </div>
-              <p style="font-size:12px; opacity:0.85; margin-top:6px;">Boost international merchant orders on Amazon, AliExpress & Shopify and earn instant daily commissions.</p>
+              <p style="font-size:12px; opacity:0.94; margin-top:6px;" data-i18n="heroDesc">Boost international merchant orders on Amazon, AliExpress & Shopify and earn instant daily commissions.</p>
             </div>
 
             <div class="info-grid">
               <div class="info-card" onclick="openCustModal('guide')">
-                <i class="fa-solid fa-book-open" style="color:#2563eb; font-size:20px; margin-bottom:4px;"></i>
-                <p style="font-size:11px; font-weight:600;">Guide</p>
+                <i class="fa-solid fa-book-open" style="color:#4f46e5; font-size:20px; margin-bottom:4px;"></i>
+                <p style="font-size:11px; font-weight:600;" data-i18n="guide">Guide</p>
               </div>
               <div class="info-card" onclick="openCustModal('how')">
                 <i class="fa-solid fa-gears" style="color:#d97706; font-size:20px; margin-bottom:4px;"></i>
-                <p style="font-size:11px; font-weight:600;">How It Works</p>
+                <p style="font-size:11px; font-weight:600;" data-i18n="howWorks">How It Works</p>
               </div>
               <div class="info-card" onclick="openCustModal('cert')">
-                <i class="fa-solid fa-award" style="color:#16a34a; font-size:20px; margin-bottom:4px;"></i>
-                <p style="font-size:11px; font-weight:600;">Certificate</p>
+                <i class="fa-solid fa-award" style="color:#059669; font-size:20px; margin-bottom:4px;"></i>
+                <p style="font-size:11px; font-weight:600;" data-i18n="cert">Certificate</p>
               </div>
             </div>
 
             <div class="live-feed-box">
-              <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
-                <span style="font-size:12px; font-weight:700;"><span class="live-dot"></span> Live Member Transactions</span>
-                <span style="font-size:11px; color:#64748b;">Real-Time</span>
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px solid #e0e7ff; padding-bottom:5px;">
+                <span style="font-size:12px; font-weight:700;"><span class="live-dot"></span> <span data-i18n="liveTx">Live Member Transactions</span></span>
+                <span style="font-size:11px; color:#4f46e5; font-weight:600;" data-i18n="realTime">Real-Time</span>
               </div>
               <div id="live-tx-container"></div>
             </div>
-          </div>
 
-          <div id="cust-page-orders" class="page">
-            <h4 style="font-size:15px; margin-bottom:10px;">Completed Order History</h4>
-            <div id="orders-list">
-              <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:40px;">No orders completed yet.</p>
-            </div>
-          </div>
-
-          <div id="cust-page-grabbing" class="page">
-            <div class="grab-stats-card">
-              <div style="text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px;">
-                <span style="font-size:11px; opacity:0.85;">Account Balance (USDT)</span>
-                <h2 id="grab-balance" style="font-size:26px; color:#fbbf24;">$0.00</h2>
+            <!-- 6 REAL E-COMMERCE & DIGITAL MARKETING PARTNER CARDS (3 TOP + 3 BOTTOM, COMPACT FIT) -->
+            <div class="partners-section">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; font-weight:700; color:#1e1b4b;"><i class="fa-solid fa-bullhorn" style="color:#4f46e5;"></i> <span data-i18n="partnersTitle">Global E-Commerce & Digital Marketing</span></span>
+                <span style="font-size:10px; color:#059669; font-weight:700;">Verified Partners</span>
               </div>
-              <div class="grab-sub-grid">
-                <div class="grab-sub-item"><span>Today's Earn</span><strong id="grab-today-earn" style="color:#4ade80;">+$0.00</strong></div>
-                <div class="grab-sub-item"><span>Account Status</span><strong id="grab-status-text" style="color:#fbbf24;">Active</strong></div>
-                <div class="grab-sub-item"><span>Total Tasks</span><strong id="grab-total-tasks">0 / 25</strong></div>
-                <div class="grab-sub-item"><span>Remaining Tasks</span><strong id="grab-rem-tasks">25</strong></div>
+              <div class="partners-grid-6">
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#ff9900;"><i class="fa-brands fa-amazon"></i></div>
+                  <h5>Amazon</h5>
+                  <span>Global Retail Ads</span>
+                </div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#e62e04;"><i class="fa-solid fa-bag-shopping"></i></div>
+                  <h5>AliExpress</h5>
+                  <span>Cross-Border Boost</span>
+                </div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#95bf47;"><i class="fa-brands fa-shopify"></i></div>
+                  <h5>Shopify</h5>
+                  <span>Merchant Growth</span>
+                </div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#0064d2;"><i class="fa-brands fa-ebay"></i></div>
+                  <h5>eBay</h5>
+                  <span>Store Promotion</span>
+                </div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#0071ce;"><i class="fa-solid fa-store"></i></div>
+                  <h5>Walmart</h5>
+                  <span>Digital Commerce</span>
+                </div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#111827;"><i class="fa-brands fa-tiktok"></i></div>
+                  <h5>TikTok Shop</h5>
+                  <span>Social Marketing</span>
+                </div>
               </div>
-            </div>
-
-            <div class="card-box" style="text-align:center;">
-              <div id="grab-stage-area"></div>
             </div>
           </div>
 
+          <!-- SERVICE PAGE (WELCOME CARD WITH 24/7 ASSIST MESSAGE, NO EXTRA SPACE) -->
           <div id="cust-page-service" class="page">
-            <div class="card-box" style="text-align:center; padding:22px;">
-              <div style="width:60px; height:60px; border-radius:50%; background:#e0f2fe; color:#0284c7; font-size:30px; display:flex; justify-content:center; align-items:center; margin:0 auto 10px;">
+            <div class="service-hero-card">
+              <div style="width:66px; height:66px; border-radius:50%; background:linear-gradient(135deg,#e0e7ff,#dbeafe); color:#0284c7; font-size:32px; display:flex; justify-content:center; align-items:center; margin:0 auto 12px;">
                 <i class="fa-brands fa-telegram"></i>
               </div>
-              <h3 style="font-size:16px;">Telegram Customer Service</h3>
-              <p style="font-size:12px; color:#64748b; margin:6px 0 14px;">Click below to open our direct Telegram customer service link.</p>
-              <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background:#0284c7; color:#fff;">
-                <i class="fa-brands fa-telegram"></i> Open Telegram Support (<span id="tg-handle-display">@GlobalEcom_Help</span>)
+              <h3 style="font-size:17px; color:#1e1b4b; font-weight:800;" data-i18n="tgSupportTitle">Welcome to Customer Support Service</h3>
+              <p style="font-size:12.5px; color:#4338ca; font-weight:600; margin:8px 0 16px;" data-i18n="tgSupportDesc">We are here to assist you 24/7 for every time</p>
+              <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary">
+                <i class="fa-brands fa-telegram"></i> <span data-i18n="openTg">Open Telegram Support</span> (<span id="tg-handle-display">@GlobalEcom_Help</span>)
               </a>
             </div>
           </div>
 
+          <!-- GRABBING PAGE -->
+          <div id="cust-page-grabbing" class="page">
+            <div id="grab-zero-balance-alert"></div>
+            <div class="grab-stats-card">
+              <div style="text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px;">
+                <span style="font-size:11px; opacity:0.85;" data-i18n="accBalance">Account Balance (USDT)</span>
+                <h2 id="grab-balance" style="font-size:26px; color:#fde68a;">$0.00</h2>
+              </div>
+              <div class="grab-sub-grid">
+                <div class="grab-sub-item"><span data-i18n="todayEarn">Today's Earn</span><strong id="grab-today-earn" style="color:#6ee7b7;">+$0.00</strong></div>
+                <div class="grab-sub-item"><span data-i18n="accStatus">Account Status</span><strong id="grab-status-text" style="color:#fde68a;">Active</strong></div>
+                <div class="grab-sub-item"><span data-i18n="totalTasks">Total Tasks</span><strong id="grab-total-tasks">0 / 25</strong></div>
+                <div class="grab-sub-item"><span data-i18n="remTasks">Remaining Tasks</span><strong id="grab-rem-tasks">25</strong></div>
+              </div>
+            </div>
+
+            <div class="grab-full-stage-card">
+              <div id="grab-stage-area"></div>
+            </div>
+          </div>
+
+          <!-- ORDERS PAGE -->
+          <div id="cust-page-orders" class="page">
+            <h4 style="font-size:15px; margin-bottom:10px; color:#1e1b4b;" data-i18n="completedHistory">Completed Order History</h4>
+            <div id="orders-list">
+              <p style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;" data-i18n="noOrders">No orders completed yet.</p>
+            </div>
+          </div>
+
+          <!-- PROFILE PAGE (ACCOUNT SETTINGS ACCORDION CARD + COMPACT LOGOUT, NO WHITE SPACE) -->
           <div id="cust-page-profile" class="page">
             <div class="profile-top-card">
               <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:10px; margin-bottom:10px;">
-                <div style="width:46px; height:46px; border-radius:50%; background:#2563eb; display:flex; justify-content:center; align-items:center; font-size:19px;">
+                <div style="width:46px; height:46px; border-radius:50%; background:#4f46e5; border:2px solid #a5b4fc; display:flex; justify-content:center; align-items:center; font-size:19px;">
                   <i class="fa-solid fa-user"></i>
                 </div>
                 <div>
                   <h4 id="prof-name" style="font-size:15px;">Sara Khan</h4>
-                  <p id="prof-email" style="font-size:11px; opacity:0.8;">sara.khan@email.com</p>
-                  <p id="prof-phone" style="font-size:10px; opacity:0.7;">+971 50 987 6543</p>
+                  <p id="prof-email" style="font-size:11px; opacity:0.85;">sara.khan@email.com</p>
+                  <p id="prof-phone" style="font-size:10px; opacity:0.75;">+971 50 987 6543</p>
                   <div style="margin-top:4px; display:flex; gap:5px; flex-wrap:wrap;">
-                    <span id="prof-status-pill" style="background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid #4ade80; font-size:10px; padding:1px 7px; border-radius:10px;">Active</span>
+                    <span id="prof-status-pill" style="background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid #6ee7b7; font-size:10px; padding:1px 7px; border-radius:10px;">Active</span>
                     <span id="prof-tier-badge" class="badge-tier" style="font-size:10px; padding:2px 8px;">Regular Account</span>
                   </div>
                 </div>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; opacity:0.85;">Account Balance:</span>
-                <h2 id="profile-balance" style="font-size:22px; color:#fbbf24;">$0.00</h2>
+                <span style="font-size:12px; opacity:0.85;" data-i18n="accBalanceShort">Account Balance:</span>
+                <h2 id="profile-balance" style="font-size:22px; color:#fde68a;">$0.00</h2>
               </div>
             </div>
 
             <div class="action-3-grid">
               <div class="action-box" onclick="openCustModal('deposit1')">
-                <i class="fa-solid fa-circle-arrow-down" style="color:#16a34a; font-size:20px; margin-bottom:4px;"></i>
-                <h4 style="font-size:12px;">Deposit</h4>
+                <i class="fa-solid fa-circle-arrow-down" style="color:#059669; font-size:20px; margin-bottom:4px;"></i>
+                <h4 style="font-size:12px;" data-i18n="deposit">Deposit</h4>
               </div>
               <div class="action-box" onclick="openCustModal('withdraw')">
-                <i class="fa-solid fa-circle-arrow-up" style="color:#2563eb; font-size:20px; margin-bottom:4px;"></i>
-                <h4 style="font-size:12px;">Withdraw</h4>
+                <i class="fa-solid fa-circle-arrow-up" style="color:#4f46e5; font-size:20px; margin-bottom:4px;"></i>
+                <h4 style="font-size:12px;" data-i18n="withdraw">Withdraw</h4>
               </div>
               <div class="action-box" onclick="openCustModal('history')">
                 <i class="fa-solid fa-clock-rotate-left" style="color:#d97706; font-size:20px; margin-bottom:4px;"></i>
-                <h4 style="font-size:12px;">History</h4>
+                <h4 style="font-size:12px;" data-i18n="history">History</h4>
               </div>
             </div>
 
             <div class="card-box" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openCustModal('bindWallet')">
               <div style="display:flex; align-items:center; gap:10px;">
-                <i class="fa-solid fa-wallet" style="font-size:18px; color:#16a34a;"></i>
+                <i class="fa-solid fa-wallet" style="font-size:18px; color:#059669;"></i>
                 <div>
-                  <h4 style="font-size:13px;">Bind Wallet / Bank</h4>
+                  <h4 style="font-size:13px;" data-i18n="bindWallet">Bind Wallet / Bank</h4>
                   <p style="font-size:11px; color:#64748b;" id="bound-wallet-label">TRC20 or Bank Transfer</p>
                 </div>
               </div>
               <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
             </div>
 
-            <div class="card-box" style="padding:0; overflow:hidden;">
-              <div style="padding:10px 15px; background:#f8fafc; font-size:12px; font-weight:700; color:#475569; border-bottom:1px solid #e2e8f0;">
-                <i class="fa-solid fa-gear"></i> Account Settings
+            <!-- ACCOUNT SETTINGS ACCORDION CARD (BOTH PASSWORDS INSIDE ON CLICK) -->
+            <div class="account-settings-accordion">
+              <div class="acc-settings-header" onclick="toggleProfileSettingsCard()">
+                <span><i class="fa-solid fa-gear" style="color:#4f46e5; margin-right:6px;"></i> <span data-i18n="accSettings">Account Settings</span></span>
+                <i id="acc-settings-chevron" class="fa-solid fa-chevron-down" style="font-size:12px; color:#4f46e5;"></i>
               </div>
-              <div class="menu-row" onclick="openCustModal('loginPass')">
-                <span><i class="fa-solid fa-lock" style="color:#2563eb; width:20px;"></i> Change Login Password</span>
-                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
+              <div id="acc-settings-body" class="acc-settings-body">
+                <div class="inline-pass-box">
+                  <label style="display:block; font-size:11px; font-weight:700; color:#312e81; margin-bottom:6px;">
+                    <i class="fa-solid fa-lock" style="color:#4f46e5;"></i> <span data-i18n="chgLoginPass">Change Login Password</span>
+                  </label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="password" id="inline-login-pass" placeholder="Enter new login password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
+                    <button class="btn-sm" style="background:#4f46e5; padding:8px 12px;" onclick="updateCustLoginPassInline()">Update</button>
+                  </div>
+                </div>
+
+                <div class="inline-pass-box" style="margin-bottom:0;">
+                  <label style="display:block; font-size:11px; font-weight:700; color:#92400e; margin-bottom:6px;">
+                    <i class="fa-solid fa-shield-halved" style="color:#d97706;"></i> <span data-i18n="chgWdPass">Change Withdraw Password</span>
+                  </label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="password" id="inline-wd-pass" placeholder="Enter new withdraw password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
+                    <button class="btn-sm" style="background:#d97706; padding:8px 12px;" onclick="updateCustWithdrawPassInline()">Update</button>
+                  </div>
+                </div>
               </div>
-              <div class="menu-row" onclick="openCustModal('withdrawPass')">
-                <span><i class="fa-solid fa-shield-halved" style="color:#d97706; width:20px;"></i> Change Withdraw Password</span>
-                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
-              </div>
-              <div class="menu-row" onclick="handleCustLogout()" style="color:#dc2626; font-weight:600; border-bottom:none;">
-                <span><i class="fa-solid fa-right-from-bracket" style="width:20px;"></i> Logout</span>
-              </div>
+            </div>
+
+            <!-- COMPACT LOGOUT BUTTON -->
+            <div class="logout-card-btn" onclick="handleCustLogout()">
+              <span><i class="fa-solid fa-right-from-bracket" style="margin-right:8px;"></i> <span data-i18n="logout">Logout</span></span>
+              <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i>
             </div>
           </div>
         </div>
 
+        <!-- BOTTOM NAVIGATION: HOME -> SERVICE -> GRABBING -> ORDERS -> PROFILE -->
         <div class="bottom-nav">
-          <div class="nav-item active" onclick="switchCustPage('home', 'Global E-Commerce', this)">
-            <i class="fa-solid fa-house"></i><span>Home</span>
+          <div class="nav-item active" onclick="switchCustPage('home', this)">
+            <i class="fa-solid fa-house"></i><span data-i18n="navHome">Home</span>
           </div>
-          <div class="nav-item" onclick="switchCustPage('orders', 'My Orders', this)">
-            <i class="fa-solid fa-receipt"></i><span>Orders</span>
+          <div class="nav-item" onclick="switchCustPage('service', this)">
+            <i class="fa-brands fa-telegram"></i><span data-i18n="navService">Service</span>
           </div>
-          <div class="nav-item grab-tab" onclick="switchCustPage('grabbing', 'Order Grabbing', this)">
-            <i class="fa-solid fa-bolt"></i><span>Grabbing</span>
+          <div class="nav-item grab-tab" onclick="switchCustPage('grabbing', this)">
+            <i class="fa-solid fa-bolt"></i><span data-i18n="navGrabbing">Grabbing</span>
           </div>
-          <div class="nav-item" onclick="switchCustPage('service', 'Customer Service', this)">
-            <i class="fa-brands fa-telegram"></i><span>Service</span>
+          <div class="nav-item" onclick="switchCustPage('orders', this)">
+            <i class="fa-solid fa-receipt"></i><span data-i18n="navOrders">Orders</span>
           </div>
-          <div class="nav-item" onclick="switchCustPage('profile', 'My Profile', this)">
-            <i class="fa-solid fa-user"></i><span>Profile</span>
+          <div class="nav-item" onclick="switchCustPage('profile', this)">
+            <i class="fa-solid fa-user"></i><span data-i18n="navProfile">Profile</span>
           </div>
         </div>
       </div>
@@ -887,7 +1221,7 @@
     <div id="admin-auth-screen" class="admin-login-full">
       <div class="admin-login-card">
         <div class="brand-logo">
-          <i class="fa-solid fa-user-shield"></i>
+          <i class="fa-solid fa-user-shield" style="font-size:40px; color:#818cf8; margin-bottom:8px;"></i>
           <h2>Admin Control Panel</h2>
           <p style="font-size:12px; opacity:0.75;">Full Screen Management • /admin/login</p>
         </div>
@@ -909,10 +1243,10 @@
         <aside class="admin-sidebar">
           <div>
             <div class="admin-brand">
-              <i class="fa-solid fa-shield-halved"></i>
+              <i class="fa-solid fa-shield-halved" style="font-size:24px; color:#a5b4fc;"></i>
               <div>
                 <h4 style="font-size:15px; color:#fff;">Admin Console</h4>
-                <span style="font-size:11px; color:#94a3b8;">Desktop Management</span>
+                <span style="font-size:11px; color:#c7d2fe;">Desktop Management</span>
               </div>
             </div>
 
@@ -930,7 +1264,7 @@
             </button>
           </div>
 
-          <button class="admin-nav-btn" onclick="handleAdminLogout()" style="color:#f87171;">
+          <button class="admin-nav-btn" onclick="handleAdminLogout()" style="color:#fda4af;">
             <i class="fa-solid fa-right-from-bracket"></i> Sign Out
           </button>
         </aside>
@@ -944,12 +1278,10 @@
           </header>
 
           <div class="admin-content-area">
-            <!-- TAB 1: USERS (EACH REGISTERED USER IN THEIR OWN LINE WITH INLINE CONTROLS, SETTING & LUCKY ORDER) -->
             <div id="admin-page-users" class="page active">
               <div id="admin-users-lines-container"></div>
             </div>
 
-            <!-- TAB 2: DEPOSITS (APPROVE / REJECT) -->
             <div id="admin-page-deposits" class="page">
               <div class="card-box">
                 <h4 style="font-size:15px; margin-bottom:12px;">Live Deposit Requests</h4>
@@ -957,7 +1289,6 @@
               </div>
             </div>
 
-            <!-- TAB 3: WITHDRAWS (APPROVE / REJECT) -->
             <div id="admin-page-withdraws" class="page">
               <div class="card-box">
                 <h4 style="font-size:15px; margin-bottom:12px;">Live Withdrawal Requests</h4>
@@ -965,7 +1296,6 @@
               </div>
             </div>
 
-            <!-- TAB 4: ADMIN SETTINGS (ONLY ADMIN EMAIL, ADMIN PASSWORD, TELEGRAM & TRC20) -->
             <div id="admin-page-settings" class="page">
               <div class="admin-grid-2">
                 <div class="card-box">
@@ -1013,6 +1343,271 @@
   <script>
     const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.firebaseio.com";
     const DB_NODE_PATH = "/global_ecommerce_state.json";
+
+    // ==================== 15 LANGUAGES REAL-TIME DICTIONARY ====================
+    const translations15 = {
+      en: {
+        signIn: "Sign In", register: "Register", emailLabel: "Email Address", passLabel: "Login Password",
+        fullName: "Full Name", phoneNum: "Phone Number", regEnter: "Register & Enter",
+        heroDesc: "Boost international merchant orders on Amazon, AliExpress & Shopify and earn instant daily commissions.",
+        guide: "Guide", howWorks: "How It Works", cert: "Certificate",
+        liveTx: "Live Member Transactions", realTime: "Real-Time",
+        partnersTitle: "Global E-Commerce & Digital Marketing",
+        tgSupportTitle: "Welcome to Customer Support Service",
+        tgSupportDesc: "We are here to assist you 24/7 for every time",
+        openTg: "Open Telegram Support", accBalance: "Account Balance (USDT)", accBalanceShort: "Account Balance:",
+        todayEarn: "Today's Earn", accStatus: "Account Status", totalTasks: "Total Tasks", remTasks: "Remaining Tasks",
+        grabBtn: "Grab Order Now", completedHistory: "Completed Order History", noOrders: "No orders completed yet.",
+        deposit: "Deposit", withdraw: "Withdraw", history: "History", bindWallet: "Bind Wallet / Bank",
+        accSettings: "Account Settings", chgLoginPass: "Change Login Password", chgWdPass: "Change Withdraw Password", logout: "Logout",
+        navHome: "Home", navService: "Service", navGrabbing: "Grabbing", navOrders: "Orders", navProfile: "Profile"
+      },
+      ur: {
+        signIn: "سائن ان کریں", register: "رجسٹر کریں", emailLabel: "ای میل ایڈریس", passLabel: "لاگ ان پاس ورڈ",
+        fullName: "پورا نام", phoneNum: "فون نمبر", regEnter: "رجسٹر کریں اور داخل ہوں",
+        heroDesc: "ایمیزون، علی ایکسپریس اور شاپیفائی پر بین الاقوامی آرڈرز بڑھائیں اور روزانہ فوری کمیشن کمائیں۔",
+        guide: "گائیڈ", howWorks: "یہ کیسے کام کرتا ہے", cert: "سرٹیفکیٹ",
+        liveTx: "لائیو ممبر ٹرانزیکشنز", realTime: "ریئل ٹائم",
+        partnersTitle: "گلوبل ای کامرس اور ڈیجیٹل مارکیٹنگ",
+        tgSupportTitle: "کسٹمر سپورٹ سروس میں خوش آمدید",
+        tgSupportDesc: "ہم ہر وقت 24/7 آپ کی مدد کے لیے یہاں موجود ہیں",
+        openTg: "ٹیلی گرام سپورٹ کھولیں", accBalance: "اکاؤنٹ بیلنس (USDT)", accBalanceShort: "اکاؤنٹ بیلنس:",
+        todayEarn: "آج کی کمائی", accStatus: "اکاؤنٹ اسٹیٹس", totalTasks: "کل ٹاسکس", remTasks: "باقی ٹاسکس",
+        grabBtn: "ابھی آرڈر گریب کریں", completedHistory: "مکمل شدہ آرڈرز کی ہسٹری", noOrders: "ابھی تک کوئی آرڈر مکمل نہیں ہوا۔",
+        deposit: "ڈپازٹ", withdraw: "ودڈرا", history: "ہسٹری", bindWallet: "والٹ / بینک منسلک کریں",
+        accSettings: "اکاؤنٹ سیٹنگز", chgLoginPass: "لاگ ان پاس ورڈ تبدیل کریں", chgWdPass: "ودڈرا پاس ورڈ تبدیل کریں", logout: "لاگ آؤٹ",
+        navHome: "ہوم", navService: "سروس", navGrabbing: "گریبنگ", navOrders: "آرڈرز", navProfile: "پروفائل"
+      },
+      hi: {
+        signIn: "साइन इन करें", register: "रजिस्टर करें", emailLabel: "ईमेल पता", passLabel: "लॉगिन पासवर्ड",
+        fullName: "पूरा नाम", phoneNum: "फ़ोन नंबर", regEnter: "रजिस्टर करें और प्रवेश करें",
+        heroDesc: "Amazon, AliExpress और Shopify पर अंतर्राष्ट्रीय ऑर्डर बढ़ाएं और तुरंत दैनिक कमीशन कमाएं।",
+        guide: "गाइड", howWorks: "यह कैसे काम करता है", cert: "प्रमाणपत्र",
+        liveTx: "लाइव सदस्य लेनदेन", realTime: "रियल-टाइम",
+        partnersTitle: "ग्लोबल ई-कॉमर्स और डिजिटल मार्केटिंग",
+        tgSupportTitle: "ग्राहक सहायता सेवा में आपका स्वागत है",
+        tgSupportDesc: "हम हर समय 24/7 आपकी सहायता के लिए यहां हैं",
+        openTg: "टेलीग्राम सपोर्ट खोलें", accBalance: "खाता शेष (USDT)", accBalanceShort: "खाता शेष:",
+        todayEarn: "आज की कमाई", accStatus: "खाता स्थिति", totalTasks: "कुल कार्य", remTasks: "शेष कार्य",
+        grabBtn: "अभी ऑर्डर ग्रैब करें", completedHistory: "पूर्ण ऑर्डर इतिहास", noOrders: "अभी तक कोई ऑर्डर पूरा नहीं हुआ है।",
+        deposit: "जमा करें", withdraw: "निकासी", history: "इतिहास", bindWallet: "वॉलेट / बैंक जोड़ें",
+        accSettings: "खाता सेटिंग्स", chgLoginPass: "लॉगिन पासवर्ड बदलें", chgWdPass: "निकासी पासवर्ड बदलें", logout: "लॉगआउट",
+        navHome: "होम", navService: "सर्विस", navGrabbing: "ग्रैबिंग", navOrders: "ऑर्डर्स", navProfile: "प्रोफ़ाइल"
+      },
+      ar: {
+        signIn: "تسجيل الدخول", register: "تسجيل جديد", emailLabel: "البريد الإلكتروني", passLabel: "كلمة المرور",
+        fullName: "الاسم الكامل", phoneNum: "رقم الهاتف", regEnter: "تسجيل والدخول",
+        heroDesc: "عزز طلبات التجار الدوليين على أمازون وعلي إكسبريس وشوبيفاي واربح عمولات يومية فورية.",
+        guide: "الدليل", howWorks: "كيف يعمل", cert: "الشهادة",
+        liveTx: "معاملات الأعضاء المباشرة", realTime: "مباشر",
+        partnersTitle: "التجارة الإلكترونية والتسويق الرقمي",
+        tgSupportTitle: "مرحبًا بكم في خدمة دعم العملاء",
+        tgSupportDesc: "نحن هنا لمساعدتك على مدار الساعة طوال أيام الأسبوع",
+        openTg: "افتح دعم تيليجرام", accBalance: "رصيد الحساب (USDT)", accBalanceShort: "رصيد الحساب:",
+        todayEarn: "أرباح اليوم", accStatus: "حالة الحساب", totalTasks: "إجمالي المهام", remTasks: "المهام المتبقية",
+        grabBtn: "احصل على الطلب الآن", completedHistory: "سجل الطلبات المكتملة", noOrders: "لا توجد طلبات مكتملة بعد.",
+        deposit: "إيداع", withdraw: "سحب", history: "السجل", bindWallet: "ربط المحفظة / البنك",
+        accSettings: "إعدادات الحساب", chgLoginPass: "تغيير كلمة مرور الدخول", chgWdPass: "تغيير كلمة مرور السحب", logout: "تسجيل الخروج",
+        navHome: "الرئيسية", navService: "الخدمة", navGrabbing: "الطلبات", navOrders: "السجل", navProfile: "حسابي"
+      },
+      es: {
+        signIn: "Iniciar Sesión", register: "Registrarse", emailLabel: "Correo Electrónico", passLabel: "Contraseña",
+        fullName: "Nombre Completo", phoneNum: "Número de Teléfono", regEnter: "Registrar y Entrar",
+        heroDesc: "Impulsa pedidos internacionales en Amazon, AliExpress y Shopify y gana comisiones diarias al instante.",
+        guide: "Guía", howWorks: "Cómo Funciona", cert: "Certificado",
+        liveTx: "Transacciones en Vivo", realTime: "Tiempo Real",
+        partnersTitle: "Comercio Electrónico y Marketing Digital",
+        tgSupportTitle: "Bienvenido al Servicio de Atención al Cliente",
+        tgSupportDesc: "Estamos aquí para ayudarte 24/7 en todo momento",
+        openTg: "Abrir Soporte Telegram", accBalance: "Saldo de Cuenta (USDT)", accBalanceShort: "Saldo:",
+        todayEarn: "Ganancia Hoy", accStatus: "Estado", totalTasks: "Tareas Totales", remTasks: "Restantes",
+        grabBtn: "Tomar Pedido Ahora", completedHistory: "Historial de Pedidos", noOrders: "Aún no hay pedidos completados.",
+        deposit: "Depositar", withdraw: "Retirar", history: "Historial", bindWallet: "Vincular Billetera / Banco",
+        accSettings: "Configuración", chgLoginPass: "Cambiar Contraseña", chgWdPass: "Contraseña de Retiro", logout: "Cerrar Sesión",
+        navHome: "Inicio", navService: "Servicio", navGrabbing: "Pedidos", navOrders: "Historial", navProfile: "Perfil"
+      },
+      fr: {
+        signIn: "Connexion", register: "S'inscrire", emailLabel: "Adresse E-mail", passLabel: "Mot de passe",
+        fullName: "Nom Complet", phoneNum: "Numéro de Téléphone", regEnter: "S'inscrire & Entrer",
+        heroDesc: "Boostez les commandes marchandes sur Amazon, AliExpress & Shopify et gagnez des commissions instantanées.",
+        guide: "Guide", howWorks: "Fonctionnement", cert: "Certificat",
+        liveTx: "Transactions en Direct", realTime: "Temps Réel",
+        partnersTitle: "E-Commerce & Marketing Digital",
+        tgSupportTitle: "Bienvenue au Service Support Client",
+        tgSupportDesc: "Nous sommes là pour vous aider 24h/24 et 7j/7 à tout moment",
+        openTg: "Ouvrir Support Telegram", accBalance: "Solde du Compte (USDT)", accBalanceShort: "Solde:",
+        todayEarn: "Gains du Jour", accStatus: "Statut", totalTasks: "Tâches Totales", remTasks: "Restantes",
+        grabBtn: "Saisir une Commande", completedHistory: "Commandes Terminées", noOrders: "Aucune commande terminée.",
+        deposit: "Dépôt", withdraw: "Retrait", history: "Historique", bindWallet: "Lier Portefeuille / Banque",
+        accSettings: "Paramètres", chgLoginPass: "Changer Mot de Passe", chgWdPass: "Mot de Passe Retrait", logout: "Déconnexion",
+        navHome: "Accueil", navService: "Service", navGrabbing: "Saisir", navOrders: "Commandes", navProfile: "Profil"
+      },
+      de: {
+        signIn: "Anmelden", register: "Registrieren", emailLabel: "E-Mail-Adresse", passLabel: "Passwort",
+        fullName: "Vollständiger Name", phoneNum: "Telefonnummer", regEnter: "Registrieren & Starten",
+        heroDesc: "Steigern Sie internationale Bestellungen auf Amazon, AliExpress & Shopify und verdienen Sie sofort Provisionen.",
+        guide: "Anleitung", howWorks: "So funktioniert's", cert: "Zertifikat",
+        liveTx: "Live-Transaktionen", realTime: "Echtzeit",
+        partnersTitle: "Global E-Commerce & Digital Marketing",
+        tgSupportTitle: "Willkommen beim Kundensupport-Service",
+        tgSupportDesc: "Wir sind rund um die Uhr (24/7) für Sie da",
+        openTg: "Telegram Support öffnen", accBalance: "Kontostand (USDT)", accBalanceShort: "Kontostand:",
+        todayEarn: "Heute verdient", accStatus: "Kontostatus", totalTasks: "Gesamtaufgaben", remTasks: "Verbleibend",
+        grabBtn: "Bestellung jetzt sichern", completedHistory: "Abgeschlossene Bestellungen", noOrders: "Noch keine Bestellungen.",
+        deposit: "Einzahlen", withdraw: "Auszahlen", history: "Verlauf", bindWallet: "Wallet / Bank verbinden",
+        accSettings: "Kontoeinstellungen", chgLoginPass: "Login-Passwort ändern", chgWdPass: "Auszahlungspasswort ändern", logout: "Abmelden",
+        navHome: "Start", navService: "Service", navGrabbing: "Grabbing", navOrders: "Aufträge", navProfile: "Profil"
+      },
+      tr: {
+        signIn: "Giriş Yap", register: "Kayıt Ol", emailLabel: "E-posta Adresi", passLabel: "Giriş Şifresi",
+        fullName: "Ad Soyad", phoneNum: "Telefon Numarası", regEnter: "Kayıt Ol ve Gir",
+        heroDesc: "Amazon, AliExpress ve Shopify siparişlerini artırın ve anında günlük komisyon kazanın.",
+        guide: "Rehber", howWorks: "Nasıl Çalışır", cert: "Sertifika",
+        liveTx: "Canlı Üye İşlemleri", realTime: "Gerçek Zamanlı",
+        partnersTitle: "Küresel E-Ticaret ve Dijital Pazarlama",
+        tgSupportTitle: "Müşteri Destek Hizmetine Hoş Geldiniz",
+        tgSupportDesc: "Her zaman 7/24 size yardımcı olmak için buradayız",
+        openTg: "Telegram Desteği Aç", accBalance: "Hesap Bakiyesi (USDT)", accBalanceShort: "Bakiye:",
+        todayEarn: "Bugünkü Kazanç", accStatus: "Hesap Durumu", totalTasks: "Toplam Görev", remTasks: "Kalan Görev",
+        grabBtn: "Şimdi Sipariş Al", completedHistory: "Tamamlanan Siparişler", noOrders: "Henüz tamamlanan sipariş yok.",
+        deposit: "Yatır", withdraw: "Çek", history: "Geçmiş", bindWallet: "Cüzdan / Banka Bağla",
+        accSettings: "Hesap Ayarları", chgLoginPass: "Giriş Şifresini Değiştir", chgWdPass: "Çekim Şifresini Değiştir", logout: "Çıkış Yap",
+        navHome: "Ana Sayfa", navService: "Servis", navGrabbing: "Sipariş Al", navOrders: "Siparişler", navProfile: "Profil"
+      },
+      zh: {
+        signIn: "登录", register: "注册", emailLabel: "电子邮箱", passLabel: "登录密码",
+        fullName: "全名", phoneNum: "手机号码", regEnter: "注册并进入",
+        heroDesc: "提升亚马逊、速卖通和 Shopify 国际商户订单量，赚取即时每日佣金。",
+        guide: "指南", howWorks: "运作方式", cert: "证书",
+        liveTx: "实时会员交易", realTime: "实时",
+        partnersTitle: "全球电子商务与数字营销",
+        tgSupportTitle: "欢迎来到客户支持服务",
+        tgSupportDesc: "我们全天候 24/7 随时为您提供帮助",
+        openTg: "打开 Telegram 客服", accBalance: "账户余额 (USDT)", accBalanceShort: "账户余额:",
+        todayEarn: "今日收益", accStatus: "账户状态", totalTasks: "总任务", remTasks: "剩余任务",
+        grabBtn: "立即抢单", completedHistory: "已完成订单记录", noOrders: "暂无已完成订单。",
+        deposit: "充值", withdraw: "提现", history: "记录", bindWallet: "绑定钱包 / 银行",
+        accSettings: "账户设置", chgLoginPass: "修改登录密码", chgWdPass: "修改提现密码", logout: "退出登录",
+        navHome: "首页", navService: "客服", navGrabbing: "抢单", navOrders: "订单", navProfile: "我的"
+      },
+      ja: {
+        signIn: "ログイン", register: "新規登録", emailLabel: "メールアドレス", passLabel: "パスワード",
+        fullName: "氏名", phoneNum: "電話番号", regEnter: "登録して開始",
+        heroDesc: "Amazon、AliExpress、Shopifyの国際注文を促進し、毎日の即時コミッションを獲得しましょう。",
+        guide: "ガイド", howWorks: "仕組み", cert: "証明書",
+        liveTx: "リアルタイム取引", realTime: "リアルタイム",
+        partnersTitle: "グローバルEC・デジタルマーケティング",
+        tgSupportTitle: "カスタマーサポートサービスへようこそ",
+        tgSupportDesc: "24時間365日いつでもサポートいたします",
+        openTg: "Telegramサポートを開く", accBalance: "口座残高 (USDT)", accBalanceShort: "口座残高:",
+        todayEarn: "本日の収益", accStatus: "ステータス", totalTasks: "総タスク", remTasks: "残りタスク",
+        grabBtn: "今すぐ注文を取得", completedHistory: "完了した注文履歴", noOrders: "完了した注文はまだありません。",
+        deposit: "入金", withdraw: "出金", history: "履歴", bindWallet: "ウォレット / 銀行連携",
+        accSettings: "アカウント設定", chgLoginPass: "ログインパスワード変更", chgWdPass: "出金パスワード変更", logout: "ログアウト",
+        navHome: "ホーム", navService: "サポート", navGrabbing: "注文取得", navOrders: "注文履歴", navProfile: "マイページ"
+      },
+      ko: {
+        signIn: "로그인", register: "회원가입", emailLabel: "이메일 주소", passLabel: "비밀번호",
+        fullName: "성명", phoneNum: "전화번호", regEnter: "가입 및 시작",
+        heroDesc: "Amazon, AliExpress 및 Shopify의 글로벌 주문을 활성화하고 매일 즉시 커미션을 받으세요.",
+        guide: "가이드", howWorks: "이용 방법", cert: "인증서",
+        liveTx: "실시간 회원 거래", realTime: "실시간",
+        partnersTitle: "글로벌 이커머스 & 디지털 마케팅",
+        tgSupportTitle: "고객 지원 서비스에 오신 것을 환영합니다",
+        tgSupportDesc: "언제나 24시간 연중무휴로 도와드리겠습니다",
+        openTg: "텔레그램 상담 열기", accBalance: "계정 잔액 (USDT)", accBalanceShort: "계정 잔액:",
+        todayEarn: "오늘 수익", accStatus: "계정 상태", totalTasks: "전체 작업", remTasks: "남은 작업",
+        grabBtn: "지금 주문 잡기", completedHistory: "완료된 주문 내역", noOrders: "완료된 주문이 없습니다.",
+        deposit: "입금", withdraw: "출금", history: "내역", bindWallet: "지갑 / 은행 연결",
+        accSettings: "계정 설정", chgLoginPass: "로그인 비밀번호 변경", chgWdPass: "출금 비밀번호 변경", logout: "로그아웃",
+        navHome: "홈", navService: "고객센터", navGrabbing: "주문잡기", navOrders: "주문내역", navProfile: "프로필"
+      },
+      ru: {
+        signIn: "Войти", register: "Регистрация", emailLabel: "Электронная почта", passLabel: "Пароль",
+        fullName: "Полное имя", phoneNum: "Номер телефона", regEnter: "Зарегистрироваться",
+        heroDesc: "Продвигайте заказы на Amazon, AliExpress и Shopify и получайте мгновенную ежедневную комиссию.",
+        guide: "Гид", howWorks: "Как это работает", cert: "Сертификат",
+        liveTx: "Транзакции участников", realTime: "Онлайн",
+        partnersTitle: "Глобальный E-Commerce и Маркетинг",
+        tgSupportTitle: "Добро пожаловать в службу поддержки",
+        tgSupportDesc: "Мы готовы помочь вам 24/7 в любое время",
+        openTg: "Открыть Telegram", accBalance: "Баланс аккаунта (USDT)", accBalanceShort: "Баланс:",
+        todayEarn: "Доход сегодня", accStatus: "Статус", totalTasks: "Всего задач", remTasks: "Осталось",
+        grabBtn: "Получить заказ сейчас", completedHistory: "История заказов", noOrders: "Завершенных заказов пока нет.",
+        deposit: "Депозит", withdraw: "Вывод", history: "История", bindWallet: "Привязать кошелек",
+        accSettings: "Настройки аккаунта", chgLoginPass: "Изменить пароль входа", chgWdPass: "Пароль вывода средств", logout: "Выйти",
+        navHome: "Главная", navService: "Сервис", navGrabbing: "Заказы", navOrders: "История", navProfile: "Профиль"
+      },
+      pt: {
+        signIn: "Entrar", register: "Registrar", emailLabel: "Endereço de E-mail", passLabel: "Senha",
+        fullName: "Nome Completo", phoneNum: "Telefone", regEnter: "Registrar e Entrar",
+        heroDesc: "Impulsione pedidos na Amazon, AliExpress e Shopify e ganhe comissões diárias instantâneas.",
+        guide: "Guia", howWorks: "Como Funciona", cert: "Certificado",
+        liveTx: "Transações ao Vivo", realTime: "Tempo Real",
+        partnersTitle: "E-Commerce Global e Marketing Digital",
+        tgSupportTitle: "Bem-vindo ao Serviço de Suporte ao Cliente",
+        tgSupportDesc: "Estamos aqui para ajudá-lo 24/7 a qualquer momento",
+        openTg: "Abrir Suporte Telegram", accBalance: "Saldo da Conta (USDT)", accBalanceShort: "Saldo:",
+        todayEarn: "Ganho Hoje", accStatus: "Status", totalTasks: "Total Tarefas", remTasks: "Restantes",
+        grabBtn: "Pegar Pedido Agora", completedHistory: "Histórico de Pedidos", noOrders: "Nenhum pedido concluído.",
+        deposit: "Depositar", withdraw: "Sacar", history: "Histórico", bindWallet: "Vincular Carteira / Banco",
+        accSettings: "Configurações", chgLoginPass: "Alterar Senha de Login", chgWdPass: "Alterar Senha de Saque", logout: "Sair",
+        navHome: "Início", navService: "Suporte", navGrabbing: "Pedidos", navOrders: "Histórico", navProfile: "Perfil"
+      },
+      it: {
+        signIn: "Accedi", register: "Registrati", emailLabel: "Indirizzo Email", passLabel: "Password",
+        fullName: "Nome Completo", phoneNum: "Numero di Telefono", regEnter: "Registrati ed Entra",
+        heroDesc: "Incrementa gli ordini su Amazon, AliExpress e Shopify e guadagna commissioni giornaliere istantanee.",
+        guide: "Guida", howWorks: "Come Funziona", cert: "Certificato",
+        liveTx: "Transazioni in Diretta", realTime: "Tempo Reale",
+        partnersTitle: "E-Commerce Globale e Digital Marketing",
+        tgSupportTitle: "Benvenuti nel Servizio di Supporto Clienti",
+        tgSupportDesc: "Siamo qui per assisterti 24/7 in ogni momento",
+        openTg: "Apri Supporto Telegram", accBalance: "Saldo Conto (USDT)", accBalanceShort: "Saldo:",
+        todayEarn: "Guadagno Oggi", accStatus: "Stato", totalTasks: "Attività Totali", remTasks: "Rimanenti",
+        grabBtn: "Prendi Ordine Ora", completedHistory: "Cronologia Ordini", noOrders: "Nessun ordine completato.",
+        deposit: "Deposita", withdraw: "Preleva", history: "Cronologia", bindWallet: "Collega Wallet / Banca",
+        accSettings: "Impostazioni Account", chgLoginPass: "Cambia Password Accesso", chgWdPass: "Cambia Password Prelievo", logout: "Esci",
+        navHome: "Home", navService: "Servizio", navGrabbing: "Ordini", navOrders: "Storico", navProfile: "Profilo"
+      },
+      id: {
+        signIn: "Masuk", register: "Daftar", emailLabel: "Alamat Email", passLabel: "Kata Sandi",
+        fullName: "Nama Lengkap", phoneNum: "Nomor Telepon", regEnter: "Daftar & Masuk",
+        heroDesc: "Tingkatkan pesanan merchant di Amazon, AliExpress & Shopify dan dapatkan komisi harian instan.",
+        guide: "Panduan", howWorks: "Cara Kerja", cert: "Sertifikat",
+        liveTx: "Transaksi Langsung", realTime: "Real-Time",
+        partnersTitle: "E-Commerce Global & Pemasaran Digital",
+        tgSupportTitle: "Selamat Datang di Layanan Dukungan Pelanggan",
+        tgSupportDesc: "Kami siap membantu Anda 24/7 setiap saat",
+        openTg: "Buka Dukungan Telegram", accBalance: "Saldo Akun (USDT)", accBalanceShort: "Saldo Akun:",
+        todayEarn: "Pendapatan Hari Ini", accStatus: "Status Akun", totalTasks: "Total Tugas", remTasks: "Sisa Tugas",
+        grabBtn: "Ambil Pesanan Sekarang", completedHistory: "Riwayat Pesanan Selesai", noOrders: "Belum ada pesanan selesai.",
+        deposit: "Deposit", withdraw: "Tarik", history: "Riwayat", bindWallet: "Tautkan Dompet / Bank",
+        accSettings: "Pengaturan Akun", chgLoginPass: "Ubah Sandi Masuk", chgWdPass: "Ubah Sandi Penarikan", logout: "Keluar",
+        navHome: "Beranda", navService: "Layanan", navGrabbing: "Ambil", navOrders: "Pesanan", navProfile: "Profil"
+      }
+    };
+
+    let currentLang = "en";
+    let showZeroBalAlert = false;
+
+    function changeLiveLanguage(langCode) {
+      currentLang = translations15[langCode] ? langCode : "en";
+      const dict = translations15[currentLang];
+      document.documentElement.dir = (currentLang === "ar" || currentLang === "ur") ? "rtl" : "ltr";
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.innerText = dict[key];
+      });
+      renderAll();
+    }
+
+    function toggleProfileSettingsCard() {
+      const body = document.getElementById('acc-settings-body');
+      const icon = document.getElementById('acc-settings-chevron');
+      const isOpen = body.classList.toggle('open');
+      icon.className = isOpen ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
+    }
 
     const unique25Products = [
       { name: "Sony WH-1000XM5 Wireless Headset", store: "Amazon", price: 275.00, comm: 7.50, img: "https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=" },
@@ -1094,7 +1689,7 @@
 
     let state = JSON.parse(JSON.stringify(defaultState));
     let pendingDepositAmt = 0;
-    let openUserPanels = {}; // { [userId]: 'setting' | 'lucky' | null }
+    let openUserPanels = {};
 
     function getActiveUser() {
       if (!Array.isArray(state.users) || state.users.length === 0) {
@@ -1183,10 +1778,10 @@
     setInterval(pullFromBackend, 2500);
 
     const demoFeed = [
-      { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#16a34a" },
+      { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
       { user: "User***14", action: "Lucky Order Bonus", amount: "+$95.00", color: "#d97706" },
-      { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#16a34a" },
-      { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#2563eb" }
+      { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
+      { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
     ];
 
     function isAdminPath() {
@@ -1234,7 +1829,7 @@
     function renderLiveFeed() {
       const el = document.getElementById('live-tx-container');
       if (!el) return;
-      const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 4);
+      const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 3);
       el.innerHTML = shuffled.map(x => `
         <div class="tx-row">
           <span><strong>${x.user}</strong> • ${x.action}</span>
@@ -1247,8 +1842,10 @@
     function renderAll() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
+      const dict = translations15[currentLang] || translations15.en;
 
-      document.getElementById('cust-header-tier').innerText = u.tier;
+      if (u.balance > 0) showZeroBalAlert = false;
+
       document.getElementById('prof-name').innerText = u.name;
       document.getElementById('prof-email').innerText = u.email;
       document.getElementById('prof-phone').innerText = u.phone;
@@ -1264,11 +1861,11 @@
       document.getElementById('grab-balance').innerText = currentBalFormatted;
       document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
       document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
-      document.getElementById('grab-rem-tasks').innerText = u.totalTasks - u.completedTasks;
+      document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
 
       const statusBadge = document.getElementById('home-account-status-badge');
       statusBadge.innerText = u.accountStatus;
-      statusBadge.style.background = u.accountStatus === "Active" ? "#16a34a" : "#dc2626";
+      statusBadge.style.background = u.accountStatus === "Active" ? "#10b981" : "#dc2626";
 
       const statusBanner = document.getElementById('cust-account-status-banner');
       const alerts = [];
@@ -1279,6 +1876,13 @@
       statusBanner.innerHTML = alerts.length > 0
         ? `<div class="status-banner-alert"><i class="fa-solid fa-triangle-exclamation"></i> ${alerts.join(" • ")}</div>`
         : '';
+
+      const zeroAlertEl = document.getElementById('grab-zero-balance-alert');
+      if (zeroAlertEl) {
+        zeroAlertEl.innerHTML = (showZeroBalAlert && u.balance <= 0)
+          ? `<div class="status-banner-alert"><i class="fa-solid fa-circle-info"></i> Please contact with customer service for active your tasks</div>`
+          : '';
+      }
 
       const notifArea = document.getElementById('cust-admin-notif-area');
       if (u.adminNotification && u.adminNotification.trim()) {
@@ -1301,8 +1905,8 @@
       const stageArea = document.getElementById('grab-stage-area');
       if (u.tasksLocked) {
         stageArea.innerHTML = `
-          <div class="status-banner-alert" style="margin-bottom:0; padding:16px;">
-            <i class="fa-solid fa-headset" style="font-size:20px; display:block; margin-bottom:6px;"></i>
+          <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
+            <i class="fa-solid fa-headset" style="font-size:24px; display:block; margin-bottom:8px;"></i>
             Please contact with customer service
           </div>
         `;
@@ -1312,32 +1916,48 @@
         stageArea.innerHTML = `
           <div class="lucky-product-card" onclick="openCustModal('deposit1')">
             <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
-            <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-            <h4 style="font-size:14px; color:#881337; margin-top:6px;">${lucky.product}</h4>
+            <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+            <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
             <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
             <p style="font-size:11px; color:#9f1239;">
               Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
             </p>
-            <p style="font-size:11px; color:#be123c; font-weight:700; margin-top:4px;">
+            <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:5px;">
               Commission Reward: +$${lucky.comm.toFixed(2)}
             </p>
           </div>
           ${hasEnough
-            ? `<button class="btn-primary" style="background:#16a34a; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
+            ? `<button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
             : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
           }
+        `;
+      } else if (u.completedTasks >= u.totalTasks) {
+        stageArea.innerHTML = `
+          <div class="product-preview">
+            <i class="fa-solid fa-circle-check" style="font-size:40px; color:#059669; margin-bottom:8px;"></i>
+            <h4 style="font-size:16px; color:#1e1b4b;">All 25 Tasks Completed!</h4>
+            <p style="font-size:12px; color:#64748b; margin-top:4px;">Your daily task batch is complete. Contact support or wait for admin task reset.</p>
+          </div>
+          <button class="btn-primary" style="opacity:0.65; cursor:not-allowed;" disabled>
+            <i class="fa-solid fa-check"></i> 25 / 25 Tasks Completed
+          </button>
         `;
       } else {
         const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
         const previewItem = unique25Products[nextIdx];
         stageArea.innerHTML = `
           <div class="product-preview" id="product-display">
+            <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
+              TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
+            </span>
             <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
-            <h4 style="font-size:14px;">${previewItem.name}</h4>
-            <p style="font-size:11px; color:#64748b; margin-top:3px;">${previewItem.store} • Order: $${previewItem.price.toFixed(2)} • Comm: +$${previewItem.comm.toFixed(2)}</p>
+            <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
+            <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
+              Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${previewItem.comm.toFixed(2)}
+            </p>
           </div>
           <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
-            <i class="fa-solid fa-bolt"></i> Grab Order Now
+            <i class="fa-solid fa-bolt"></i> ${dict.grabBtn}
           </button>
         `;
       }
@@ -1345,23 +1965,22 @@
       const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
       const ordersEl = document.getElementById('orders-list');
       if (userOrders.length === 0) {
-        ordersEl.innerHTML = `<p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:40px;">No orders completed yet.</p>`;
+        ordersEl.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;">${dict.noOrders}</p>`;
       } else {
         ordersEl.innerHTML = userOrders.map(o => `
           <div class="card-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;">
             <div style="display:flex; align-items:center; gap:10px;">
               <img src="${o.img}" class="order-thumb" alt="Order Item" />
               <div>
-                <h4 style="font-size:12px; color:#1e293b;">Task #${o.taskNum} • ${o.name}</h4>
+                <h4 style="font-size:12px; color:#0f172a;">Task #${o.taskNum} • ${o.name}</h4>
                 <p style="font-size:10px; color:#64748b;">${o.store} • Completed</p>
               </div>
             </div>
-            <strong style="color:#16a34a; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
+            <strong style="color:#059669; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
           </div>
         `).join('');
       }
 
-      // Admin Settings inputs (only Admin Email, Admin Password, Telegram & TRC20)
       if (document.activeElement !== document.getElementById('adm-set-email')) {
         document.getElementById('adm-set-email').value = state.adminCredentials.email;
       }
@@ -1379,7 +1998,7 @@
       renderAdminTxLists();
     }
 
-    // ==================== RENDER EACH USER IN ITS OWN LINE ====================
+    // ==================== RENDER EACH USER IN ADMIN ====================
     function renderAdminUserLines() {
       const container = document.getElementById('admin-users-lines-container');
       if (!container) return;
@@ -1393,7 +2012,7 @@
             <div class="user-line-top">
               <div>
                 <h4 style="font-size:15px; color:#0f172a;">
-                  <i class="fa-solid fa-user-circle" style="color:#2563eb;"></i> ${user.name}
+                  <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name}
                   <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
                     ${user.accountStatus}
                   </span>
@@ -1401,9 +2020,9 @@
               </div>
 
               <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span style="font-size:15px; font-weight:800; color:#16a34a; margin-right:6px;">$${user.balance.toFixed(2)}</span>
+                <span style="font-size:15px; font-weight:800; color:#059669; margin-right:6px;">$${user.balance.toFixed(2)}</span>
                 <input type="number" id="fund-input-${user.id}" placeholder="Amount ($)" style="width:105px; padding:7px 9px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px;" />
-                <button class="btn-sm" style="background:#16a34a;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
+                <button class="btn-sm" style="background:#059669;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
                 <button class="btn-sm" style="background:#dc2626;" onclick="userAdjustFunds('${user.id}', 'deduct')">- Deduct Funds</button>
               </div>
             </div>
@@ -1412,11 +2031,11 @@
               <div><span style="color:#64748b;">Name:</span> <strong>${user.name}</strong></div>
               <div><span style="color:#64748b;">Phone:</span> <strong>${user.phone}</strong></div>
               <div><span style="color:#64748b;">Email:</span> <strong>${user.email}</strong></div>
-              <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong></div>
+              <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong> • <span style="color:#059669; font-weight:700;">Today: $${user.todayEarn.toFixed(2)}</span></div>
             </div>
 
             <div class="user-inline-controls">
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
                 <span style="font-size:11px; font-weight:700; color:#334155;">Status:</span>
                 <select id="status-select-${user.id}" onchange="userSetStatus('${user.id}', this.value)" style="padding:4px 7px; border-radius:6px; border:1px solid #cbd5e1; font-size:11px; font-weight:600;">
                   <option value="Active" ${user.accountStatus === 'Active' ? 'selected' : ''}>Active</option>
@@ -1425,18 +2044,18 @@
                 </select>
               </div>
 
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
                 <span style="font-size:11px; font-weight:700; color:#334155;">Slide Lock:</span>
                 <label class="switch">
                   <input type="checkbox" ${user.tasksLocked ? 'checked' : ''} onchange="userToggleSlideLock('${user.id}', this.checked)" />
                   <span class="slider"></span>
                 </label>
-                <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#16a34a'}; font-weight:700;">
+                <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#059669'}; font-weight:700;">
                   ${user.tasksLocked ? 'ON (Service Msg)' : 'OFF'}
                 </span>
               </div>
 
-              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
                 <span style="font-size:11px; font-weight:700; color:#334155;">WD Block:</span>
                 <label class="switch">
                   <input type="checkbox" ${user.withdrawBlocked ? 'checked' : ''} onchange="userToggleWdBlock('${user.id}', this.checked)" />
@@ -1444,7 +2063,11 @@
                 </label>
               </div>
 
-              <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#2563eb'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
+              <button class="btn-sm" style="background:#7c3aed;" onclick="userResetTasks('${user.id}')">
+                <i class="fa-solid fa-rotate-left"></i> Reset Tasks (0/25)
+              </button>
+
+              <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#4f46e5'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
                 <i class="fa-solid fa-gear"></i> User Setting
               </button>
 
@@ -1474,7 +2097,7 @@
                     <input type="text" id="u-notif-${user.id}" value="${user.adminNotification || ''}" placeholder="Live message for this user" />
                   </div>
                 </div>
-                <button class="btn-sm" style="background:#16a34a; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
+                <button class="btn-sm" style="background:#059669; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
                   <i class="fa-solid fa-check"></i> Save User Setting
                 </button>
               </div>
@@ -1519,6 +2142,20 @@
     function toggleUserSubpanel(userId, mode) {
       openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
       renderAdminUserLines();
+    }
+
+    function userResetTasks(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.completedTasks = 0;
+      u.todayEarn = 0;
+      if (u.activeLuckyOrder) {
+        u.activeLuckyOrder.triggered = false;
+        u.activeLuckyOrder.completed = false;
+      }
+      state.ordersHistory = state.ordersHistory.filter(o => o.userId !== userId);
+      saveState();
+      alert(`Tasks reset to 0/25, Today's Earn reset to $0.00, and previous order history cleared for ${u.name}!`);
     }
 
     function userAdjustFunds(userId, mode) {
@@ -1589,7 +2226,31 @@
       alert(`Lucky Order set for ${u.name} on Task #${tNum}!`);
     }
 
-    // ==================== CUSTOMER AUTH & ACTIONS ====================
+    // ==================== CUSTOMER VERIFYING & AUTH FLOW ====================
+    function showVerifyingThenEnter(onComplete) {
+      const overlay = document.getElementById('verifying-overlay');
+      const fill = document.getElementById('verify-progress-fill');
+      const title = document.getElementById('verify-title');
+      const sub = document.getElementById('verify-sub');
+
+      title.innerText = "Verifying Account...";
+      sub.innerText = "Checking security credentials & syncing real-time merchant session...";
+      fill.style.width = "0%";
+      overlay.style.display = "flex";
+
+      setTimeout(() => { fill.style.width = "65%"; }, 80);
+      setTimeout(() => {
+        title.innerText = "Security Verified ✓";
+        sub.innerText = "Opening Global E-Commerce Dashboard...";
+        fill.style.width = "100%";
+      }, 950);
+      setTimeout(() => {
+        overlay.style.display = "none";
+        fill.style.width = "0%";
+        onComplete();
+      }, 1750);
+    }
+
     function switchAuthTab(mode) {
       document.getElementById('tab-login').classList.toggle('active', mode === 'login');
       document.getElementById('tab-register').classList.toggle('active', mode === 'register');
@@ -1623,9 +2284,11 @@
         state.activeUserId = created.id;
       }
 
-      state.customerLoggedIn = true;
-      saveState();
-      applyRouting();
+      showVerifyingThenEnter(() => {
+        state.customerLoggedIn = true;
+        saveState();
+        applyRouting();
+      });
     }
 
     function handleCustRegister() {
@@ -1648,11 +2311,13 @@
         balance: 0.00
       });
 
-      state.users.unshift(newUser);
-      state.activeUserId = newUser.id;
-      state.customerLoggedIn = true;
-      saveState();
-      applyRouting();
+      showVerifyingThenEnter(() => {
+        state.users.unshift(newUser);
+        state.activeUserId = newUser.id;
+        state.customerLoggedIn = true;
+        saveState();
+        applyRouting();
+      });
     }
 
     function handleCustLogout() {
@@ -1661,12 +2326,12 @@
       applyRouting();
     }
 
-    function switchCustPage(pageId, title, navEl) {
+    function switchCustPage(pageId, navEl) {
       document.querySelectorAll('#cust-app-screen .page').forEach(p => p.classList.remove('active'));
       document.getElementById('cust-page-' + pageId).classList.add('active');
-      document.getElementById('cust-header-title').innerText = title;
       document.querySelectorAll('#cust-app-screen .nav-item').forEach(n => n.classList.remove('active'));
       navEl.classList.add('active');
+      renderAll();
     }
 
     function dismissCustomerNotification() {
@@ -1688,6 +2353,13 @@
         return;
       }
       if (lucky && lucky.triggered && !lucky.completed) {
+        openCustModal('deposit1');
+        return;
+      }
+      // ZERO FUNDS / NEW ACCOUNT CHECK: SHOW ALERT ABOVE & OPEN DEPOSIT CARD
+      if (u.balance <= 0) {
+        showZeroBalAlert = true;
+        renderAll();
         openCustModal('deposit1');
         return;
       }
@@ -1759,6 +2431,26 @@
       alert(`Lucky Order Completed! +$${lucky.comm.toFixed(2)} commission credited.`);
     }
 
+    function updateCustLoginPassInline() {
+      const u = getActiveUser();
+      const val = document.getElementById('inline-login-pass').value.trim();
+      if (!val) { alert("Enter a new login password."); return; }
+      u.loginPassword = val;
+      document.getElementById('inline-login-pass').value = "";
+      saveState();
+      alert("Login Password Updated!");
+    }
+
+    function updateCustWithdrawPassInline() {
+      const u = getActiveUser();
+      const val = document.getElementById('inline-wd-pass').value.trim();
+      if (!val) { alert("Enter a new withdraw password."); return; }
+      u.withdrawPassword = val;
+      document.getElementById('inline-wd-pass').value = "";
+      saveState();
+      alert("Withdraw Password Updated!");
+    }
+
     function openCustModal(type) {
       const u = getActiveUser();
       if (type === 'withdraw' && u.withdrawBlocked) {
@@ -1780,7 +2472,8 @@
           ? (lucky.amount - u.balance).toFixed(2)
           : "";
         content.innerHTML = `
-          <h3 style="font-size:16px; color:#16a34a; margin-bottom:10px;">Deposit Funds</h3>
+          <h3 style="font-size:16px; color:#059669; margin-bottom:6px;">Deposit Funds</h3>
+          ${u.balance <= 0 ? `<p style="font-size:11px; color:#b91c1c; background:#fef2f2; padding:7px 9px; border-radius:8px; margin-bottom:10px; font-weight:600;">Please contact with customer service for active your tasks</p>` : ''}
           <div class="input-group">
             <label>Deposit / Recharge Amount (USDT)</label>
             <input type="number" id="dep-amt-input" value="${suggested}" placeholder="Enter amount" />
@@ -1789,7 +2482,7 @@
         `;
       } else if (type === 'withdraw') {
         content.innerHTML = `
-          <h3 style="font-size:16px; color:#2563eb; margin-bottom:8px;">Withdraw Funds</h3>
+          <h3 style="font-size:16px; color:#4f46e5; margin-bottom:8px;">Withdraw Funds</h3>
           <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Available Balance: <strong>$${u.balance.toFixed(2)}</strong></p>
           <div class="input-group"><label>Withdraw Amount (USDT)</label><input type="number" id="wd-amt-input" placeholder="Enter amount" /></div>
           <div class="input-group"><label>Withdraw Password</label><input type="password" id="wd-pass-input" placeholder="Enter withdraw password" /></div>
@@ -1819,46 +2512,14 @@
           <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
           <button class="btn-primary" onclick="saveBind()">Save Binding</button>
         `;
-      } else if (type === 'loginPass') {
-        content.innerHTML = `
-          <h3 style="font-size:15px; margin-bottom:10px;">Change Login Password</h3>
-          <div class="input-group"><label>New Login Password</label><input type="password" id="new-cust-login-pass" placeholder="Enter new login password" /></div>
-          <button class="btn-primary" onclick="updateCustLoginPass()">Update Login Password</button>
-        `;
-      } else if (type === 'withdrawPass') {
-        content.innerHTML = `
-          <h3 style="font-size:15px; margin-bottom:10px;">Change Withdraw Password</h3>
-          <div class="input-group"><label>New Withdraw Password</label><input type="password" id="new-cust-wd-pass" placeholder="Enter new withdraw password" /></div>
-          <button class="btn-primary" onclick="updateCustWithdrawPass()">Update Withdraw Password</button>
-        `;
       } else {
         content.innerHTML = `
-          <h3 style="font-size:16px; color:#1e3a8a; margin-bottom:8px;">Global E-Commerce</h3>
+          <h3 style="font-size:16px; color:#4f46e5; margin-bottom:8px;">Global E-Commerce</h3>
           <p style="font-size:12px; color:#334155; line-height:1.6;">
             Complete your 25 unique product promotion tasks in the Grabbing tab to earn instant commissions.
           </p>
         `;
       }
-    }
-
-    function updateCustLoginPass() {
-      const u = getActiveUser();
-      const val = document.getElementById('new-cust-login-pass').value.trim();
-      if (!val) { alert("Enter a password."); return; }
-      u.loginPassword = val;
-      saveState();
-      alert("Login Password Updated!");
-      closeModal();
-    }
-
-    function updateCustWithdrawPass() {
-      const u = getActiveUser();
-      const val = document.getElementById('new-cust-wd-pass').value.trim();
-      if (!val) { alert("Enter a password."); return; }
-      u.withdrawPassword = val;
-      saveState();
-      alert("Withdraw Password Updated!");
-      closeModal();
     }
 
     function goDepositStep2() {
@@ -1870,15 +2531,15 @@
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(addr)}`;
 
       document.getElementById('modal-content').innerHTML = `
-        <h3 style="font-size:15px; color:#1e3a8a;">TRC20 Payment ($${amt.toFixed(2)})</h3>
-        <div style="text-align:center; background:#f8fafc; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #cbd5e1;">
+        <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
+        <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
           <img src="${qrUrl}" style="width:145px; height:145px;" />
           <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:11px;">
             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;">${addr}</span>
-            <button class="btn-sm" style="background:#1e3a8a;" onclick="navigator.clipboard.writeText('${addr}'); alert('TRC20 Copied!');">Copy</button>
+            <button class="btn-sm" style="background:#4f46e5;" onclick="navigator.clipboard.writeText('${addr}'); alert('TRC20 Copied!');">Copy</button>
           </div>
         </div>
-        <button class="btn-primary" style="background:#16a34a; color:#fff;" onclick="confirmPaid()">I Have Paid</button>
+        <button class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
       `;
     }
 
@@ -1988,7 +2649,7 @@
                 <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${d.time}</p>
                 ${d.status === 'Pending' ? `
                   <div style="display:flex; gap:8px;">
-                    <button class="btn-sm" style="background:#16a34a;" onclick="decideAdminTx(${d.id}, 'Approved')">Approve Deposit</button>
+                    <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx(${d.id}, 'Approved')">Approve Deposit</button>
                     <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${d.id}, 'Rejected')">Reject Deposit</button>
                   </div>
                 ` : ''}
@@ -2010,7 +2671,7 @@
                 <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${w.time}</p>
                 ${w.status === 'Pending' ? `
                   <div style="display:flex; gap:8px;">
-                    <button class="btn-sm" style="background:#16a34a;" onclick="decideAdminTx(${w.id}, 'Approved')">Approve Withdraw</button>
+                    <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx(${w.id}, 'Approved')">Approve Withdraw</button>
                     <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${w.id}, 'Rejected')">Reject Withdraw</button>
                   </div>
                 ` : ''}
