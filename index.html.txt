@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global E-Commerce</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0b0f17;
+      min-height: 100vh;
+    }
+
+    /* ==================== CUSTOMER MOBILE SHELL ==================== */
+    .customer-outer {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+      background: radial-gradient(circle at top, #1e293b, #090d16);
+    }
+
+    .mobile-container {
+      width: 395px;
+      height: 800px;
+      background-color: #f1f5f9;
+      border-radius: 34px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 8px solid #090b0e;
+    }
+
+    /* ==================== ADMIN FULL DESKTOP SHELL ==================== */
+    .admin-outer {
+      min-height: 100vh;
+      width: 100%;
+      background: #0f172a;
+      display: none;
+      flex-direction: column;
+    }
+
+    .admin-login-full {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
+      color: #fff;
+    }
+
+    .admin-login-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .admin-dashboard-full {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+      background: #f1f5f9;
+    }
+
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .admin-sidebar {
+      width: 245px;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 14px;
+      flex-shrink: 0;
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px 20px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      margin-bottom: 14px;
+    }
+
+    .admin-brand i {
+      font-size: 24px;
+      color: #fbbf24;
+    }
+
+    .admin-nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 6px;
+      text-align: left;
+      transition: 0.2s;
+    }
+
+    .admin-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .admin-nav-btn.active {
+      background: #4338ca;
+      color: #fff;
+    }
+
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .admin-topbar {
+      background: #fff;
+      padding: 16px 26px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-content-area {
+      padding: 22px;
+      max-width: 1320px;
+      width: 100%;
+    }
+
+    .admin-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    /* ==================== USER LINE IN ADMIN ==================== */
+    .user-line-card {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+
+    .user-line-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+
+    .user-inline-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .user-subpanel {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* ================= SHARED AUTH & UI STYLES ================= */
+    .auth-box {
+      flex: 1;
+      background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 26px;
+    }
+
+    .brand-logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .brand-logo i {
+      font-size: 42px;
+      color: #fbbf24;
+      margin-bottom: 8px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 14px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      color: #cbd5e1;
+    }
+
+    .auth-tab.active {
+      background: #fbbf24;
+      color: #111827;
+    }
+
+    .input-group {
+      margin-bottom: 10px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 4px;
+      opacity: 0.92;
+      font-weight: 600;
+    }
+
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      font-size: 13px;
+      background: #fff;
+      color: #1e293b;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      color: #111827;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 4px;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .app-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .top-header {
+      background: linear-gradient(90deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-tier {
+      background: #fbbf24;
+      color: #111;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .pages-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      padding-bottom: 85px;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: #fff;
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+
+    .status-banner-alert {
+      background: #fef2f2;
+      border: 1.5px solid #ef4444;
+      color: #991b1b;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .admin-push-notif {
+      background: #fffbeb;
+      border: 1.5px solid #f59e0b;
+      color: #78350f;
+      padding: 11px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+
+    .info-card {
+      background: #fff;
+      padding: 12px 6px;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+    }
+
+    .live-feed-box, .card-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .live-dot {
+      height: 8px;
+      width: 8px;
+      background-color: #16a34a;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0.3; } }
+
+    .tx-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 12px;
+    }
+
+    .grab-stats-card {
+      background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+      color: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .grab-sub-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .grab-sub-item {
+      background: rgba(255, 255, 255, 0.14);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .grab-sub-item strong {
+      display: block;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .product-preview {
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 8px 0 12px;
+      text-align: center;
+    }
+
+    .lucky-product-card {
+      background: #fff1f2;
+      border: 2px solid #e11d48;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      margin: 8px 0 12px;
+      cursor: pointer;
+    }
+
+    .negative-order-amt {
+      color: #e11d48;
+      font-size: 20px;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    .prod-img {
+      width: 92px;
+      height: 92px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      margin: 0 auto 8px;
+      display: block;
+      background: #fff;
+    }
+
+    .order-thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      flex-shrink: 0;
+    }
+
+    .profile-top-card {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+
+    .action-3-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+
+    .action-box {
+      background: #fff;
+      padding: 12px 6px;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+    }
+
+    .menu-row {
+      padding: 13px 15px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #1e293b;
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+      vertical-align: middle;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #16a34a;
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #dc2626; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .btn-sm {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: none;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .badge-pending { background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+    .badge-approved { background: #dcfce7; color: #16a34a; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+    .badge-rejected { background: #fee2e2; color: #dc2626; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.78);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      z-index: 400;
+    }
+
+    .modal-box {
+      background: #fff;
+      width: 100%;
+      max-width: 360px;
+      max-height: 88%;
+      overflow-y: auto;
+      border-radius: 18px;
+      padding: 18px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 18px;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 66px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      color: #64748b;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-item i {
+      font-size: 17px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .nav-item.grab-tab i {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      color: #111;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -18px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       1. CUSTOMER MOBILE PAGE
+       ===================================================================== -->
+  <div id="customer-outer" class="customer-outer">
+    <div class="mobile-container">
+
+      <div id="cust-auth-screen" class="auth-box">
+        <div class="brand-logo">
+          <i class="fa-solid fa-globe"></i>
+          <h2>Global E-Commerce</h2>
+          <p style="font-size:12px; opacity:0.8;">Customer Merchant Portal</p>
+        </div>
+
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</div>
+        </div>
+
+        <div id="form-login">
+          <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" id="login-email" value="sara.khan@email.com" />
+          </div>
+          <div class="input-group">
+            <label>Login Password</label>
+            <input type="password" id="login-pass" value="123456" />
+          </div>
+          <button class="btn-primary" onclick="handleCustLogin()">Sign In</button>
+        </div>
+
+        <div id="form-register" style="display:none;">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter full name" />
+          </div>
+          <div class="input-group">
+            <label>Phone Number</label>
+            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
+          </div>
+          <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" id="reg-email" placeholder="Enter email address" />
+          </div>
+          <div class="input-group">
+            <label>Login Password</label>
+            <input type="password" id="reg-pass" placeholder="Create password" />
+          </div>
+          <button class="btn-primary" onclick="handleCustRegister()">Register & Enter</button>
+        </div>
+      </div>
+
+      <div id="cust-app-screen" class="app-view">
+        <div class="top-header">
+          <h3 id="cust-header-title">Global E-Commerce</h3>
+          <span class="badge-tier" id="cust-header-tier">Regular Account</span>
+        </div>
+
+        <div class="pages-wrapper">
+          <div id="cust-admin-notif-area"></div>
+          <div id="cust-account-status-banner"></div>
+
+          <div id="cust-page-home" class="page active">
+            <div class="hero-banner">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="color:#fbbf24; font-size:15px;">Global E-Commerce</h4>
+                <span id="home-account-status-badge" style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:#16a34a; color:#fff;">Active</span>
+              </div>
+              <p style="font-size:12px; opacity:0.85; margin-top:6px;">Boost international merchant orders on Amazon, AliExpress & Shopify and earn instant daily commissions.</p>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-card" onclick="openCustModal('guide')">
+                <i class="fa-solid fa-book-open" style="color:#2563eb; font-size:20px; margin-bottom:4px;"></i>
+                <p style="font-size:11px; font-weight:600;">Guide</p>
+              </div>
+              <div class="info-card" onclick="openCustModal('how')">
+                <i class="fa-solid fa-gears" style="color:#d97706; font-size:20px; margin-bottom:4px;"></i>
+                <p style="font-size:11px; font-weight:600;">How It Works</p>
+              </div>
+              <div class="info-card" onclick="openCustModal('cert')">
+                <i class="fa-solid fa-award" style="color:#16a34a; font-size:20px; margin-bottom:4px;"></i>
+                <p style="font-size:11px; font-weight:600;">Certificate</p>
+              </div>
+            </div>
+
+            <div class="live-feed-box">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
+                <span style="font-size:12px; font-weight:700;"><span class="live-dot"></span> Live Member Transactions</span>
+                <span style="font-size:11px; color:#64748b;">Real-Time</span>
+              </div>
+              <div id="live-tx-container"></div>
+            </div>
+          </div>
+
+          <div id="cust-page-orders" class="page">
+            <h4 style="font-size:15px; margin-bottom:10px;">Completed Order History</h4>
+            <div id="orders-list">
+              <p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:40px;">No orders completed yet.</p>
+            </div>
+          </div>
+
+          <div id="cust-page-grabbing" class="page">
+            <div class="grab-stats-card">
+              <div style="text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px;">
+                <span style="font-size:11px; opacity:0.85;">Account Balance (USDT)</span>
+                <h2 id="grab-balance" style="font-size:26px; color:#fbbf24;">$0.00</h2>
+              </div>
+              <div class="grab-sub-grid">
+                <div class="grab-sub-item"><span>Today's Earn</span><strong id="grab-today-earn" style="color:#4ade80;">+$0.00</strong></div>
+                <div class="grab-sub-item"><span>Account Status</span><strong id="grab-status-text" style="color:#fbbf24;">Active</strong></div>
+                <div class="grab-sub-item"><span>Total Tasks</span><strong id="grab-total-tasks">0 / 25</strong></div>
+                <div class="grab-sub-item"><span>Remaining Tasks</span><strong id="grab-rem-tasks">25</strong></div>
+              </div>
+            </div>
+
+            <div class="card-box" style="text-align:center;">
+              <div id="grab-stage-area"></div>
+            </div>
+          </div>
+
+          <div id="cust-page-service" class="page">
+            <div class="card-box" style="text-align:center; padding:22px;">
+              <div style="width:60px; height:60px; border-radius:50%; background:#e0f2fe; color:#0284c7; font-size:30px; display:flex; justify-content:center; align-items:center; margin:0 auto 10px;">
+                <i class="fa-brands fa-telegram"></i>
+              </div>
+              <h3 style="font-size:16px;">Telegram Customer Service</h3>
+              <p style="font-size:12px; color:#64748b; margin:6px 0 14px;">Click below to open our direct Telegram customer service link.</p>
+              <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background:#0284c7; color:#fff;">
+                <i class="fa-brands fa-telegram"></i> Open Telegram Support (<span id="tg-handle-display">@GlobalEcom_Help</span>)
+              </a>
+            </div>
+          </div>
+
+          <div id="cust-page-profile" class="page">
+            <div class="profile-top-card">
+              <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:10px; margin-bottom:10px;">
+                <div style="width:46px; height:46px; border-radius:50%; background:#2563eb; display:flex; justify-content:center; align-items:center; font-size:19px;">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                  <h4 id="prof-name" style="font-size:15px;">Sara Khan</h4>
+                  <p id="prof-email" style="font-size:11px; opacity:0.8;">sara.khan@email.com</p>
+                  <p id="prof-phone" style="font-size:10px; opacity:0.7;">+971 50 987 6543</p>
+                  <div style="margin-top:4px; display:flex; gap:5px; flex-wrap:wrap;">
+                    <span id="prof-status-pill" style="background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid #4ade80; font-size:10px; padding:1px 7px; border-radius:10px;">Active</span>
+                    <span id="prof-tier-badge" class="badge-tier" style="font-size:10px; padding:2px 8px;">Regular Account</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; opacity:0.85;">Account Balance:</span>
+                <h2 id="profile-balance" style="font-size:22px; color:#fbbf24;">$0.00</h2>
+              </div>
+            </div>
+
+            <div class="action-3-grid">
+              <div class="action-box" onclick="openCustModal('deposit1')">
+                <i class="fa-solid fa-circle-arrow-down" style="color:#16a34a; font-size:20px; margin-bottom:4px;"></i>
+                <h4 style="font-size:12px;">Deposit</h4>
+              </div>
+              <div class="action-box" onclick="openCustModal('withdraw')">
+                <i class="fa-solid fa-circle-arrow-up" style="color:#2563eb; font-size:20px; margin-bottom:4px;"></i>
+                <h4 style="font-size:12px;">Withdraw</h4>
+              </div>
+              <div class="action-box" onclick="openCustModal('history')">
+                <i class="fa-solid fa-clock-rotate-left" style="color:#d97706; font-size:20px; margin-bottom:4px;"></i>
+                <h4 style="font-size:12px;">History</h4>
+              </div>
+            </div>
+
+            <div class="card-box" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openCustModal('bindWallet')">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-wallet" style="font-size:18px; color:#16a34a;"></i>
+                <div>
+                  <h4 style="font-size:13px;">Bind Wallet / Bank</h4>
+                  <p style="font-size:11px; color:#64748b;" id="bound-wallet-label">TRC20 or Bank Transfer</p>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
+            </div>
+
+            <div class="card-box" style="padding:0; overflow:hidden;">
+              <div style="padding:10px 15px; background:#f8fafc; font-size:12px; font-weight:700; color:#475569; border-bottom:1px solid #e2e8f0;">
+                <i class="fa-solid fa-gear"></i> Account Settings
+              </div>
+              <div class="menu-row" onclick="openCustModal('loginPass')">
+                <span><i class="fa-solid fa-lock" style="color:#2563eb; width:20px;"></i> Change Login Password</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
+              </div>
+              <div class="menu-row" onclick="openCustModal('withdrawPass')">
+                <span><i class="fa-solid fa-shield-halved" style="color:#d97706; width:20px;"></i> Change Withdraw Password</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
+              </div>
+              <div class="menu-row" onclick="handleCustLogout()" style="color:#dc2626; font-weight:600; border-bottom:none;">
+                <span><i class="fa-solid fa-right-from-bracket" style="width:20px;"></i> Logout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item active" onclick="switchCustPage('home', 'Global E-Commerce', this)">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+          </div>
+          <div class="nav-item" onclick="switchCustPage('orders', 'My Orders', this)">
+            <i class="fa-solid fa-receipt"></i><span>Orders</span>
+          </div>
+          <div class="nav-item grab-tab" onclick="switchCustPage('grabbing', 'Order Grabbing', this)">
+            <i class="fa-solid fa-bolt"></i><span>Grabbing</span>
+          </div>
+          <div class="nav-item" onclick="switchCustPage('service', 'Customer Service', this)">
+            <i class="fa-brands fa-telegram"></i><span>Service</span>
+          </div>
+          <div class="nav-item" onclick="switchCustPage('profile', 'My Profile', this)">
+            <i class="fa-solid fa-user"></i><span>Profile</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       2. FULL DESKTOP / LAPTOP ADMIN PANEL (/admin/login)
+       ===================================================================== -->
+  <div id="admin-outer" class="admin-outer">
+
+    <div id="admin-auth-screen" class="admin-login-full">
+      <div class="admin-login-card">
+        <div class="brand-logo">
+          <i class="fa-solid fa-user-shield"></i>
+          <h2>Admin Control Panel</h2>
+          <p style="font-size:12px; opacity:0.75;">Full Screen Management • /admin/login</p>
+        </div>
+
+        <div class="input-group">
+          <label>Admin Email or Username</label>
+          <input type="text" id="admin-login-user" value="admin@globalecom.com" />
+        </div>
+        <div class="input-group">
+          <label>Admin Password</label>
+          <input type="password" id="admin-login-pass" value="admin123" />
+        </div>
+        <button class="btn-primary" onclick="handleAdminLogin()">Login to Admin Panel</button>
+      </div>
+    </div>
+
+    <div id="admin-app-screen" class="admin-dashboard-full">
+      <div class="admin-layout">
+        <aside class="admin-sidebar">
+          <div>
+            <div class="admin-brand">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div>
+                <h4 style="font-size:15px; color:#fff;">Admin Console</h4>
+                <span style="font-size:11px; color:#94a3b8;">Desktop Management</span>
+              </div>
+            </div>
+
+            <button class="admin-nav-btn active" onclick="switchAdminPage('users', 'Registered Users', this)">
+              <i class="fa-solid fa-users"></i> Users
+            </button>
+            <button class="admin-nav-btn" onclick="switchAdminPage('deposits', 'Deposit Requests', this)">
+              <i class="fa-solid fa-circle-arrow-down"></i> Deposits
+            </button>
+            <button class="admin-nav-btn" onclick="switchAdminPage('withdraws', 'Withdrawal Requests', this)">
+              <i class="fa-solid fa-circle-arrow-up"></i> Withdraws
+            </button>
+            <button class="admin-nav-btn" onclick="switchAdminPage('settings', 'Admin Settings', this)">
+              <i class="fa-solid fa-gear"></i> Settings
+            </button>
+          </div>
+
+          <button class="admin-nav-btn" onclick="handleAdminLogout()" style="color:#f87171;">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </button>
+        </aside>
+
+        <main class="admin-main">
+          <header class="admin-topbar">
+            <h3 id="admin-header-title" style="font-size:18px; color:#0f172a;">Registered Users</h3>
+            <span id="adm-live-sync-pill" style="background:#dcfce7; color:#15803d; font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px;">
+              <i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Live Sync Active
+            </span>
+          </header>
+
+          <div class="admin-content-area">
+            <!-- TAB 1: USERS (EACH REGISTERED USER IN THEIR OWN LINE WITH INLINE CONTROLS, SETTING & LUCKY ORDER) -->
+            <div id="admin-page-users" class="page active">
+              <div id="admin-users-lines-container"></div>
+            </div>
+
+            <!-- TAB 2: DEPOSITS (APPROVE / REJECT) -->
+            <div id="admin-page-deposits" class="page">
+              <div class="card-box">
+                <h4 style="font-size:15px; margin-bottom:12px;">Live Deposit Requests</h4>
+                <div id="adm-deposits-list"></div>
+              </div>
+            </div>
+
+            <!-- TAB 3: WITHDRAWS (APPROVE / REJECT) -->
+            <div id="admin-page-withdraws" class="page">
+              <div class="card-box">
+                <h4 style="font-size:15px; margin-bottom:12px;">Live Withdrawal Requests</h4>
+                <div id="adm-withdraws-list"></div>
+              </div>
+            </div>
+
+            <!-- TAB 4: ADMIN SETTINGS (ONLY ADMIN EMAIL, ADMIN PASSWORD, TELEGRAM & TRC20) -->
+            <div id="admin-page-settings" class="page">
+              <div class="admin-grid-2">
+                <div class="card-box">
+                  <h4 style="font-size:15px; margin-bottom:12px;"><i class="fa-solid fa-user-lock"></i> Admin Credentials</h4>
+                  <div class="input-group">
+                    <label>Admin Email</label>
+                    <input type="email" id="adm-set-email" />
+                  </div>
+                  <div class="input-group">
+                    <label>Admin Password</label>
+                    <input type="text" id="adm-set-adminpass" />
+                  </div>
+                  <button class="btn-primary" onclick="adminSaveAdminAuthSettings()">Update Admin Email & Password</button>
+                </div>
+
+                <div class="card-box">
+                  <h4 style="font-size:15px; margin-bottom:12px;"><i class="fa-solid fa-globe"></i> Telegram & TRC20 (Real-Time)</h4>
+                  <div class="input-group">
+                    <label>TRC20 Wallet Address</label>
+                    <input type="text" id="adm-set-trc20" />
+                  </div>
+                  <div class="input-group">
+                    <label>Telegram Username or Link</label>
+                    <input type="text" id="adm-set-tg" />
+                  </div>
+                  <button class="btn-primary" onclick="adminSavePlatformSettings()">Update TRC20 & Telegram Live</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL POPUP -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <i class="fa-solid fa-xmark modal-close" onclick="closeModal()"></i>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.firebaseio.com";
+    const DB_NODE_PATH = "/global_ecommerce_state.json";
+
+    const unique25Products = [
+      { name: "Sony WH-1000XM5 Wireless Headset", store: "Amazon", price: 275.00, comm: 7.50, img: "https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=" },
+      { name: "Omega Seamaster Diver Watch", store: "Shopify", price: 340.00, comm: 9.20, img: "https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg" },
+      { name: "Chloe Woody Tote Bag", store: "Shopify", price: 220.00, comm: 6.40, img: "https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg" },
+      { name: "Garmin Fenix 7 Pro Smartwatch", store: "Amazon", price: 310.00, comm: 8.50, img: "https://www.oozoo.com/cdn/shop/products/Q00137-1.png?v=1693205171" },
+      { name: "Dyson Airwrap Multi-Styler", store: "Shopify", price: 360.00, comm: 9.80, img: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&q=80" },
+      { name: "Canon EOS R50 Mirrorless Camera", store: "Amazon", price: 410.00, comm: 11.00, img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80" },
+      { name: "Nike Air Jordan 1 Retro High", store: "Shopify", price: 185.00, comm: 5.30, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
+      { name: "Marshall Stanmore III Speaker", store: "Amazon", price: 245.00, comm: 6.90, img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80" },
+      { name: "Leica M11 Rangefinder Lens Kit", store: "AliExpress", price: 480.00, comm: 12.50, img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&q=80" },
+      { name: "Breville Barista Express Machine", store: "Amazon", price: 390.00, comm: 10.40, img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
+      { name: "Ray-Ban Meta Wayfarer Smart Glasses", store: "Shopify", price: 260.00, comm: 7.10, img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80" },
+      { name: "Keychron Q1 Pro Mechanical Keyboard", store: "AliExpress", price: 165.00, comm: 4.80, img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80" },
+      { name: "Yeti Tundra 45 Hard Cooler", store: "Amazon", price: 230.00, comm: 6.50, img: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&q=80" },
+      { name: "Gucci Ophidia GG Shoulder Bag", store: "Shopify", price: 450.00, comm: 11.80, img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80" },
+      { name: "Bose SoundLink Max Portable", store: "Amazon", price: 215.00, comm: 6.10, img: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80" },
+      { name: "Montblanc Meisterstuck Fountain Pen", store: "Shopify", price: 330.00, comm: 8.90, img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&q=80" },
+      { name: "DJI Osmo Mobile 6 Gimbal", store: "AliExpress", price: 149.00, comm: 4.40, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" },
+      { name: "Aesop Resurrection Hand Balm Duo", store: "Shopify", price: 120.00, comm: 3.70, img: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" },
+      { name: "Samsung T9 2TB Portable SSD", store: "Amazon", price: 175.00, comm: 5.10, img: "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400&q=80" },
+      { name: "Tag Heuer Carrera Chronograph", store: "Shopify", price: 495.00, comm: 13.00, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&q=80" },
+      { name: "Hydro Flask 32oz Wide Mouth", store: "Amazon", price: 95.00, comm: 3.10, img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80" },
+      { name: "Shure SM7B Vocal Dynamic Mic", store: "AliExpress", price: 320.00, comm: 8.70, img: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80" },
+      { name: "Prada Re-Nylon Crossbody Pouch", store: "Shopify", price: 380.00, comm: 10.20, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80" },
+      { name: "Philips Sonicare Prestige 9900", store: "Amazon", price: 205.00, comm: 5.90, img: "https://images.unsplash.com/photo-1559599101-74659e7938e3?w=400&q=80" },
+      { name: "Fujifilm Instax Mini 12 Bundle", store: "AliExpress", price: 135.00, comm: 4.10, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" }
+    ];
+
+    function makeUserRecord(partial) {
+      return {
+        id: partial.id || ("usr_" + Date.now() + "_" + Math.floor(Math.random() * 1000)),
+        name: partial.name || "Sara Khan",
+        phone: partial.phone || "+971 50 987 6543",
+        email: partial.email || "sara.khan@email.com",
+        loginPassword: partial.loginPassword || "123456",
+        withdrawPassword: partial.withdrawPassword || "",
+        trc20Address: partial.trc20Address || "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
+        tier: partial.tier || "Regular Account",
+        accountStatus: partial.accountStatus || "Active",
+        withdrawBlocked: !!partial.withdrawBlocked,
+        tasksLocked: !!partial.tasksLocked,
+        balance: Number(partial.balance || 0),
+        todayEarn: Number(partial.todayEarn || 0),
+        completedTasks: Number(partial.completedTasks || 0),
+        totalTasks: 25,
+        boundWallet: partial.boundWallet || "TRC20 or Bank Transfer",
+        adminNotification: partial.adminNotification || "",
+        activeLuckyOrder: partial.activeLuckyOrder || null
+      };
+    }
+
+    const defaultState = {
+      adminCredentials: {
+        email: "admin@globalecom.com",
+        user: "admin",
+        pass: "admin123"
+      },
+      platformConfig: {
+        trc20Address: "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
+        telegramSupport: "@GlobalEcom_Help"
+      },
+      activeUserId: "usr_default_1",
+      customerLoggedIn: false,
+      users: [
+        makeUserRecord({
+          id: "usr_default_1",
+          name: "Sara Khan",
+          phone: "+971 50 987 6543",
+          email: "sara.khan@email.com",
+          loginPassword: "",
+          withdrawPassword: "",
+          balance: 0.00
+        })
+      ],
+      ordersHistory: [],
+      txHistory: []
+    };
+
+    let state = JSON.parse(JSON.stringify(defaultState));
+    let pendingDepositAmt = 0;
+    let openUserPanels = {}; // { [userId]: 'setting' | 'lucky' | null }
+
+    function getActiveUser() {
+      if (!Array.isArray(state.users) || state.users.length === 0) {
+        state.users = [makeUserRecord({})];
+      }
+      let u = state.users.find(x => x.id === state.activeUserId);
+      if (!u) {
+        u = state.users[0];
+        state.activeUserId = u.id;
+      }
+      return u;
+    }
+
+    function normalizeState(rawObj) {
+      if (!rawObj || typeof rawObj !== "object") return JSON.parse(JSON.stringify(defaultState));
+      const mergedUsers = Array.isArray(rawObj.users) && rawObj.users.length > 0
+        ? rawObj.users.map(u => makeUserRecord(u))
+        : (rawObj.customer ? [makeUserRecord(rawObj.customer)] : JSON.parse(JSON.stringify(defaultState.users)));
+
+      return {
+        ...defaultState,
+        ...rawObj,
+        adminCredentials: { ...defaultState.adminCredentials, ...(rawObj.adminCredentials || {}) },
+        platformConfig: { ...defaultState.platformConfig, ...(rawObj.platformConfig || {}) },
+        users: mergedUsers,
+        activeUserId: rawObj.activeUserId || mergedUsers[0].id,
+        customerLoggedIn: !!rawObj.customerLoggedIn,
+        ordersHistory: Array.isArray(rawObj.ordersHistory) ? rawObj.ordersHistory : [],
+        txHistory: Array.isArray(rawObj.txHistory) ? rawObj.txHistory : []
+      };
+    }
+
+    function getEndpoint() {
+      const cleanBase = (FIREBASE_DB_URL || "").trim().replace(/\/+$/, "");
+      if (!cleanBase) return null;
+      return cleanBase + DB_NODE_PATH;
+    }
+
+    async function pullFromBackend() {
+      const url = getEndpoint();
+      const pill = document.getElementById("adm-live-sync-pill");
+      if (!url) return;
+
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("Backend fetch failed");
+        const remoteData = await res.json();
+        if (remoteData) {
+          state = normalizeState(remoteData);
+          applyRouting();
+          renderAll();
+        } else {
+          await pushToBackend();
+        }
+        if (pill) {
+          pill.style.background = "#dcfce7";
+          pill.style.color = "#15803d";
+          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Synced';
+        }
+      } catch (err) {
+        if (pill) {
+          pill.style.background = "#fee2e2";
+          pill.style.color = "#b91c1c";
+          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Offline';
+        }
+      }
+    }
+
+    async function pushToBackend() {
+      renderAll();
+      const url = getEndpoint();
+      if (!url) return;
+      try {
+        await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(state)
+        });
+      } catch (err) {}
+    }
+
+    function saveState() {
+      pushToBackend();
+    }
+
+    setInterval(pullFromBackend, 2500);
+
+    const demoFeed = [
+      { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#16a34a" },
+      { user: "User***14", action: "Lucky Order Bonus", amount: "+$95.00", color: "#d97706" },
+      { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#16a34a" },
+      { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#2563eb" }
+    ];
+
+    function isAdminPath() {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      return (
+        path.endsWith("/admin/login") ||
+        path.includes("/admin/login") ||
+        hash === "#/admin/login" ||
+        hash === "#admin/login" ||
+        hash === "#admin" ||
+        search.includes("admin/login") ||
+        search.includes("admin=login")
+      );
+    }
+
+    function buildTelegramHref(raw) {
+      const clean = (raw || "").trim();
+      if (!clean) return "https://t.me/GlobalEcom_Help";
+      if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
+      return "https://t.me/" + clean.replace(/^@+/, "");
+    }
+
+    function applyRouting() {
+      const isAdmin = isAdminPath();
+      document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
+      document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+
+      if (!isAdmin) {
+        document.getElementById('cust-auth-screen').style.display = state.customerLoggedIn ? 'none' : 'flex';
+        document.getElementById('cust-app-screen').style.display = state.customerLoggedIn ? 'flex' : 'none';
+      }
+    }
+
+    window.addEventListener("hashchange", applyRouting);
+    window.addEventListener("popstate", applyRouting);
+    window.addEventListener("DOMContentLoaded", () => {
+      applyRouting();
+      renderLiveFeed();
+      renderAll();
+      pullFromBackend();
+    });
+
+    function renderLiveFeed() {
+      const el = document.getElementById('live-tx-container');
+      if (!el) return;
+      const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 4);
+      el.innerHTML = shuffled.map(x => `
+        <div class="tx-row">
+          <span><strong>${x.user}</strong> • ${x.action}</span>
+          <strong style="color:${x.color};">${x.amount}</strong>
+        </div>
+      `).join('');
+    }
+    setInterval(renderLiveFeed, 3000);
+
+    function renderAll() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+
+      document.getElementById('cust-header-tier').innerText = u.tier;
+      document.getElementById('prof-name').innerText = u.name;
+      document.getElementById('prof-email').innerText = u.email;
+      document.getElementById('prof-phone').innerText = u.phone;
+      document.getElementById('prof-tier-badge').innerText = u.tier;
+      document.getElementById('bound-wallet-label').innerText = u.boundWallet;
+
+      const tgVal = state.platformConfig.telegramSupport;
+      document.getElementById('tg-handle-display').innerText = tgVal;
+      document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
+
+      const currentBalFormatted = `$${u.balance.toFixed(2)}`;
+      document.getElementById('profile-balance').innerText = currentBalFormatted;
+      document.getElementById('grab-balance').innerText = currentBalFormatted;
+      document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
+      document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
+      document.getElementById('grab-rem-tasks').innerText = u.totalTasks - u.completedTasks;
+
+      const statusBadge = document.getElementById('home-account-status-badge');
+      statusBadge.innerText = u.accountStatus;
+      statusBadge.style.background = u.accountStatus === "Active" ? "#16a34a" : "#dc2626";
+
+      const statusBanner = document.getElementById('cust-account-status-banner');
+      const alerts = [];
+      if (u.accountStatus !== "Active") alerts.push(`Account Status: ${u.accountStatus}`);
+      if (u.tasksLocked) alerts.push("Please contact with customer service");
+      if (u.withdrawBlocked) alerts.push("Withdrawals are currently BLOCKED");
+
+      statusBanner.innerHTML = alerts.length > 0
+        ? `<div class="status-banner-alert"><i class="fa-solid fa-triangle-exclamation"></i> ${alerts.join(" • ")}</div>`
+        : '';
+
+      const notifArea = document.getElementById('cust-admin-notif-area');
+      if (u.adminNotification && u.adminNotification.trim()) {
+        notifArea.innerHTML = `
+          <div class="admin-push-notif">
+            <div><strong style="display:block; margin-bottom:2px;"><i class="fa-solid fa-bell"></i> Admin Notice</strong>${u.adminNotification}</div>
+            <span onclick="dismissCustomerNotification()" style="cursor:pointer; font-weight:700;">✕</span>
+          </div>
+        `;
+      } else {
+        notifArea.innerHTML = '';
+      }
+
+      const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
+      document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
+        ? u.accountStatus
+        : (u.tasksLocked ? "Contact Service" : (luckyLockedByFunds ? "Recharge Needed" : "Active"));
+      document.getElementById('prof-status-pill').innerText = u.accountStatus;
+
+      const stageArea = document.getElementById('grab-stage-area');
+      if (u.tasksLocked) {
+        stageArea.innerHTML = `
+          <div class="status-banner-alert" style="margin-bottom:0; padding:16px;">
+            <i class="fa-solid fa-headset" style="font-size:20px; display:block; margin-bottom:6px;"></i>
+            Please contact with customer service
+          </div>
+        `;
+      } else if (lucky && lucky.triggered && !lucky.completed) {
+        const hasEnough = u.balance >= lucky.amount;
+        const rechargeNeeded = Math.max(0, lucky.amount - u.balance);
+        stageArea.innerHTML = `
+          <div class="lucky-product-card" onclick="openCustModal('deposit1')">
+            <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
+            <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+            <h4 style="font-size:14px; color:#881337; margin-top:6px;">${lucky.product}</h4>
+            <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
+            <p style="font-size:11px; color:#9f1239;">
+              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
+            </p>
+            <p style="font-size:11px; color:#be123c; font-weight:700; margin-top:4px;">
+              Commission Reward: +$${lucky.comm.toFixed(2)}
+            </p>
+          </div>
+          ${hasEnough
+            ? `<button class="btn-primary" style="background:#16a34a; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
+            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
+          }
+        `;
+      } else {
+        const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
+        const previewItem = unique25Products[nextIdx];
+        stageArea.innerHTML = `
+          <div class="product-preview" id="product-display">
+            <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
+            <h4 style="font-size:14px;">${previewItem.name}</h4>
+            <p style="font-size:11px; color:#64748b; margin-top:3px;">${previewItem.store} • Order: $${previewItem.price.toFixed(2)} • Comm: +$${previewItem.comm.toFixed(2)}</p>
+          </div>
+          <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
+            <i class="fa-solid fa-bolt"></i> Grab Order Now
+          </button>
+        `;
+      }
+
+      const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
+      const ordersEl = document.getElementById('orders-list');
+      if (userOrders.length === 0) {
+        ordersEl.innerHTML = `<p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:40px;">No orders completed yet.</p>`;
+      } else {
+        ordersEl.innerHTML = userOrders.map(o => `
+          <div class="card-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <img src="${o.img}" class="order-thumb" alt="Order Item" />
+              <div>
+                <h4 style="font-size:12px; color:#1e293b;">Task #${o.taskNum} • ${o.name}</h4>
+                <p style="font-size:10px; color:#64748b;">${o.store} • Completed</p>
+              </div>
+            </div>
+            <strong style="color:#16a34a; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
+          </div>
+        `).join('');
+      }
+
+      // Admin Settings inputs (only Admin Email, Admin Password, Telegram & TRC20)
+      if (document.activeElement !== document.getElementById('adm-set-email')) {
+        document.getElementById('adm-set-email').value = state.adminCredentials.email;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-adminpass')) {
+        document.getElementById('adm-set-adminpass').value = state.adminCredentials.pass;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-trc20')) {
+        document.getElementById('adm-set-trc20').value = state.platformConfig.trc20Address;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-tg')) {
+        document.getElementById('adm-set-tg').value = state.platformConfig.telegramSupport;
+      }
+
+      renderAdminUserLines();
+      renderAdminTxLists();
+    }
+
+    // ==================== RENDER EACH USER IN ITS OWN LINE ====================
+    function renderAdminUserLines() {
+      const container = document.getElementById('admin-users-lines-container');
+      if (!container) return;
+
+      container.innerHTML = state.users.map(user => {
+        const panelMode = openUserPanels[user.id] || null;
+        const l = user.activeLuckyOrder;
+
+        return `
+          <div class="user-line-card" id="user-line-${user.id}">
+            <div class="user-line-top">
+              <div>
+                <h4 style="font-size:15px; color:#0f172a;">
+                  <i class="fa-solid fa-user-circle" style="color:#2563eb;"></i> ${user.name}
+                  <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
+                    ${user.accountStatus}
+                  </span>
+                </h4>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:15px; font-weight:800; color:#16a34a; margin-right:6px;">$${user.balance.toFixed(2)}</span>
+                <input type="number" id="fund-input-${user.id}" placeholder="Amount ($)" style="width:105px; padding:7px 9px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px;" />
+                <button class="btn-sm" style="background:#16a34a;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
+                <button class="btn-sm" style="background:#dc2626;" onclick="userAdjustFunds('${user.id}', 'deduct')">- Deduct Funds</button>
+              </div>
+            </div>
+
+            <div class="user-meta-grid">
+              <div><span style="color:#64748b;">Name:</span> <strong>${user.name}</strong></div>
+              <div><span style="color:#64748b;">Phone:</span> <strong>${user.phone}</strong></div>
+              <div><span style="color:#64748b;">Email:</span> <strong>${user.email}</strong></div>
+              <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong></div>
+            </div>
+
+            <div class="user-inline-controls">
+              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">Status:</span>
+                <select id="status-select-${user.id}" onchange="userSetStatus('${user.id}', this.value)" style="padding:4px 7px; border-radius:6px; border:1px solid #cbd5e1; font-size:11px; font-weight:600;">
+                  <option value="Active" ${user.accountStatus === 'Active' ? 'selected' : ''}>Active</option>
+                  <option value="Freeze" ${user.accountStatus === 'Freeze' ? 'selected' : ''}>Freeze</option>
+                  <option value="Deactive" ${user.accountStatus === 'Deactive' ? 'selected' : ''}>Deactive</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">Slide Lock:</span>
+                <label class="switch">
+                  <input type="checkbox" ${user.tasksLocked ? 'checked' : ''} onchange="userToggleSlideLock('${user.id}', this.checked)" />
+                  <span class="slider"></span>
+                </label>
+                <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#16a34a'}; font-weight:700;">
+                  ${user.tasksLocked ? 'ON (Service Msg)' : 'OFF'}
+                </span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:9px; border:1px solid #e2e8f0;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">WD Block:</span>
+                <label class="switch">
+                  <input type="checkbox" ${user.withdrawBlocked ? 'checked' : ''} onchange="userToggleWdBlock('${user.id}', this.checked)" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#2563eb'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
+                <i class="fa-solid fa-gear"></i> User Setting
+              </button>
+
+              <button class="btn-sm" style="background:${panelMode === 'lucky' ? '#0f172a' : '#d97706'};" onclick="toggleUserSubpanel('${user.id}', 'lucky')">
+                <i class="fa-solid fa-star"></i> Lucky Order
+              </button>
+            </div>
+
+            ${panelMode === 'setting' ? `
+              <div class="user-subpanel">
+                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-gear"></i> ${user.name} — Account & Security Setting</h5>
+                <div class="admin-grid-2">
+                  <div class="input-group">
+                    <label>Customer Login Password</label>
+                    <input type="text" id="u-loginpass-${user.id}" value="${user.loginPassword || ''}" placeholder="Set login password" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer Withdraw Password</label>
+                    <input type="text" id="u-wdpass-${user.id}" value="${user.withdrawPassword || ''}" placeholder="Set withdraw password" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer TRC20 Address</label>
+                    <input type="text" id="u-trc20-${user.id}" value="${user.trc20Address || ''}" placeholder="TRC20 wallet address" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer Notice / Notification</label>
+                    <input type="text" id="u-notif-${user.id}" value="${user.adminNotification || ''}" placeholder="Live message for this user" />
+                  </div>
+                </div>
+                <button class="btn-sm" style="background:#16a34a; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
+                  <i class="fa-solid fa-check"></i> Save User Setting
+                </button>
+              </div>
+            ` : ''}
+
+            ${panelMode === 'lucky' ? `
+              <div class="user-subpanel">
+                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-star" style="color:#d97706;"></i> ${user.name} — Lucky Order Configuration</h5>
+                <div class="admin-grid-2">
+                  <div class="input-group">
+                    <label>Task Number (1 - 25)</label>
+                    <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="${l ? l.taskNum : 2}" />
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Product</label>
+                    <select id="u-lucky-prod-${user.id}">
+                      <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
+                      <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
+                      <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Order Amount (USDT)</label>
+                    <input type="number" id="u-lucky-amt-${user.id}" value="${l ? l.amount : 500}" />
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Commission (USDT)</label>
+                    <input type="number" id="u-lucky-comm-${user.id}" value="${l ? l.comm : 85}" />
+                  </div>
+                </div>
+                <button class="btn-sm" style="background:#d97706; padding:8px 14px;" onclick="saveUserLuckyOrder('${user.id}')">
+                  <i class="fa-solid fa-bolt"></i> Apply Lucky Order to User
+                </button>
+                ${l ? `<p style="font-size:11px; color:#9f1239; margin-top:8px; font-weight:700;">Current Lucky Order: Task #${l.taskNum} • ${l.product} (-$${l.amount}, Comm +$${l.comm})</p>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleUserSubpanel(userId, mode) {
+      openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
+      renderAdminUserLines();
+    }
+
+    function userAdjustFunds(userId, mode) {
+      const u = state.users.find(x => x.id === userId);
+      const amt = parseFloat(document.getElementById('fund-input-' + userId).value);
+      if (!u || !amt || amt <= 0) {
+        alert("Enter a valid amount.");
+        return;
+      }
+      u.balance = mode === 'add' ? u.balance + amt : Math.max(0, u.balance - amt);
+      saveState();
+      alert(`${mode === 'add' ? 'Added' : 'Deducted'} $${amt.toFixed(2)} for ${u.name}`);
+    }
+
+    function userSetStatus(userId, newStatus) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.accountStatus = newStatus;
+      saveState();
+    }
+
+    function userToggleSlideLock(userId, locked) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.tasksLocked = locked;
+      saveState();
+    }
+
+    function userToggleWdBlock(userId, blocked) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.withdrawBlocked = blocked;
+      saveState();
+    }
+
+    function saveUserSettings(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.loginPassword = document.getElementById('u-loginpass-' + userId).value.trim();
+      u.withdrawPassword = document.getElementById('u-wdpass-' + userId).value.trim();
+      u.trc20Address = document.getElementById('u-trc20-' + userId).value.trim() || state.platformConfig.trc20Address;
+      u.adminNotification = document.getElementById('u-notif-' + userId).value.trim();
+      saveState();
+      alert(`Settings saved for ${u.name}!`);
+    }
+
+    function saveUserLuckyOrder(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      const tNum = parseInt(document.getElementById('u-lucky-task-' + userId).value);
+      const prodSplit = document.getElementById('u-lucky-prod-' + userId).value.split('|');
+      const amt = parseFloat(document.getElementById('u-lucky-amt-' + userId).value);
+      const comm = parseFloat(document.getElementById('u-lucky-comm-' + userId).value);
+      if (!tNum || tNum < 1 || tNum > 25 || !amt || !comm) {
+        alert("Enter valid task number, amount, and commission.");
+        return;
+      }
+      u.activeLuckyOrder = {
+        taskNum: tNum,
+        product: prodSplit[0],
+        img: prodSplit[1],
+        amount: amt,
+        comm: comm,
+        triggered: u.completedTasks + 1 === tNum,
+        completed: false
+      };
+      saveState();
+      alert(`Lucky Order set for ${u.name} on Task #${tNum}!`);
+    }
+
+    // ==================== CUSTOMER AUTH & ACTIONS ====================
+    function switchAuthTab(mode) {
+      document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+      document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+      document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+      document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+    }
+
+    function handleCustLogin() {
+      const email = (document.getElementById('login-email').value.trim() || "sara.khan@email.com").toLowerCase();
+      const pass = document.getElementById('login-pass').value;
+      let existing = state.users.find(x => x.email.toLowerCase() === email);
+
+      if (existing) {
+        if (existing.loginPassword && pass !== existing.loginPassword) {
+          alert("Incorrect Login Password!");
+          return;
+        }
+        if (existing.accountStatus === "Deactive") {
+          alert("Your account is Deactivated. Please contact customer service.");
+          return;
+        }
+        state.activeUserId = existing.id;
+      } else {
+        const created = makeUserRecord({
+          name: email.split('@')[0].replace(/[._]/g, ' ').toUpperCase(),
+          phone: "+971 50 000 0000",
+          email: email,
+          loginPassword: pass
+        });
+        state.users.unshift(created);
+        state.activeUserId = created.id;
+      }
+
+      state.customerLoggedIn = true;
+      saveState();
+      applyRouting();
+    }
+
+    function handleCustRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+
+      if (!name || !phone || !email) {
+        alert("Please enter Name, Phone Number, and Email.");
+        return;
+      }
+
+      const newUser = makeUserRecord({
+        name,
+        phone,
+        email,
+        loginPassword: pass || "123456",
+        trc20Address: state.platformConfig.trc20Address,
+        balance: 0.00
+      });
+
+      state.users.unshift(newUser);
+      state.activeUserId = newUser.id;
+      state.customerLoggedIn = true;
+      saveState();
+      applyRouting();
+    }
+
+    function handleCustLogout() {
+      state.customerLoggedIn = false;
+      saveState();
+      applyRouting();
+    }
+
+    function switchCustPage(pageId, title, navEl) {
+      document.querySelectorAll('#cust-app-screen .page').forEach(p => p.classList.remove('active'));
+      document.getElementById('cust-page-' + pageId).classList.add('active');
+      document.getElementById('cust-header-title').innerText = title;
+      document.querySelectorAll('#cust-app-screen .nav-item').forEach(n => n.classList.remove('active'));
+      navEl.classList.add('active');
+    }
+
+    function dismissCustomerNotification() {
+      const u = getActiveUser();
+      u.adminNotification = "";
+      saveState();
+    }
+
+    function grabOrder() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+
+      if (u.accountStatus !== "Active") {
+        alert(`Action blocked: Account is ${u.accountStatus}.`);
+        return;
+      }
+      if (u.tasksLocked) {
+        alert("Please contact with customer service");
+        return;
+      }
+      if (lucky && lucky.triggered && !lucky.completed) {
+        openCustModal('deposit1');
+        return;
+      }
+      if (u.completedTasks >= u.totalTasks) {
+        alert("All 25 unique tasks completed!");
+        return;
+      }
+
+      const nextTaskNum = u.completedTasks + 1;
+      const btn = document.getElementById('grab-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      }
+
+      setTimeout(() => {
+        if (lucky && !lucky.completed && lucky.taskNum === nextTaskNum) {
+          lucky.triggered = true;
+          if (u.balance < lucky.amount) {
+            saveState();
+            return;
+          } else {
+            completeLuckyOrder();
+            return;
+          }
+        }
+
+        const item = unique25Products[u.completedTasks % unique25Products.length];
+        u.completedTasks++;
+        u.balance += item.comm;
+        u.todayEarn += item.comm;
+
+        state.ordersHistory.unshift({
+          userId: u.id,
+          taskNum: nextTaskNum,
+          name: item.name,
+          store: item.store,
+          comm: item.comm,
+          img: item.img
+        });
+
+        saveState();
+      }, 450);
+    }
+
+    function completeLuckyOrder() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+      if (!lucky || u.balance < lucky.amount) {
+        openCustModal('deposit1');
+        return;
+      }
+
+      u.completedTasks++;
+      u.balance += lucky.comm;
+      u.todayEarn += lucky.comm;
+      lucky.completed = true;
+
+      state.ordersHistory.unshift({
+        userId: u.id,
+        taskNum: lucky.taskNum,
+        name: lucky.product + " (Lucky)",
+        store: "VIP Lucky",
+        comm: lucky.comm,
+        img: lucky.img
+      });
+
+      saveState();
+      alert(`Lucky Order Completed! +$${lucky.comm.toFixed(2)} commission credited.`);
+    }
+
+    function openCustModal(type) {
+      const u = getActiveUser();
+      if (type === 'withdraw' && u.withdrawBlocked) {
+        alert("Withdrawals are BLOCKED on your account.");
+        return;
+      }
+      if (u.accountStatus === "Deactive") {
+        alert("Your account is Deactivated.");
+        return;
+      }
+
+      const overlay = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      overlay.style.display = 'flex';
+
+      if (type === 'deposit1') {
+        const lucky = u.activeLuckyOrder;
+        const suggested = (lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount)
+          ? (lucky.amount - u.balance).toFixed(2)
+          : "";
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#16a34a; margin-bottom:10px;">Deposit Funds</h3>
+          <div class="input-group">
+            <label>Deposit / Recharge Amount (USDT)</label>
+            <input type="number" id="dep-amt-input" value="${suggested}" placeholder="Enter amount" />
+          </div>
+          <button class="btn-primary" onclick="goDepositStep2()">Next: QR & TRC20</button>
+        `;
+      } else if (type === 'withdraw') {
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#2563eb; margin-bottom:8px;">Withdraw Funds</h3>
+          <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Available Balance: <strong>$${u.balance.toFixed(2)}</strong></p>
+          <div class="input-group"><label>Withdraw Amount (USDT)</label><input type="number" id="wd-amt-input" placeholder="Enter amount" /></div>
+          <div class="input-group"><label>Withdraw Password</label><input type="password" id="wd-pass-input" placeholder="Enter withdraw password" /></div>
+          <button class="btn-primary" onclick="submitWithdraw()">Submit Withdrawal</button>
+        `;
+      } else if (type === 'history') {
+        const userTx = state.txHistory.filter(t => t.userId === u.id);
+        const rows = userTx.length === 0
+          ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No live transactions yet.</p>`
+          : userTx.map(t => {
+              const badgeCls = t.status === 'Approved' ? 'badge-approved' : (t.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+              return `
+                <div style="padding:9px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <strong style="font-size:12px;">${t.type} • $${t.amount.toFixed(2)}</strong>
+                    <p style="font-size:10px; color:#64748b;">${t.time}</p>
+                  </div>
+                  <span class="${badgeCls}">${t.status}</span>
+                </div>
+              `;
+            }).join('');
+        content.innerHTML = `<h3 style="font-size:15px; margin-bottom:8px;">Live Deposit & Withdraw History</h3>${rows}`;
+      } else if (type === 'bindWallet') {
+        content.innerHTML = `
+          <h3 style="font-size:15px; margin-bottom:10px;">Bind Wallet / Bank</h3>
+          <div class="input-group"><label>Method</label><select id="bind-type"><option>USDT (TRC20)</option><option>Bank Transfer</option></select></div>
+          <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
+          <button class="btn-primary" onclick="saveBind()">Save Binding</button>
+        `;
+      } else if (type === 'loginPass') {
+        content.innerHTML = `
+          <h3 style="font-size:15px; margin-bottom:10px;">Change Login Password</h3>
+          <div class="input-group"><label>New Login Password</label><input type="password" id="new-cust-login-pass" placeholder="Enter new login password" /></div>
+          <button class="btn-primary" onclick="updateCustLoginPass()">Update Login Password</button>
+        `;
+      } else if (type === 'withdrawPass') {
+        content.innerHTML = `
+          <h3 style="font-size:15px; margin-bottom:10px;">Change Withdraw Password</h3>
+          <div class="input-group"><label>New Withdraw Password</label><input type="password" id="new-cust-wd-pass" placeholder="Enter new withdraw password" /></div>
+          <button class="btn-primary" onclick="updateCustWithdrawPass()">Update Withdraw Password</button>
+        `;
+      } else {
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#1e3a8a; margin-bottom:8px;">Global E-Commerce</h3>
+          <p style="font-size:12px; color:#334155; line-height:1.6;">
+            Complete your 25 unique product promotion tasks in the Grabbing tab to earn instant commissions.
+          </p>
+        `;
+      }
+    }
+
+    function updateCustLoginPass() {
+      const u = getActiveUser();
+      const val = document.getElementById('new-cust-login-pass').value.trim();
+      if (!val) { alert("Enter a password."); return; }
+      u.loginPassword = val;
+      saveState();
+      alert("Login Password Updated!");
+      closeModal();
+    }
+
+    function updateCustWithdrawPass() {
+      const u = getActiveUser();
+      const val = document.getElementById('new-cust-wd-pass').value.trim();
+      if (!val) { alert("Enter a password."); return; }
+      u.withdrawPassword = val;
+      saveState();
+      alert("Withdraw Password Updated!");
+      closeModal();
+    }
+
+    function goDepositStep2() {
+      const u = getActiveUser();
+      const amt = parseFloat(document.getElementById('dep-amt-input').value);
+      if (!amt || amt <= 0) { alert("Enter a valid amount."); return; }
+      pendingDepositAmt = amt;
+      const addr = u.trc20Address || state.platformConfig.trc20Address;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(addr)}`;
+
+      document.getElementById('modal-content').innerHTML = `
+        <h3 style="font-size:15px; color:#1e3a8a;">TRC20 Payment ($${amt.toFixed(2)})</h3>
+        <div style="text-align:center; background:#f8fafc; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #cbd5e1;">
+          <img src="${qrUrl}" style="width:145px; height:145px;" />
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:11px;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;">${addr}</span>
+            <button class="btn-sm" style="background:#1e3a8a;" onclick="navigator.clipboard.writeText('${addr}'); alert('TRC20 Copied!');">Copy</button>
+          </div>
+        </div>
+        <button class="btn-primary" style="background:#16a34a; color:#fff;" onclick="confirmPaid()">I Have Paid</button>
+      `;
+    }
+
+    function confirmPaid() {
+      const u = getActiveUser();
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.txHistory.unshift({
+        id: Date.now(),
+        userId: u.id,
+        user: u.name,
+        type: "Deposit",
+        amount: pendingDepositAmt,
+        status: "Pending",
+        time: "Today, " + now
+      });
+      saveState();
+      alert("Deposit submitted live! Waiting for Admin approval.");
+      closeModal();
+    }
+
+    function submitWithdraw() {
+      const u = getActiveUser();
+      if (u.withdrawBlocked) {
+        alert("Withdrawals are BLOCKED on your account.");
+        return;
+      }
+      const amt = parseFloat(document.getElementById('wd-amt-input').value);
+      const wdPass = document.getElementById('wd-pass-input').value;
+      if (u.withdrawPassword && wdPass !== u.withdrawPassword) {
+        alert("Incorrect Withdraw Password!");
+        return;
+      }
+      if (!amt || amt <= 0 || amt > u.balance) {
+        alert("Invalid or insufficient balance.");
+        return;
+      }
+      u.balance -= amt;
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.txHistory.unshift({
+        id: Date.now(),
+        userId: u.id,
+        user: u.name,
+        type: "Withdraw",
+        amount: amt,
+        status: "Pending",
+        time: "Today, " + now
+      });
+      saveState();
+      alert("Withdrawal submitted live! Waiting for Admin approval.");
+      closeModal();
+    }
+
+    function saveBind() {
+      const u = getActiveUser();
+      const t = document.getElementById('bind-type').value;
+      const v = document.getElementById('bind-val').value.trim();
+      if (!v) return;
+      u.boundWallet = `${t}: ${v.slice(0, 12)}...`;
+      saveState();
+      closeModal();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    // ==================== ADMIN AUTH, TX APPROVE/REJECT & SETTINGS ====================
+    function handleAdminLogin() {
+      const u = document.getElementById('admin-login-user').value.trim().toLowerCase();
+      const p = document.getElementById('admin-login-pass').value.trim();
+      const validUser = u === state.adminCredentials.email.toLowerCase() || u === state.adminCredentials.user.toLowerCase();
+      if (validUser && p === state.adminCredentials.pass) {
+        document.getElementById('admin-auth-screen').style.display = 'none';
+        document.getElementById('admin-app-screen').style.display = 'block';
+        renderAll();
+      } else {
+        alert("Invalid Admin Login!");
+      }
+    }
+
+    function handleAdminLogout() {
+      document.getElementById('admin-app-screen').style.display = 'none';
+      document.getElementById('admin-auth-screen').style.display = 'flex';
+    }
+
+    function switchAdminPage(pageId, title, btnEl) {
+      document.querySelectorAll('#admin-app-screen .page').forEach(p => p.classList.remove('active'));
+      document.getElementById('admin-page-' + pageId).classList.add('active');
+      document.getElementById('admin-header-title').innerText = title;
+      document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderAll();
+    }
+
+    function renderAdminTxLists() {
+      const deps = state.txHistory.filter(t => t.type === 'Deposit');
+      document.getElementById('adm-deposits-list').innerHTML = deps.length === 0
+        ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No deposit requests.</p>`
+        : deps.map(d => {
+            const badgeCls = d.status === 'Approved' ? 'badge-approved' : (d.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+            return `
+              <div class="card-box" style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                  <strong>${d.user} • $${d.amount.toFixed(2)}</strong>
+                  <span class="${badgeCls}">${d.status}</span>
+                </div>
+                <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${d.time}</p>
+                ${d.status === 'Pending' ? `
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn-sm" style="background:#16a34a;" onclick="decideAdminTx(${d.id}, 'Approved')">Approve Deposit</button>
+                    <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${d.id}, 'Rejected')">Reject Deposit</button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+
+      const wds = state.txHistory.filter(t => t.type === 'Withdraw');
+      document.getElementById('adm-withdraws-list').innerHTML = wds.length === 0
+        ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
+        : wds.map(w => {
+            const badgeCls = w.status === 'Approved' ? 'badge-approved' : (w.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+            return `
+              <div class="card-box" style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                  <strong>${w.user} • $${w.amount.toFixed(2)}</strong>
+                  <span class="${badgeCls}">${w.status}</span>
+                </div>
+                <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${w.time}</p>
+                ${w.status === 'Pending' ? `
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn-sm" style="background:#16a34a;" onclick="decideAdminTx(${w.id}, 'Approved')">Approve Withdraw</button>
+                    <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${w.id}, 'Rejected')">Reject Withdraw</button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+    }
+
+    function decideAdminTx(id, decision) {
+      const tx = state.txHistory.find(t => t.id === id);
+      if (!tx || tx.status !== 'Pending') return;
+      const targetUser = state.users.find(x => x.id === tx.userId) || getActiveUser();
+
+      tx.status = decision;
+      if (tx.type === 'Deposit' && decision === 'Approved') {
+        targetUser.balance += tx.amount;
+      }
+      if (tx.type === 'Withdraw' && decision === 'Rejected') {
+        targetUser.balance += tx.amount;
+      }
+
+      saveState();
+      alert(`${tx.type} ${decision} live!`);
+    }
+
+    function adminSaveAdminAuthSettings() {
+      const email = document.getElementById('adm-set-email').value.trim();
+      const pass = document.getElementById('adm-set-adminpass').value.trim();
+      if (email) state.adminCredentials.email = email;
+      if (pass) state.adminCredentials.pass = pass;
+      saveState();
+      alert("Admin Email & Password updated live!");
+    }
+
+    function adminSavePlatformSettings() {
+      const newTrc = document.getElementById('adm-set-trc20').value.trim();
+      const newTg = document.getElementById('adm-set-tg').value.trim();
+      if (newTrc) {
+        state.platformConfig.trc20Address = newTrc;
+        state.users.forEach(u => { u.trc20Address = newTrc; });
+      }
+      if (newTg) {
+        state.platformConfig.telegramSupport = newTg;
+      }
+      saveState();
+      alert("Telegram & TRC20 updated in real time!");
+    }
+  </script>
+
+</body>
+</html>
