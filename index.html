@@ -1763,9 +1763,13 @@ const sb = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
 console.log("Supabase client initialized");
 
+const realtimeTest = sb.channel('connection-test');
+
+realtimeTest.subscribe((status) => {
+  console.log('Supabase Realtime Status:', status);
+});
 
 
 
@@ -2299,7 +2303,6 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       }
     }
 
-
 let LuckyOrders = {};
 let LuckyOrdersRef = null;
 
@@ -2312,6 +2315,7 @@ let demoLuckyFundsRef = null;
 function saveState() {
   pushToBackend();
 }
+
 fbAuth.onAuthStateChanged(async user => {
   firebaseUser = user;
 
