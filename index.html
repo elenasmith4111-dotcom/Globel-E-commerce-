@@ -3340,11 +3340,13 @@ async function updateDemoLuckyOrder(userId, orderId) {
     document.getElementById('u-lucky-comm-' + userId).value
   );
 
-  if (!tNum || tNum < 1 || tNum > 25 ||
-      !amt || amt <= 0 || !comm || comm <= 0) {
-    alert("Enter valid values.");
-    return;
-  }
+  if (!Number.isInteger(tNum) || tNum < 1 || tNum > 25 ||
+    !Number.isFinite(amt) || amt <= 0 ||
+    !Number.isFinite(comm) || comm < 0 ||
+    !prodSplit[0] || !prodSplit[1]) {
+  alert("Enter valid demo order values.");
+  return;
+}
 
   try {
     await fbDb.ref(
