@@ -2094,8 +2094,12 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
   { name: "Philips Sonicare Prestige 9900", store: "Amazon", price: 205.00, comm: 5.90, img: "https://images.unsplash.com/photo-1559599101-74659e7938e3?w=400&q=80" },
   { name: "Fujifilm Instax Mini 12 Bundle", store: "AliExpress", price: 135.00, comm: 4.10, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" }
 ];
+function makeUserRecord(partial = {}) {
+      const parsedBalance =
+        partial.balance !== undefined && partial.balance !== null && partial.balance !== ""
+          ? Number(partial.balance)
+          : 0;
 
-    function makeUserRecord(partial) {
       return {
         id: partial.id || ("usr_" + Date.now() + "_" + Math.floor(Math.random() * 1000)),
         customerCode: partial.customerCode || "",
@@ -2111,7 +2115,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         accountStatus: partial.accountStatus || "Active",
         withdrawBlocked: !!partial.withdrawBlocked,
         tasksLocked: !!partial.tasksLocked,
-        balance: Number(partial.balance || 0),
+        balance: Number.isFinite(parsedBalance) ? parsedBalance : 0,
         todayEarn: Number(partial.todayEarn || 0),
         completedTasks: Number(partial.completedTasks || 0),
         totalTasks: 25,
@@ -3762,6 +3766,7 @@ function grabOrder() {
 
   const lucky = u.activeLuckyOrder;
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
+  const currentBal = Number(u.balance || 0);
 
   if (u.accountStatus !== "Active") {
     alert(`Action blocked: Account is ${u.accountStatus}.`);
@@ -3772,7 +3777,7 @@ function grabOrder() {
     return;
   }
 
-  const activeTaskDemo = Object.values(demoLuckyOrders || {}).find(
+  const matchedDemoOrder = Object.values(demoLuckyOrders || {}).find(
     o =>
       o &&
       o.status !== "Approved" &&
@@ -3780,28 +3785,35 @@ function grabOrder() {
       Number(o.taskNum) === nextTaskNum
   );
 
-  if (activeTaskDemo) {
-    const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
-    const currentBal = Number(u.balance || 0);
+  if (matchedDemoOrder) {
+    const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    if (reqAmt > 0 && currentBal >= reqAmt) {
+      matchedDemoOrder.status = "FundsAdded";
+    }
+    renderAll();
+    if (typeof saveState === "function") saveState();
+    if (reqAmt > 0 && currentBal < reqAmt) {
+      openCustModal('deposit1', reqAmt.toFixed(2));
+    }
+    return;
+  }
+
+  if (lucky && !lucky.completed && (lucky.triggered || Number(lucky.taskNum) === nextTaskNum)) {
+    lucky.triggered = true;
+    const reqAmt = Math.abs(Number(lucky.amount || 0));
     u.productRevealed = false;
     u.pendingTaskCommission = null;
     renderAll();
-    if (currentBal < reqAmt && reqAmt > 0) {
+    if (typeof saveState === "function") saveState();
+    if (reqAmt > 0 && currentBal < reqAmt) {
       openCustModal('deposit1', reqAmt.toFixed(2));
     }
     return;
   }
 
-  if (lucky && lucky.triggered && !lucky.completed) {
-    const reqAmt = Math.abs(Number(lucky.amount || 0));
-    renderAll();
-    if (Number(u.balance || 0) < reqAmt && reqAmt > 0) {
-      openCustModal('deposit1', reqAmt.toFixed(2));
-    }
-    return;
-  }
-
-  if (Number(u.balance || 0) <= 0) {
+  if (currentBal <= 0) {
     showZeroBalAlert = true;
     renderAll();
     openCustModal('deposit1');
@@ -3819,65 +3831,30 @@ function grabOrder() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
   }
 
-  setTimeout(() => {
-    const matchedDemoOrder = Object.values(demoLuckyOrders || {}).find(
-      o =>
-        o &&
-        o.status !== "Approved" &&
-        o.status !== "Deleted" &&
-        Number(o.taskNum) === nextTaskNum
-    );
+  const baseItem = unique25Products[Number(u.completedTasks || 0) % unique25Products.length];
+  const item = {
+    ...baseItem,
+    comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
+  };
 
-    if (matchedDemoOrder) {
-      const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
-      const currentBal = Number(u.balance || 0);
-      u.productRevealed = false;
-      u.pendingTaskCommission = null;
-      renderAll();
-      if (currentBal < reqAmt && reqAmt > 0) {
-        openCustModal('deposit1', reqAmt.toFixed(2));
-      }
-      return;
-    }
+  u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
+  u.productRevealed = false;
+  u.pendingTaskCommission = null;
+  u.balance = currentBal + item.comm;
+  u.todayEarn = Number(u.todayEarn || 0) + item.comm;
 
-    if (lucky && !lucky.completed && Number(lucky.taskNum) === nextTaskNum) {
-      lucky.triggered = true;
-      u.productRevealed = false;
-      u.pendingTaskCommission = null;
-      renderAll();
-      saveState();
-      if (Number(u.balance || 0) < Math.abs(Number(lucky.amount || 0))) {
-        openCustModal('deposit1', Math.abs(Number(lucky.amount || 0)).toFixed(2));
-      }
-      return;
-    }
+  state.ordersHistory.unshift({
+    userId: u.id,
+    taskNum: nextTaskNum,
+    name: item.name,
+    store: item.store,
+    comm: item.comm,
+    img: item.img
+  });
 
-    const baseItem = unique25Products[Number(u.completedTasks || 0) % unique25Products.length];
-    const item = {
-      ...baseItem,
-      comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
-    };
-
-    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-    u.productRevealed = false;
-    u.pendingTaskCommission = null;
-    u.balance = Number(u.balance || 0) + item.comm;
-    u.todayEarn = Number(u.todayEarn || 0) + item.comm;
-
-    state.ordersHistory.unshift({
-      userId: u.id,
-      taskNum: nextTaskNum,
-      name: item.name,
-      store: item.store,
-      comm: item.comm,
-      img: item.img
-    });
-
-    renderAll();
-    saveState();
-  }, 350);
-}
-async function editDemoLuckyOrder(userId, orderId) {
+  renderAll();
+  if (typeof saveState === "function") saveState();
+}async function editDemoLuckyOrder(userId, orderId) {
   try {
     const { data: order, error } = await sb
       .from("lucky_orders")
