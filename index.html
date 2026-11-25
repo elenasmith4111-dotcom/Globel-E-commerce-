@@ -2286,88 +2286,102 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
    let LuckyOrders = {};
 let LuckyOrdersRef = null;
 
- function saveState() { pushToBackend(); }
+ 
 
-    fbAuth.onAuthStateChanged(async user => {
-      firebaseUser = user;
-      try {
-        if (user && !isFirebaseAdmin(user)) {
-          const profileRef = fbDb.ref("customer_profiles/" + user.uid);
-          let profileSnap = await profileRef.once("value");
-          if (!profileSnap.exists() && pendingRegistrationProfile) {
-            await profileRef.set(pendingRegistrationProfile);
-            profileSnap = await profileRef.once("value");
-          }
-          if (profileSnap.exists()) {
-            const profile = makeUserRecord({ ...profileSnap.val(), id: user.uid, email: user.email });
-            const idx = state.users.findIndex(x => x.id === user.uid);
-            if (idx >= 0) state.users[idx] = profile; else state.users = [profile];
-            state.activeUserId = user.uid;
-            state.customerLoggedIn = true;
-          } else {
-            state.customerLoggedIn = false;
-          }
+let demoLuckyOrders = {};
+let demoLuckyOrdersRef = null;
+
+function saveState() {
+  pushToBackend();
+}
+  
+fbAuth.onAuthStateChanged(async user => {
+  firebaseUser = user;
+
+  if (demoLuckyOrdersRef) {
+    demoLuckyOrdersRef.off();
+    demoLuckyOrdersRef = null;
+  }
+
+  demoLuckyOrders = {};
+
+  try {
+    if (user && !isFirebaseAdmin(user)) {
+      const profileRef = fbDb.ref("customer_profiles/" + user.uid);
+      let profileSnap = await profileRef.once("value");
+
+      if (!profileSnap.exists() && pendingRegistrationProfile) {
+        await profileRef.set(pendingRegistrationProfile);
+        profileSnap = await profileRef.once("value");
+      }
+
+      if (profileSnap.exists()) {
+        const profile = makeUserRecord({
+          ...profileSnap.val(),
+          id: user.uid,
+          email: user.email
+        });
+
+        const idx = state.users.findIndex(x => x.id === user.uid);
+
+        if (idx >= 0) {
+          state.users[idx] = profile;
         } else {
-          state.customerLoggedIn = false;
+          state.users = [profile];
         }
-      } catch (err) {
-        console.error("Could not load signed-in profile:", err);
+
+        state.activeUserId = user.uid;
+        state.customerLoggedIn = true;
+
+        demoLuckyOrdersRef = fbDb.ref(
+          "demo_lucky_orders/" + user.uid
+        );
+
+        demoLuckyOrdersRef.on("value", snapshot => {
+          demoLuckyOrders = snapshot.val() || {};
+          if (state.customerLoggedIn) renderAll();
+        });
+
+      } else {
         state.customerLoggedIn = false;
+        state.activeUserId = null;
+        state.users = [];
       }
-      authReady = true;
-     
+    } else {
+      state.customerLoggedIn = false;
 
- if (user && isFirebaseAdmin(user)) {
-        document.getElementById("admin-auth-screen").style.display = "none";
-        document.getElementById("admin-app-screen").style.display = "block";
-      } else if (isAdminPath()) {
-        document.getElementById("admin-app-screen").style.display = "none";
-        document.getElementById("admin-auth-screen").style.display = "flex";
+      if (!user) {
+        state.activeUserId = null;
+        state.users = [];
+        state.ordersHistory = [];
       }
-if (user) startRealtimeSync();
+    }
+  } catch (err) {
+    console.error("Could not load signed-in profile:", err);
+    state.customerLoggedIn = false;
+    state.activeUserId = null;
+  }
 
-if (demoLuckyOrdersRef) {
-  demoLuckyOrdersRef.off();
-  demoLuckyOrdersRef = null;
-}
-demoLuckyOrders = {};
+  authReady = true;
 
-if (user && !isFirebaseAdmin(user)) {
-  demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + user.uid);
+  if (user && isFirebaseAdmin(user)) {
+    document.getElementById("admin-auth-screen").style.display = "none";
+    document.getElementById("admin-app-screen").style.display = "block";
+  } else if (isAdminPath()) {
+    document.getElementById("admin-app-screen").style.display = "none";
+    document.getElementById("admin-auth-screen").style.display = "flex";
+  }
 
-  demoLuckyOrdersRef.on("value", snapshot => {
-    demoLuckyOrders = snapshot.val() || {};
+  if (user) {
+    startRealtimeSync();
+  }
+
+  applyRouting();
+
+  if (state.customerLoggedIn) {
     renderAll();
-  }, error => {
-    console.error("Demo Lucky Order listener error:", error);
-  });
-}
-
-if (user) {
-  startRealtimeSync();
-} else {
-  state.customerLoggedIn = false;
-  state.activeUserId = null;
-  state.users = [];
-  state.ordersHistory = [];
-}
-
-applyRouting();
-renderAll();
-demoLuckyOrders = {};
-
-if (user && !isFirebaseAdmin(user)) {
-  demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + user.uid);
-
-  demoLuckyOrdersRef.on("value", snapshot => {
-    demoLuckyOrders = snapshot.val() || {};
-    renderAll();
-  }, error => {
-    console.error("Demo Lucky Order listener error:", error);
-  });
-}      applyRouting();
-      renderAll();
-    });
+  }
+});
 
     const demoFeed = [
       { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
