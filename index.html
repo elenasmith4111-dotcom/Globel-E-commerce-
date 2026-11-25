@@ -2527,6 +2527,7 @@ async function handleSupabaseAuth(user) {
   state.customerLoggedIn = false;
   state.activeUserId = null;
 
+
   if (!user) {
     state.users = [];
     state.ordersHistory = [];
@@ -2684,21 +2685,17 @@ await startRealtimeSync();
   }
 }
 
-// Supabase auth event
+// Supabase auth event — serialized handler
+let authQueue = Promise.resolve();
+
 sb.auth.onAuthStateChange((event, session) => {
   setTimeout(() => {
-    handleSupabaseAuth(session?.user || null);
+    authQueue = authQueue
+      .then(() => handleSupabaseAuth(session?.user || null))
+      .catch(err => {
+        console.error("Auth handler error:", err);
+      });
   }, 0);
-});
-
-// Initial session check
-sb.auth.getSession().then(({ data, error }) => {
-  if (error) {
-    console.error("Session error:", error);
-    return;
-  }
-
-  handleSupabaseAuth(data.session?.user || null);
 });
 
 const demoFeed = [
