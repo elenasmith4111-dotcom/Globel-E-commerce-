@@ -961,19 +961,25 @@
               <label data-i18n="passLabel">Login Password</label>
               <input type="password" id="login-pass" value="123456" />
             </div>
-<div class="input-group">
-  <label>Security Code</label>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span id="captcha-question"
-      style="background:#eef2ff;padding:12px;border-radius:8px;font-weight:800;letter-spacing:2px;">
-    </span>
-    <button type="button" class="btn-sm"
-      onclick="generateLoginCaptcha()">↻ Refresh</button>
+<div class="captcha-box">
+  <label class="captcha-label">SECURITY VERIFICATION</label>
+
+  <div class="captcha-display">
+    <span id="captcha-question">5 + 3 = ?</span>
   </div>
-  <input type="number" id="captcha-answer"
-    placeholder="Enter security code answer" />
-</div>           
- <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
+
+  <button type="button" class="captcha-refresh"
+    onclick="generateLoginCaptcha()">
+    ↻ Refresh Code
+  </button>
+
+  <input
+    type="number"
+    id="captcha-answer"
+    placeholder="Enter security code"
+    class="captcha-input"
+  />
+</div> <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
           </div>
 
           <div id="form-register" style="display:none;">
