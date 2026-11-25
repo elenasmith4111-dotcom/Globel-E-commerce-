@@ -3248,7 +3248,7 @@ function switchCustPage(pageId, navEl) {
       renderAll();
     }
 
-    function grabOrder() {
+   function grabOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
 
@@ -3284,6 +3284,22 @@ function switchCustPage(pageId, navEl) {
       }
 
       setTimeout(() => {
+        const matchedDemoOrder = Object.values(demoLuckyOrders || {}).find(
+          o =>
+            o &&
+            o.status !== "Approved" &&
+            o.status !== "Deleted" &&
+            Number(o.taskNum) === nextTaskNum
+        );
+
+        if (matchedDemoOrder) {
+          u.productRevealed = false;
+          u.pendingTaskCommission = null;
+          saveState();
+          renderAll();
+          return;
+        }
+
         if (lucky && !lucky.completed && lucky.taskNum === nextTaskNum) {
           lucky.triggered = true;
           if (u.balance < lucky.amount) {
@@ -3315,7 +3331,6 @@ function switchCustPage(pageId, navEl) {
         saveState();
       }, 450);
     }
-
     function completeLuckyOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
