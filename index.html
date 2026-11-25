@@ -2720,6 +2720,31 @@ function isAdminPath() {
   );
 }
 
+async function handleCustLogout() {
+  try {
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+
+    state.customerLoggedIn = false;
+    state.activeUserId = null;
+    state.users = [];
+    state.ordersHistory = [];
+
+    if (luckyOrdersChannel) {
+      await sb.removeChannel(luckyOrdersChannel);
+      luckyOrdersChannel = null;
+    }
+
+    authReady = true;
+    applyRouting();
+
+  } catch (err) {
+    console.error("Customer logout error:", err);
+    alert(err.message);
+  }
+}
+
+
 async function adminAddDemoLuckyFunds(userId, orderId, amount) {
   const value = Number(amount);
 
@@ -4309,7 +4334,33 @@ async function handleAdminLogout() {
     alert(err.message || "Logout failed.");
   }
 }
-    function switchAdminPage(pageId, title, btnEl) {
+ 
+
+
+async function handleCustLogout() {
+  try {
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+
+    if (luckyOrdersChannel) {
+      await sb.removeChannel(luckyOrdersChannel);
+      luckyOrdersChannel = null;
+    }
+
+    state.customerLoggedIn = false;
+    state.activeUserId = null;
+    state.users = [];
+    state.ordersHistory = [];
+
+    authReady = true;
+    applyRouting();
+
+  } catch (err) {
+    console.error("Customer logout error:", err);
+    alert(err.message || "Customer logout failed.");
+  }
+}
+   function switchAdminPage(pageId, title, btnEl) {
       document.querySelectorAll('#admin-app-screen .page').forEach(p => p.classList.remove('active'));
       document.getElementById('admin-page-' + pageId).classList.add('active');
       document.getElementById('admin-header-title').innerText = title;
