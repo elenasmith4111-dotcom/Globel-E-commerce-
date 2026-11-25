@@ -2512,7 +2512,6 @@ function saveState() {
   pushToBackend();
 }
 // ================= SUPABASE AUTH LISTENER =================
-
 let luckyOrdersChannel = null;
 
 async function handleSupabaseAuth(user) {
@@ -2532,7 +2531,7 @@ async function handleSupabaseAuth(user) {
     state.users = [];
     state.ordersHistory = [];
 
- authReady = true;
+    authReady = true;
     applyRouting();
     return;
   }
