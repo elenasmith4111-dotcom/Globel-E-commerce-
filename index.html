@@ -3396,8 +3396,7 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       alert(`Tasks reset to 0/25, Today's Earn reset to $0.00, and previous order history cleared for ${u.name}!`);
     }
 
-   
-async function userAdjustFunds(userId, mode) {
+   async function userAdjustFunds(userId, mode) {
   const u = state.users.find(x => x.id === userId);
   const input = document.getElementById('fund-input-' + userId);
   const amt = parseFloat(input?.value);
@@ -3417,8 +3416,28 @@ async function userAdjustFunds(userId, mode) {
 
     if (error) throw error;
 
-    u.balance = Number(data);
-    renderAdminUserLines();
+    const newBalance = Number(data);
+    u.balance = newBalance;
+
+    if (mode === "add" && typeof demoLuckyOrders === "object" && demoLuckyOrders) {
+      Object.keys(demoLuckyOrders).forEach(key => {
+        const ord = demoLuckyOrders[key];
+        const reqAmt = Math.abs(Number(ord?.amount || 0));
+        if (ord && ord.status !== "Approved" && ord.status !== "Deleted" && reqAmt > 0 && newBalance >= reqAmt) {
+          demoLuckyOrders[key] = { ...ord, status: "FundsAdded" };
+        }
+      });
+    }
+
+    if (typeof renderAll === "function") {
+      renderAll();
+    } else {
+      renderAdminUserLines();
+    }
+
+    if (typeof saveState === "function") {
+      saveState();
+    }
 
     if (input) input.value = "";
     alert(`${mode === "add" ? "Added" : "Deducted"} $${amt.toFixed(2)} successfully.`);
@@ -3427,7 +3446,6 @@ async function userAdjustFunds(userId, mode) {
     alert(err.message || "Wallet adjustment failed.");
   }
 }
-
     function userSetStatus(userId, newStatus) {
       const u = state.users.find(x => x.id === userId);
       if (!u) return;
@@ -3854,7 +3872,6 @@ function grabOrder() {
     saveState();
   }, 350);
 }
-
 async function editDemoLuckyOrder(userId, orderId) {
   try {
     const { data: order, error } = await sb
@@ -3963,7 +3980,6 @@ async function updateDemoLuckyOrder(userId, orderId) {
     alert("Update failed: " + err.message);
   }
 }
-
 async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
@@ -3979,15 +3995,16 @@ async function completeDemoLuckyOrder(orderId) {
 
   const reqAmt = Math.abs(Number(order.amount || 0));
   const comm = Number(order.commission || 0);
+  const currentBal = Number(u.balance || 0);
 
-  if (Number(u.balance || 0) < reqAmt) {
-    const needed = Math.max(0, reqAmt - Number(u.balance || 0)).toFixed(2);
+  if (currentBal < reqAmt) {
+    const needed = Math.max(0, reqAmt).toFixed(2);
     openCustModal('deposit1', needed);
     return;
   }
 
   u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-  u.balance = Number(u.balance || 0) + comm;
+  u.balance = currentBal + comm;
   u.todayEarn = Number(u.todayEarn || 0) + comm;
   u.productRevealed = false;
   u.pendingTaskCommission = null;
@@ -4003,18 +4020,28 @@ async function completeDemoLuckyOrder(orderId) {
 
   if (order.id && u.id) {
     demoLuckyOrders[order.id] = { ...order, status: "Approved", completedAt: Date.now() };
-    await fbDb.ref("demo_lucky_orders/" + u.id + "/" + order.id).update({
-      status: "Approved",
-      completedAt: Date.now()
-    });
+
+    if (typeof sb !== "undefined" && sb) {
+      try {
+        const { error } = await sb
+          .from("lucky_orders")
+          .update({ status: "Approved" })
+          .eq("id", order.id)
+          .eq("user_id", u.id);
+
+        if (error) {
+          console.warn("Supabase lucky_orders update warning:", error.message);
+        }
+      } catch (err) {
+        console.warn("Supabase lucky_orders update error:", err);
+      }
+    }
   }
 
   renderAll();
   saveState();
   alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
-}
-
-    function updateCustLoginPassInline() {
+}    function updateCustLoginPassInline() {
       const u = getActiveUser();
       const val = document.getElementById('inline-login-pass').value.trim();
       if (!val) { alert("Enter a new login password."); return; }
