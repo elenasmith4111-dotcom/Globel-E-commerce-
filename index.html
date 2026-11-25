@@ -1728,54 +1728,111 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       return cleanBase + DB_NODE_PATH;
     }
 
+    let backendStream = null;
+    let backendWriteInProgress = false;
+    let backendHasInitialData = false;
+
+    function setBackendStatus(online) {
+      const pill = document.getElementById("adm-live-sync-pill");
+      if (!pill) return;
+      pill.style.background = online ? "#dcfce7" : "#fee2e2";
+      pill.style.color = online ? "#15803d" : "#b91c1c";
+      pill.innerHTML = online
+        ? '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Live Sync Connected'
+        : '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Offline';
+    }
+
+    function applyRemoteState(remoteData) {
+      if (!remoteData || typeof remoteData !== "object") return;
+      state = normalizeState(remoteData);
+      applyRouting();
+      renderAll();
+    }
+
     async function pullFromBackend() {
       const url = getEndpoint();
-      const pill = document.getElementById("adm-live-sync-pill");
       if (!url) return;
-
       try {
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("Backend fetch failed");
         const remoteData = await res.json();
-        if (remoteData) {
-          state = normalizeState(remoteData);
-          applyRouting();
-          renderAll();
-        } else {
-          await pushToBackend();
-        }
-        if (pill) {
-          pill.style.background = "#dcfce7";
-          pill.style.color = "#15803d";
-          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Synced';
-        }
+        if (remoteData) applyRemoteState(remoteData);
+        else await pushToBackend();
+        backendHasInitialData = true;
+        setBackendStatus(true);
       } catch (err) {
-        if (pill) {
-          pill.style.background = "#fee2e2";
-          pill.style.color = "#b91c1c";
-          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Offline';
-        }
+        setBackendStatus(false);
       }
     }
 
-    async function pushToBackend() {
-      renderAll();
+    function startRealtimeSync() {
       const url = getEndpoint();
-      if (!url) return;
+      if (!url || typeof EventSource === "undefined") {
+        pullFromBackend();
+        return;
+      }
+      if (backendStream) backendStream.close();
+      backendStream = new EventSource(url);
+      backendStream.onopen = () => setBackendStatus(true);
+      const handleUpdate = event => {
+        try {
+          const message = JSON.parse(event.data || "{}");
+          if (message.path === "/" && message.data && typeof message.data === "object") {
+            applyRemoteState(message.data);
+          } else if (message.path && message.data !== undefined) {
+            // Firebase sends incremental updates as path/data pairs.
+            const next = JSON.parse(JSON.stringify(state));
+            const parts = message.path.split("/").filter(Boolean);
+            let target = next;
+            for (let i = 0; i < parts.length - 1; i++) {
+              if (target[parts[i]] == null) target[parts[i]] = {};
+              target = target[parts[i]];
+            }
+            if (parts.length) {
+              if (message.data === null) delete target[parts[parts.length - 1]];
+              else target[parts[parts.length - 1]] = message.data;
+              applyRemoteState(next);
+            }
+          } else if (message.path === "/" && message.data === null && !backendHasInitialData) {
+            pushToBackend();
+          }
+          backendHasInitialData = true;
+          setBackendStatus(true);
+        } catch (err) {
+          // Ignore malformed stream events; the next valid event will resync state.
+        }
+      };
+      backendStream.addEventListener("put", handleUpdate);
+      backendStream.addEventListener("patch", handleUpdate);
+      backendStream.addEventListener("cancel", () => setBackendStatus(false));
+      backendStream.addEventListener("auth_revoked", () => setBackendStatus(false));
+      backendStream.onerror = () => setBackendStatus(false);
+      // Initial fetch also supports browsers/proxies that do not deliver the first SSE event.
+      pullFromBackend();
+    }
+
+    async function pushToBackend() {
+      const url = getEndpoint();
+      if (!url || backendWriteInProgress) return;
+      backendWriteInProgress = true;
       try {
-        await fetch(url, {
+        const res = await fetch(url, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(state)
         });
-      } catch (err) {}
+        if (!res.ok) throw new Error("Backend write failed");
+        setBackendStatus(true);
+      } catch (err) {
+        setBackendStatus(false);
+      } finally {
+        backendWriteInProgress = false;
+      }
     }
 
     function saveState() {
       pushToBackend();
     }
-
-    setInterval(pullFromBackend, 2500);
 
     const demoFeed = [
       { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
@@ -1823,7 +1880,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       applyRouting();
       renderLiveFeed();
       renderAll();
-      pullFromBackend();
+      startRealtimeSync();
     });
 
     function renderLiveFeed() {
