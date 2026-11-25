@@ -991,77 +991,101 @@
     </div>
   </div>
 
-  <!-- =====================================================================
-       1. CUSTOMER FULL-FIT PAGE
-       ===================================================================== -->
+<!-- =====================================================================
+     1. CUSTOMER FULL-FIT PAGE
+     ===================================================================== -->
 <div id="customer-outer" class="customer-outer" style="display:none;">
-    <div class="mobile-container">
+  <div class="mobile-container">
 
-      <!-- AUTH SCREEN -->
-      <div id="cust-auth-screen" class="auth-box">
-        <div class="auth-card-inner">
-          <div class="brand-logo">
-            <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#38BDF8"/>
-                  <stop offset="50%" stop-color="#818CF8"/>
-                  <stop offset="100%" stop-color="#F59E0B"/>
-                </linearGradient>
-              </defs>
-              <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.16)"/>
-              <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
-              <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
-              <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
-              <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-            <h2 style="font-size:23px; letter-spacing:0.3px;">Global E-Commerce</h2>
+    <!-- AUTH SCREEN -->
+    <div id="cust-auth-screen" class="auth-box">
+      <div class="auth-card-inner">
+
+        <div class="brand-logo">
+          <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="50%" stop-color="#818CF8"/>
+                <stop offset="100%" stop-color="#F59E0B"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.16)"/>
+            <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
+            <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
+            <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
+            <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+          </svg>
+          <h2 style="font-size:23px; letter-spacing:0.3px;">Global E-Commerce</h2>
+        </div>
+
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn">Sign In</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="form-login">
+
+          <div class="input-group">
+            <label data-i18n="emailLabel">Email Address</label>
+            <input type="email" id="login-email" value="sara.khan@email.com" />
           </div>
 
-          <div class="auth-tabs">
-            <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn">Sign In</div>
-            <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
+          <div class="input-group">
+            <label data-i18n="passLabel">Login Password</label>
+            <input type="password" id="login-pass" value="123456" />
           </div>
 
-          <div id="form-login">
-            <div class="input-group">
-              <label data-i18n="emailLabel">Email Address</label>
-              <input type="email" id="login-email" value="sara.khan@email.com" />
-            </div>
-       <div class="captcha-box">
-  <span id="captcha-question">3424</span>
-  <input
-    type="number"
-    id="captcha-answer"
-    placeholder="Code enter karein"
-    class="captcha-input"
-  />
-</div>
- <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
+          <!-- SIMPLE 4-CHARACTER CAPTCHA -->
+          <div class="simple-captcha">
+            <span id="captcha-question">K7P2</span>
+            <input
+              type="text"
+              id="captcha-answer"
+              placeholder="Enter code"
+              maxlength="4"
+              autocomplete="off"
+            />
           </div>
 
-          <div id="form-register" style="display:none;">
-            <div class="input-group">
-              <label data-i18n="fullName">Full Name</label>
-              <input type="text" id="reg-name" placeholder="Enter full name" />
-            </div>
-            <div class="input-group">
-              <label data-i18n="phoneNum">Phone Number</label>
-              <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
-            </div>
-            <div class="input-group">
-              <label data-i18n="emailLabel">Email Address</label>
-              <input type="email" id="reg-email" placeholder="Enter email address" />
-            </div>
-            <div class="input-group">
-              <label data-i18n="passLabel">Login Password</label>
-              <input type="password" id="reg-pass" placeholder="Create password" />
-            </div>
-            <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter">Register & Enter</button>
+          <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">
+            Sign In
+          </button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="form-register" style="display:none;">
+
+          <div class="input-group">
+            <label data-i18n="fullName">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter full name" />
           </div>
+
+          <div class="input-group">
+            <label data-i18n="phoneNum">Phone Number</label>
+            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
+          </div>
+
+          <div class="input-group">
+            <label data-i18n="emailLabel">Email Address</label>
+            <input type="email" id="reg-email" placeholder="Enter email address" />
+          </div>
+
+          <div class="input-group">
+            <label data-i18n="passLabel">Login Password</label>
+            <input type="password" id="reg-pass" placeholder="Create password" />
+          </div>
+
+          <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter">
+            Register & Enter
+          </button>
+
         </div>
       </div>
-
+    </div>
+  </div>
+</div>
       <!-- CUSTOMER DASHBOARD -->
       <div id="cust-app-screen" class="app-view">
         <div class="top-header">
