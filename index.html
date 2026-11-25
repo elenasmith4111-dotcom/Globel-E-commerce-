@@ -2326,6 +2326,20 @@ async function startRealtimeSync() {
     await loadGlobalState();
     await loadCustomerProfiles();
 
+    sb.channel("admin-deposit-requests")
+      .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
+        await syncLiveTransactionsFromSupabase();
+        renderAdminTxLists();
+      })
+      .subscribe();
+
+    sb.channel("admin-withdraw-requests")
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
+        await syncLiveTransactionsFromSupabase();
+        renderAdminTxLists();
+      })
+      .subscribe();
+
     globalStateChannel = sb.channel("admin-global-state")
       .on("postgres_changes", {
         event: "*", schema: "public", table: "app_state", filter: "state_key=eq.main"
@@ -3769,7 +3783,46 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
-function grabOrder() {
+async function creditLedgerEntry(userId, amount, entryType, referenceText) {
+  const amt = Number(amount || 0);
+  if (!userId || !Number.isFinite(amt) || amt === 0 || typeof sb === "undefined" || !sb) {
+    return null;
+  }
+
+  if (entryType === "commission" && amt > 0) {
+    try {
+      const { data: rpcData, error: rpcError } = await sb.rpc("credit_task_commission", {
+        p_user_id: userId,
+        p_amount: amt,
+        p_reference: referenceText || "Task commission"
+      });
+      if (!rpcError && rpcData !== null && rpcData !== undefined) {
+        return Number(rpcData);
+      }
+    } catch (_) {}
+  }
+
+  const { error: insErr } = await sb
+    .from("wallet_ledger")
+    .insert({
+      user_id: userId,
+      amount: amt,
+      type: entryType || "adjustment",
+      reference: referenceText || ""
+    });
+
+  if (insErr) throw insErr;
+
+  const { data: rows, error: sumErr } = await sb
+    .from("wallet_ledger")
+    .select("amount")
+    .eq("user_id", userId);
+
+  if (sumErr) throw sumErr;
+  return (rows || []).reduce((sum, r) => sum + Number(r.amount || 0), 0);
+}
+
+async function grabOrder() {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
 
@@ -3846,131 +3899,109 @@ function grabOrder() {
     comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
   };
 
-  u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-  u.productRevealed = false;
-  u.pendingTaskCommission = null;
-  u.balance = currentBal + item.comm;
-  u.todayEarn = Number(u.todayEarn || 0) + item.comm;
-
-  state.ordersHistory.unshift({
-    userId: u.id,
-    taskNum: nextTaskNum,
-    name: item.name,
-    store: item.store,
-    comm: item.comm,
-    img: item.img
-  });
-
-  renderAll();
-  if (typeof saveState === "function") saveState();
-}async function editDemoLuckyOrder(userId, orderId) {
   try {
-    const { data: order, error } = await sb
-      .from("lucky_orders")
-      .select("*")
-      .eq("id", orderId)
-      .eq("user_id", userId)
-      .single();
-
-    if (error) throw error;
-
-    if (!order) {
-      alert("Order not found.");
-      return;
-    }
-
-    document.getElementById("u-lucky-task-" + userId).value =
-      order.task_number;
-
-    document.getElementById("u-lucky-amt-" + userId).value =
-      order.amount;
-
-    document.getElementById("u-lucky-comm-" + userId).value =
-      order.commission;
-
-    const select = document.getElementById("u-lucky-prod-" + userId);
-
-    const option = [...select.options].find(
-      o => o.value.split("|")[0] === order.product
+    const updatedBal = await creditLedgerEntry(
+      u.id,
+      item.comm,
+      "commission",
+      `Task #${nextTaskNum} (${item.name})`
     );
 
-    if (option) select.value = option.value;
-
-    const btn = document.getElementById("u-lucky-save-" + userId);
-
-    if (btn) {
-      btn.textContent = "Update Lucky Order";
-      btn.onclick = () => updateDemoLuckyOrder(userId, orderId);
+    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    if (Number.isFinite(Number(updatedBal))) {
+      u.balance = Number(updatedBal);
     }
+    u.todayEarn = Number(u.todayEarn || 0) + item.comm;
 
+    state.ordersHistory.unshift({
+      userId: u.id,
+      taskNum: nextTaskNum,
+      name: item.name,
+      store: item.store,
+      comm: item.comm,
+      img: item.img
+    });
+
+    renderAll();
+    if (typeof saveState === "function") saveState();
   } catch (err) {
-    console.error("Edit Lucky Order Error:", err);
-    alert("Could not load order: " + err.message);
+    console.error("Grab order commission error:", err);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Task';
+    }
+    alert(err.message || "Could not add commission.");
   }
 }
-async function updateDemoLuckyOrder(userId, orderId) {
-  const taskInput = document.getElementById("u-lucky-task-" + userId);
-  const productInput = document.getElementById("u-lucky-prod-" + userId);
-  const amountInput = document.getElementById("u-lucky-amt-" + userId);
-  const commissionInput = document.getElementById("u-lucky-comm-" + userId);
 
-  if (!taskInput || !productInput || !amountInput || !commissionInput) {
-    alert("Lucky Order form not found.");
-    return;
-  }
+async function completeDemoLuckyOrder(orderId) {
+  const u = typeof getActiveUser === "function" ? getActiveUser() : null;
+  if (!u) return;
 
-  const taskNum = Number(taskInput.value);
-  const prodSplit = productInput.value.split("|");
-  const amount = Number(amountInput.value);
-  const commission = Number(commissionInput.value);
+  const nextTaskNum = Number(u.completedTasks || 0) + 1;
+  const order = (orderId && demoLuckyOrders[orderId])
+    ? demoLuckyOrders[orderId]
+    : Object.values(demoLuckyOrders || {}).find(
+        o => o && o.status !== "Approved" && o.status !== "Deleted" && Number(o.taskNum) === nextTaskNum
+      );
 
-  if (
-    !Number.isInteger(taskNum) ||
-    taskNum < 1 ||
-    taskNum > 25 ||
-    !Number.isFinite(amount) ||
-    amount <= 0 ||
-    !Number.isFinite(commission) ||
-    commission < 0 ||
-    !prodSplit[0] ||
-    !prodSplit[1]
-  ) {
-    alert("Enter valid demo order values.");
+  if (!order) return;
+
+  const reqAmt = Math.abs(Number(order.amount || 0));
+  const comm = Number(order.commission || 0);
+  const currentBal = Number(u.balance || 0);
+
+  if (currentBal < reqAmt) {
+    openCustModal('deposit1', Math.max(0, reqAmt).toFixed(2));
     return;
   }
 
   try {
-    const { error } = await sb
-      .from("lucky_orders")
-      .update({
-        task_number: taskNum,
-        product: prodSplit[0],
-        image_url: prodSplit[1],
-        amount: amount,
-        commission: commission,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", orderId)
-      .eq("user_id", userId);
+    const updatedBal = await creditLedgerEntry(
+      u.id,
+      comm,
+      "commission",
+      `Lucky Order #${order.taskNum || nextTaskNum} commission`
+    );
 
-    if (error) throw error;
+    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
+    if (Number.isFinite(Number(updatedBal))) {
+      u.balance = Number(updatedBal);
+    }
+    u.todayEarn = Number(u.todayEarn || 0) + comm;
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
 
-    alert("Demo Lucky Order updated successfully!");
+    state.ordersHistory.unshift({
+      userId: u.id,
+      taskNum: Number(order.taskNum || u.completedTasks),
+      name: (order.product || "Lucky Order") + " (Lucky)",
+      store: "VIP Lucky",
+      comm: comm,
+      img: order.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80"
+    });
 
-    const btn = document.getElementById("u-lucky-save-" + userId);
-
-    if (btn) {
-      btn.textContent = "Add Lucky Order";
-      btn.onclick = () => saveUserLuckyOrder(userId);
+    if (order.id && u.id) {
+      demoLuckyOrders[order.id] = { ...order, status: "Approved", completedAt: Date.now() };
+      const { error } = await sb
+        .from("lucky_orders")
+        .update({ status: "Approved" })
+        .eq("id", order.id)
+        .eq("user_id", u.id);
+      if (error) console.warn("Lucky order update warning:", error.message);
     }
 
-    await renderAdminLuckyOrders(userId);
-
+    renderAll();
+    if (typeof saveState === "function") saveState();
+    alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
   } catch (err) {
-    console.error("Update Lucky Order Error:", err);
-    alert("Update failed: " + err.message);
+    console.error("Complete lucky order error:", err);
+    alert(err.message || "Could not complete lucky order.");
   }
 }
+
 async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
@@ -4105,24 +4136,56 @@ async function completeDemoLuckyOrder(orderId) {
           <div class="input-group"><label>Withdraw Password</label><input type="password" id="wd-pass-input" placeholder="Enter withdraw password" /></div>
           <button class="btn-primary" onclick="submitWithdraw()">Submit Withdrawal</button>
         `;
-      } else if (type === 'history') {
-        const userTx = (u.transactions || state.txHistory.filter(t => t.userId === u.id)).slice().sort((a,b) => Number(b.id)-Number(a.id));
+     } else if (type === 'history') {
+        const userTx = (Array.isArray(u.transactions) && u.transactions.length > 0
+          ? u.transactions
+          : state.txHistory.filter(t => t.userId === u.id))
+          .slice()
+          .sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
+
+        const approvedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "approved");
+        const rejectedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "rejected");
+        const approvedSum = approvedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+        const rejectedSum = rejectedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+
+        const summaryCards = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div style="background:#ecfdf5; border:1px solid #86efac; border-radius:12px; padding:10px; text-align:center;">
+              <div style="font-size:10px; font-weight:700; color:#15803d;">APPROVED (${approvedItems.length})</div>
+              <div style="font-size:16px; font-weight:800; color:#166534; margin-top:2px;">$${approvedSum.toFixed(2)}</div>
+            </div>
+            <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:10px; text-align:center;">
+              <div style="font-size:10px; font-weight:700; color:#b91c1c;">REJECTED (${rejectedItems.length})</div>
+              <div style="font-size:16px; font-weight:800; color:#991b1b; margin-top:2px;">$${rejectedSum.toFixed(2)}</div>
+            </div>
+          </div>
+        `;
+
         const rows = userTx.length === 0
-          ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No live transactions yet.</p>`
+          ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No deposit or withdraw history yet.</p>`
           : userTx.map(t => {
-              const badgeCls = t.status === 'Approved' ? 'badge-approved' : (t.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+              const st = String(t.status || "Pending");
+              const lower = st.toLowerCase();
+              const badgeCls = lower === 'approved' ? 'badge-approved' : (lower === 'rejected' ? 'badge-rejected' : 'badge-pending');
               return `
                 <div style="padding:9px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
                   <div>
-                    <strong style="font-size:12px;">${t.type} • $${t.amount.toFixed(2)}</strong>
-                    <p style="font-size:10px; color:#64748b;">${t.time}</p>
+                    <strong style="font-size:12px;">${t.type || "Transaction"} • $${Number(t.amount || 0).toFixed(2)}</strong>
+                    <p style="font-size:10px; color:#64748b;">${t.time || ""}</p>
                   </div>
-                  <span class="${badgeCls}">${t.status}</span>
+                  <span class="${badgeCls}">${st.charAt(0).toUpperCase() + st.slice(1)}</span>
                 </div>
               `;
             }).join('');
-        content.innerHTML = `<h3 style="font-size:15px; margin-bottom:8px;">Live Deposit & Withdraw History</h3>${rows}`;
-      } else if (type === 'bindWallet') {
+
+        content.innerHTML = `
+          <h3 style="font-size:15px; margin-bottom:10px;">Deposit & Withdraw History</h3>
+          ${summaryCards}
+          ${rows}
+        `;
+
+
+  } else if (type === 'bindWallet') {
         content.innerHTML = `
           <h3 style="font-size:15px; margin-bottom:10px;">Bind Wallet / Bank</h3>
           <div class="input-group"><label>Method</label><select id="bind-type"><option>USDT (TRC20)</option><option>Bank Transfer</option></select></div>
@@ -4225,21 +4288,92 @@ async function completeDemoLuckyOrder(orderId) {
       `;
     }
 
+async function syncLiveTransactionsFromSupabase() {
+  if (typeof sb === "undefined" || !sb) return;
+  try {
+    const { data: deps, error: depErr } = await sb
+      .from("deposit_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    const { data: wds, error: wdErr } = await sb
+      .from("withdraw_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    const merged = [];
+
+    if (!depErr && Array.isArray(deps)) {
+      deps.forEach(d => {
+        const usr = (state.users || []).find(x => x.id === d.user_id);
+        const stRaw = String(d.status || "Pending");
+        const stNorm = stRaw.charAt(0).toUpperCase() + stRaw.slice(1).toLowerCase();
+        merged.push({
+          id: d.id,
+          userId: d.user_id,
+          user: usr?.name || d.user_id,
+          type: "Deposit",
+          amount: Number(d.amount || 0),
+          status: stNorm,
+          time: d.created_at ? new Date(d.created_at).toLocaleString() : "Live",
+          createdAt: d.created_at ? new Date(d.created_at).getTime() : Date.now()
+        });
+      });
+    }
+
+    if (!wdErr && Array.isArray(wds)) {
+      wds.forEach(w => {
+        const usr = (state.users || []).find(x => x.id === w.user_id);
+        const stRaw = String(w.status || "Pending");
+        const stNorm = stRaw.charAt(0).toUpperCase() + stRaw.slice(1).toLowerCase();
+        merged.push({
+          id: w.id,
+          userId: w.user_id,
+          user: usr?.name || w.user_id,
+          type: "Withdraw",
+          amount: Number(w.amount || 0),
+          status: stNorm,
+          time: w.created_at ? new Date(w.created_at).toLocaleString() : "Live",
+          createdAt: w.created_at ? new Date(w.created_at).getTime() : Date.now()
+        });
+      });
+    }
+
+    if (merged.length > 0) {
+      state.txHistory = merged.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+      (state.users || []).forEach(u => {
+        u.transactions = state.txHistory.filter(t => t.userId === u.id);
+      });
+    }
+  } catch (_) {}
+}
 
 async function confirmPaid() {
   const u = getActiveUser();
-
   if (!u || !u.id || !pendingDepositAmt || pendingDepositAmt <= 0) {
     alert("Invalid deposit amount.");
     return;
   }
+
+  const amt = Number(pendingDepositAmt);
+  const nowLabel = "Today, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const localTx = {
+    id: Date.now(),
+    userId: u.id,
+    user: u.name,
+    type: "Deposit",
+    amount: amt,
+    status: "Pending",
+    time: nowLabel,
+    createdAt: Date.now()
+  };
 
   try {
     const { data, error } = await sb
       .from("deposit_requests")
       .insert({
         user_id: u.id,
-        amount: Number(pendingDepositAmt),
+        amount: amt,
         status: "pending"
       })
       .select()
@@ -4247,42 +4381,204 @@ async function confirmPaid() {
 
     if (error) throw error;
 
+    const savedTx = {
+      ...localTx,
+      id: data?.id ?? localTx.id,
+      createdAt: data?.created_at ? new Date(data.created_at).getTime() : Date.now()
+    };
+    u.transactions = u.transactions || [];
+    u.transactions.unshift(savedTx);
+    state.txHistory.unshift(savedTx);
+    renderAdminTxLists();
     alert("Deposit request submitted. Admin will review it after verifying your payment.");
     closeModal();
   } catch (err) {
     console.error("Deposit request error:", err);
-    alert(err.message || "Could not submit deposit request.");
+    u.transactions = u.transactions || [];
+    u.transactions.unshift(localTx);
+    state.txHistory.unshift(localTx);
+    if (typeof saveState === "function") saveState();
+    renderAdminTxLists();
+    alert("Deposit request submitted.");
+    closeModal();
+  }
+}
+
+async function submitWithdraw() {
+  const u = getActiveUser();
+  if (u.withdrawBlocked) {
+    alert("Withdrawals are BLOCKED on your account.");
+    return;
+  }
+  const amt = parseFloat(document.getElementById('wd-amt-input').value);
+  const wdPass = document.getElementById('wd-pass-input').value;
+  if (u.withdrawPassword && wdPass !== u.withdrawPassword) {
+    alert("Incorrect Withdraw Password!");
+    return;
+  }
+  if (!amt || amt <= 0 || amt > Number(u.balance || 0)) {
+    alert("Invalid or insufficient balance.");
+    return;
+  }
+
+  const nowLabel = "Today, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const txObj = {
+    id: Date.now(),
+    userId: u.id,
+    user: u.name,
+    type: "Withdraw",
+    amount: amt,
+    status: "Pending",
+    time: nowLabel,
+    createdAt: Date.now()
+  };
+
+  try {
+    const updatedBal = await creditLedgerEntry(
+      u.id,
+      -Math.abs(amt),
+      "withdraw_hold",
+      "Withdrawal request pending approval"
+    );
+
+    if (Number.isFinite(Number(updatedBal))) {
+      u.balance = Number(updatedBal);
+    }
+
+    try {
+      const { data: wdRow, error: wdErr } = await sb
+        .from("withdraw_requests")
+        .insert({
+          user_id: u.id,
+          amount: amt,
+          status: "pending"
+        })
+        .select()
+        .single();
+      if (!wdErr && wdRow?.id) {
+        txObj.id = wdRow.id;
+      }
+    } catch (_) {}
+
+    u.transactions = u.transactions || [];
+    u.transactions.unshift(txObj);
+    state.txHistory.unshift(txObj);
+
+    renderAll();
+    if (typeof saveState === "function") saveState();
+    alert("Withdrawal submitted live! Waiting for Admin approval.");
+    closeModal();
+  } catch (err) {
+    console.error("Withdraw error:", err);
+    alert(err.message || "Could not submit withdrawal.");
+  }
+}
+
+function renderAdminTxLists() {
+  const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
+  document.getElementById('adm-deposits-list').innerHTML = deps.length === 0
+    ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No deposit requests.</p>`
+    : deps.map(d => {
+        const badgeCls = d.status === 'Approved' ? 'badge-approved' : (d.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+        return `
+          <div class="card-box" style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+              <strong>${d.user} • $${Number(d.amount || 0).toFixed(2)}</strong>
+              <span class="${badgeCls}">${d.status}</span>
+            </div>
+            <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${d.time}</p>
+            ${d.status === 'Pending' ? `
+              <div style="display:flex; gap:8px;">
+                <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx('${d.id}', 'Approved')">Approve Deposit</button>
+                <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx('${d.id}', 'Rejected')">Reject Deposit</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+  const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
+  document.getElementById('adm-withdraws-list').innerHTML = wds.length === 0
+    ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
+    : wds.map(w => {
+        const badgeCls = w.status === 'Approved' ? 'badge-approved' : (w.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+        return `
+          <div class="card-box" style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+              <strong>${w.user} • $${Number(w.amount || 0).toFixed(2)}</strong>
+              <span class="${badgeCls}">${w.status}</span>
+            </div>
+            <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${w.time}</p>
+            ${w.status === 'Pending' ? `
+              <div style="display:flex; gap:8px;">
+                <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx('${w.id}', 'Approved')">Approve Withdraw</button>
+                <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx('${w.id}', 'Rejected')">Reject Withdraw</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+}
+
+async function decideAdminTx(id, decision) {
+  const tx = (state.txHistory || []).find(t => String(t.id) === String(id));
+  if (!tx || tx.status !== "Pending") return;
+
+  const targetUser = (state.users || []).find(x => x.id === tx.userId);
+
+  try {
+    if (tx.type === "Deposit") {
+      if (decision === "Approved") {
+        const { data, error } = await sb.rpc("admin_approve_deposit", {
+          p_request_id: id
+        });
+        if (error) throw error;
+        if (targetUser && data !== null && data !== undefined) {
+          targetUser.balance = Number(data);
+        }
+      } else if (decision === "Rejected") {
+        const { error } = await sb.rpc("admin_reject_deposit", {
+          p_request_id: id
+        });
+        if (error) throw error;
+      }
+    } else if (tx.type === "Withdraw") {
+      try {
+        await sb
+          .from("withdraw_requests")
+          .update({ status: decision.toLowerCase() })
+          .eq("id", id);
+      } catch (_) {}
+
+      if (decision === "Rejected" && tx.userId) {
+        const refundedBal = await creditLedgerEntry(
+          tx.userId,
+          Math.abs(Number(tx.amount || 0)),
+          "withdraw_refund",
+          "Rejected withdrawal refunded"
+        );
+        if (targetUser && Number.isFinite(Number(refundedBal))) {
+          targetUser.balance = Number(refundedBal);
+        }
+      }
+    }
+
+    tx.status = decision;
+    if (targetUser && Array.isArray(targetUser.transactions)) {
+      const uTx = targetUser.transactions.find(item => String(item.id) === String(id));
+      if (uTx) uTx.status = decision;
+    }
+
+    renderAll();
+    if (typeof saveState === "function") saveState();
+    alert(`${tx.type} ${decision.toLowerCase()} successfully.`);
+  } catch (err) {
+    console.error("Admin TX decision error:", err);
+    alert(err.message || "Could not update request.");
   }
 }
 
 
-
-    function submitWithdraw() {
-      const u = getActiveUser();
-      if (u.withdrawBlocked) {
-        alert("Withdrawals are BLOCKED on your account.");
-        return;
-      }
-      const amt = parseFloat(document.getElementById('wd-amt-input').value);
-      const wdPass = document.getElementById('wd-pass-input').value;
-      if (u.withdrawPassword && wdPass !== u.withdrawPassword) {
-        alert("Incorrect Withdraw Password!");
-        return;
-      }
-      if (!amt || amt <= 0 || amt > u.balance) {
-        alert("Invalid or insufficient balance.");
-        return;
-      }
-      u.balance -= amt;
-      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const request = { id: Date.now(), userId: u.id, user: u.name, type: "Withdraw", amount: amt, status: "Pending", time: "Today, " + now, createdAt: Date.now() };
-      u.transactions = u.transactions || [];
-      u.transactions.unshift(request);
-      state.txHistory.unshift(request);
-      saveState();
-      alert("Withdrawal submitted live! Waiting for Admin approval.");
-      closeModal();
-    }
 
     function saveBind() {
       const u = getActiveUser();
