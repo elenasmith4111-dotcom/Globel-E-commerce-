@@ -207,51 +207,13 @@
       gap: 18px;
     }
 
-    .admin-search-bar {
-      background: #ffffff;
-      border: 1px solid #c7d2fe;
-      border-radius: 14px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      box-shadow: 0 2px 8px rgba(30, 27, 75, 0.05);
-    }
-
-    .admin-search-input-wrap {
-      flex: 1;
-      min-width: 240px;
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .admin-search-input-wrap i {
-      position: absolute;
-      left: 12px;
-      color: #4f46e5;
-      font-size: 13px;
-    }
-
-    .admin-search-input-wrap input {
-      width: 100%;
-      padding: 9px 12px 9px 34px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      font-size: 13px;
-      outline: none;
-    }
-
     /* ==================== USER LINE IN ADMIN ==================== */
     .user-line-card {
       background: #fff;
       border: 1px solid #c7d2fe;
       border-radius: 16px;
       padding: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       box-shadow: 0 2px 10px rgba(30, 27, 75, 0.06);
     }
 
@@ -263,17 +225,6 @@
       gap: 14px;
       padding-bottom: 12px;
       border-bottom: 1px solid #e2e8f0;
-    }
-
-    .line-id-badge {
-      background: #eef2ff;
-      color: #3730a3;
-      border: 1px solid #a5b4fc;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 8px;
-      margin-right: 6px;
     }
 
     .user-meta-grid {
@@ -561,7 +512,7 @@
       font-size: 12px;
     }
 
-    /* ==================== 6 COLORFUL PARTNER CARDS GRID WITH REAL LOGOS & SUMMARIES ==================== */
+    /* ==================== 6 PARTNER CARDS GRID (3x2 COMPACT, NO GAP) ==================== */
     .partners-section {
       background: linear-gradient(180deg, #ffffff, #eef2ff);
       border-radius: 16px;
@@ -579,47 +530,48 @@
     }
 
     .partner-mini-card {
+      background: #ffffff;
+      border: 1px solid #e0e7ff;
       border-radius: 13px;
-      padding: 11px 7px;
+      padding: 11px 6px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.05);
       transition: 0.2s;
-      border: 1px solid rgba(255, 255, 255, 0.65);
     }
 
     .partner-mini-card:hover {
+      border-color: #6366f1;
       transform: translateY(-2px);
     }
 
     .partner-logo-box {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 6px;
       font-size: 18px;
-      color: #ffffff;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+      background: #f8fafc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
     .partner-mini-card h5 {
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 700;
       color: #0f172a;
       margin-bottom: 2px;
     }
 
-    .partner-mini-card p.partner-summary {
+    .partner-mini-card span {
       font-size: 9px;
-      color: #334155;
+      color: #4f46e5;
       font-weight: 600;
-      line-height: 1.25;
     }
 
     /* ==================== GRABBING VIEW ==================== */
@@ -705,7 +657,7 @@
       flex-shrink: 0;
     }
 
-    /* ==================== PROFILE PAGE ==================== */
+    /* ==================== PROFILE PAGE (COMPACT, EXPANDABLE ACCOUNT SETTINGS CARD) ==================== */
     .profile-top-card {
       background: linear-gradient(135deg, #1e1b4b, #4338ca, #6d28d9);
       color: #fff;
@@ -786,69 +738,14 @@
       cursor: pointer;
     }
 
-    /* ==================== CUSTOMER SERVICE & FAQ CARD ==================== */
+    /* ==================== CUSTOMER SERVICE CARD ==================== */
     .service-hero-card {
       background: linear-gradient(180deg, #ffffff, #eef2ff);
       border: 1px solid #c7d2fe;
       border-radius: 18px;
-      padding: 18px 16px;
+      padding: 22px 18px;
       text-align: center;
       box-shadow: 0 6px 20px rgba(30, 27, 75, 0.08);
-      margin-bottom: 12px;
-    }
-
-    .faq-card-box {
-      background: linear-gradient(180deg, #ffffff, #f5f3ff);
-      border: 1px solid #c7d2fe;
-      border-radius: 18px;
-      padding: 15px;
-      box-shadow: 0 4px 14px rgba(30, 27, 75, 0.06);
-    }
-
-    .faq-q-item {
-      background: #ffffff;
-      border: 1px solid #e0e7ff;
-      border-radius: 11px;
-      padding: 9px 11px;
-      margin-bottom: 7px;
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #1e1b4b;
-      display: flex;
-      align-items: flex-start;
-      gap: 7px;
-    }
-
-    .faq-detail-lines {
-      background: #eef2ff;
-      border-left: 3px solid #4f46e5;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 10px;
-    }
-
-    .faq-detail-lines p {
-      font-size: 11px;
-      color: #1e293b;
-      font-weight: 600;
-      margin-bottom: 5px;
-      line-height: 1.4;
-    }
-
-    .faq-detail-lines p:last-child {
-      margin-bottom: 0;
-    }
-
-    .modal-lines-list p {
-      font-size: 11.5px;
-      color: #1e293b;
-      font-weight: 600;
-      margin-bottom: 7px;
-      line-height: 1.45;
-      padding: 6px 9px;
-      background: #f8fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
     }
 
     .switch {
@@ -907,7 +804,7 @@
     .modal-box {
       background: #fff;
       width: 100%;
-      max-width: 390px;
+      max-width: 380px;
       max-height: 88%;
       overflow-y: auto;
       border-radius: 18px;
@@ -1089,7 +986,7 @@
           <div id="cust-admin-notif-area"></div>
           <div id="cust-account-status-banner"></div>
 
-          <!-- HOME PAGE -->
+          <!-- HOME PAGE (NO EXTRA WHITE GAP ANYWHERE) -->
           <div id="cust-page-home" class="page active">
             <div class="hero-banner">
               <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1122,78 +1019,58 @@
               <div id="live-tx-container"></div>
             </div>
 
-            <!-- 6 COLORFUL PARTNER CARDS WITH LOGOS & SUMMARIES -->
+            <!-- 6 REAL E-COMMERCE & DIGITAL MARKETING PARTNER CARDS (3 TOP + 3 BOTTOM, COMPACT FIT) -->
             <div class="partners-section">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; font-weight:800; color:#1e1b4b;"><i class="fa-solid fa-bullhorn" style="color:#4f46e5;"></i> <span data-i18n="partnersTitle">Global E-Commerce & Digital Marketing</span></span>
+                <span style="font-size:12px; font-weight:700; color:#1e1b4b;"><i class="fa-solid fa-bullhorn" style="color:#4f46e5;"></i> <span data-i18n="partnersTitle">Global E-Commerce & Digital Marketing</span></span>
                 <span style="font-size:10px; color:#059669; font-weight:700;">Verified Partners</span>
               </div>
               <div class="partners-grid-6">
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#fffbeb,#fef3c7);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#ff9900,#ea580c);"><i class="fa-brands fa-amazon"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#ff9900;"><i class="fa-brands fa-amazon"></i></div>
                   <h5>Amazon</h5>
-                  <p class="partner-summary">Global retail order boost & instant ad payout.</p>
+                  <span>Global Retail Ads</span>
                 </div>
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#fff1f2,#ffe4e6);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#e62e04,#be123c);"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#e62e04;"><i class="fa-solid fa-bag-shopping"></i></div>
                   <h5>AliExpress</h5>
-                  <p class="partner-summary">Cross-border seller traffic & daily task rewards.</p>
+                  <span>Cross-Border Boost</span>
                 </div>
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#ecfdf5,#d1fae5);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#10b981,#047857);"><i class="fa-brands fa-shopify"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#95bf47;"><i class="fa-brands fa-shopify"></i></div>
                   <h5>Shopify</h5>
-                  <p class="partner-summary">Brand store conversion & merchant volume growth.</p>
+                  <span>Merchant Growth</span>
                 </div>
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#eff6ff,#dbeafe);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#0064d2,#1d4ed8);"><i class="fa-brands fa-ebay"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#0064d2;"><i class="fa-brands fa-ebay"></i></div>
                   <h5>eBay</h5>
-                  <p class="partner-summary">Auction listing promotion & verified buyer flow.</p>
+                  <span>Store Promotion</span>
                 </div>
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#f0f9ff,#e0f2fe);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#0284c7,#0369a1);"><i class="fa-solid fa-store"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#0071ce;"><i class="fa-solid fa-store"></i></div>
                   <h5>Walmart</h5>
-                  <p class="partner-summary">Digital marketplace orders & steady commissions.</p>
+                  <span>Digital Commerce</span>
                 </div>
-                <div class="partner-mini-card" style="background:linear-gradient(160deg,#f5f3ff,#ede9fe);">
-                  <div class="partner-logo-box" style="background:linear-gradient(135deg,#111827,#4f46e5);"><i class="fa-brands fa-tiktok"></i></div>
+                <div class="partner-mini-card">
+                  <div class="partner-logo-box" style="color:#111827;"><i class="fa-brands fa-tiktok"></i></div>
                   <h5>TikTok Shop</h5>
-                  <p class="partner-summary">Social commerce campaigns & viral order boost.</p>
+                  <span>Social Marketing</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- SERVICE PAGE (WELCOME CARD + FAQ CARD WITH 5 QUESTIONS & 5 DETAIL LINES) -->
+          <!-- SERVICE PAGE (WELCOME CARD WITH 24/7 ASSIST MESSAGE, NO EXTRA SPACE) -->
           <div id="cust-page-service" class="page">
             <div class="service-hero-card">
-              <div style="width:62px; height:62px; border-radius:50%; background:linear-gradient(135deg,#e0e7ff,#dbeafe); color:#0284c7; font-size:30px; display:flex; justify-content:center; align-items:center; margin:0 auto 10px;">
+              <div style="width:66px; height:66px; border-radius:50%; background:linear-gradient(135deg,#e0e7ff,#dbeafe); color:#0284c7; font-size:32px; display:flex; justify-content:center; align-items:center; margin:0 auto 12px;">
                 <i class="fa-brands fa-telegram"></i>
               </div>
               <h3 style="font-size:17px; color:#1e1b4b; font-weight:800;" data-i18n="tgSupportTitle">Welcome to Customer Support Service</h3>
-              <p style="font-size:12.5px; color:#4338ca; font-weight:600; margin:7px 0 14px;" data-i18n="tgSupportDesc">We are here to assist you 24/7 for every time</p>
+              <p style="font-size:12.5px; color:#4338ca; font-weight:600; margin:8px 0 16px;" data-i18n="tgSupportDesc">We are here to assist you 24/7 for every time</p>
               <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary">
                 <i class="fa-brands fa-telegram"></i> <span data-i18n="openTg">Open Telegram Support</span> (<span id="tg-handle-display">@GlobalEcom_Help</span>)
               </a>
-            </div>
-
-            <div class="faq-card-box">
-              <h4 style="font-size:14px; color:#1e1b4b; font-weight:800; margin-bottom:10px;">
-                <i class="fa-solid fa-circle-question" style="color:#4f46e5;"></i> Frequently Asked Questions (FAQ)
-              </h4>
-
-              <div class="faq-q-item"><i class="fa-solid fa-q" style="color:#4f46e5; margin-top:2px;"></i> <span>1. What is the minimum deposit amount to start?</span></div>
-              <div class="faq-q-item"><i class="fa-solid fa-q" style="color:#4f46e5; margin-top:2px;"></i> <span>2. How fast are deposits and withdrawals approved?</span></div>
-              <div class="faq-q-item"><i class="fa-solid fa-q" style="color:#4f46e5; margin-top:2px;"></i> <span>3. How many tasks must be completed to withdraw?</span></div>
-              <div class="faq-q-item"><i class="fa-solid fa-q" style="color:#4f46e5; margin-top:2px;"></i> <span>4. What happens if a Lucky Order appears during tasks?</span></div>
-              <div class="faq-q-item"><i class="fa-solid fa-q" style="color:#4f46e5; margin-top:2px;"></i> <span>5. Is customer support available if my task or account needs help?</span></div>
-
-              <div class="faq-detail-lines">
-                <p>1. Deposit starts from a minimum of $10 USDT and activates your merchant task balance immediately.</p>
-                <p>2. Both deposit and withdrawal requests are processed and approved within 2 to 5 minutes.</p>
-                <p>3. You must complete all 25 total tasks in your session before submitting a withdrawal request.</p>
-                <p>4. Completing any assigned Lucky Order ensures your task progress continues smoothly toward all 25 tasks.</p>
-                <p>5. Our 24/7 support team is always ready to assist you anytime for task activation and account help.</p>
-              </div>
             </div>
           </div>
 
@@ -1226,7 +1103,7 @@
             </div>
           </div>
 
-          <!-- PROFILE PAGE -->
+          <!-- PROFILE PAGE (ACCOUNT SETTINGS ACCORDION CARD + COMPACT LOGOUT, NO WHITE SPACE) -->
           <div id="cust-page-profile" class="page">
             <div class="profile-top-card">
               <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:10px; margin-bottom:10px;">
@@ -1275,7 +1152,7 @@
               <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
             </div>
 
-            <!-- ACCOUNT SETTINGS ACCORDION CARD -->
+            <!-- ACCOUNT SETTINGS ACCORDION CARD (BOTH PASSWORDS INSIDE ON CLICK) -->
             <div class="account-settings-accordion">
               <div class="acc-settings-header" onclick="toggleProfileSettingsCard()">
                 <span><i class="fa-solid fa-gear" style="color:#4f46e5; margin-right:6px;"></i> <span data-i18n="accSettings">Account Settings</span></span>
@@ -1312,21 +1189,21 @@
           </div>
         </div>
 
-        <!-- BOTTOM NAVIGATION -->
+        <!-- BOTTOM NAVIGATION: HOME -> SERVICE -> GRABBING -> ORDERS -> PROFILE -->
         <div class="bottom-nav">
-          <div class="nav-item active" data-cust-page="home" onclick="switchCustPage('home', this)">
+          <div class="nav-item active" onclick="switchCustPage('home', this)">
             <i class="fa-solid fa-house"></i><span data-i18n="navHome">Home</span>
           </div>
-          <div class="nav-item" data-cust-page="service" onclick="switchCustPage('service', this)">
+          <div class="nav-item" onclick="switchCustPage('service', this)">
             <i class="fa-brands fa-telegram"></i><span data-i18n="navService">Service</span>
           </div>
-          <div class="nav-item grab-tab" data-cust-page="grabbing" onclick="switchCustPage('grabbing', this)">
+          <div class="nav-item grab-tab" onclick="switchCustPage('grabbing', this)">
             <i class="fa-solid fa-bolt"></i><span data-i18n="navGrabbing">Grabbing</span>
           </div>
-          <div class="nav-item" data-cust-page="orders" onclick="switchCustPage('orders', this)">
+          <div class="nav-item" onclick="switchCustPage('orders', this)">
             <i class="fa-solid fa-receipt"></i><span data-i18n="navOrders">Orders</span>
           </div>
-          <div class="nav-item" data-cust-page="profile" onclick="switchCustPage('profile', this)">
+          <div class="nav-item" onclick="switchCustPage('profile', this)">
             <i class="fa-solid fa-user"></i><span data-i18n="navProfile">Profile</span>
           </div>
         </div>
@@ -1373,16 +1250,16 @@
               </div>
             </div>
 
-            <button class="admin-nav-btn active" data-adm-page="users" onclick="switchAdminPage('users', 'Registered Users', this)">
+            <button class="admin-nav-btn active" onclick="switchAdminPage('users', 'Registered Users', this)">
               <i class="fa-solid fa-users"></i> Users
             </button>
-            <button class="admin-nav-btn" data-adm-page="deposits" onclick="switchAdminPage('deposits', 'Deposit Requests', this)">
+            <button class="admin-nav-btn" onclick="switchAdminPage('deposits', 'Deposit Requests', this)">
               <i class="fa-solid fa-circle-arrow-down"></i> Deposits
             </button>
-            <button class="admin-nav-btn" data-adm-page="withdraws" onclick="switchAdminPage('withdraws', 'Withdrawal Requests', this)">
+            <button class="admin-nav-btn" onclick="switchAdminPage('withdraws', 'Withdrawal Requests', this)">
               <i class="fa-solid fa-circle-arrow-up"></i> Withdraws
             </button>
-            <button class="admin-nav-btn" data-adm-page="settings" onclick="switchAdminPage('settings', 'Admin Settings', this)">
+            <button class="admin-nav-btn" onclick="switchAdminPage('settings', 'Admin Settings', this)">
               <i class="fa-solid fa-gear"></i> Settings
             </button>
           </div>
@@ -1402,13 +1279,6 @@
 
           <div class="admin-content-area">
             <div id="admin-page-users" class="page active">
-              <div class="admin-search-bar">
-                <div class="admin-search-input-wrap">
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                  <input type="text" id="admin-user-search" placeholder="Search user by Name, Email, Phone or Line ID (#1, #2...)..." oninput="renderAdminUserLines()" />
-                </div>
-                <span id="admin-user-count-badge" style="font-size:12px; font-weight:700; color:#312e81; background:#eef2ff; padding:6px 12px; border-radius:10px;">Total Users: 0</span>
-              </div>
               <div id="admin-users-lines-container"></div>
             </div>
 
@@ -1471,11 +1341,8 @@
   </div>
 
   <script>
-    const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.firebaseio.com";
-    const DB_NODE_PATH = "/global_ecommerce_state.json";
-    const LOCAL_STORAGE_KEY = "global_ecommerce_live_state_v2";
-    const SESSION_STORAGE_KEY = "global_ecommerce_session_v2";
-    const broadcastChannel = (typeof BroadcastChannel !== "undefined") ? new BroadcastChannel("global_ecommerce_live_bus") : null;
+    const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app";
+const DB_NODE_PATH = "/global_ecommerce_state.json";
 
     // ==================== 15 LANGUAGES REAL-TIME DICTIONARY ====================
     const translations15 = {
@@ -1658,4 +1525,1201 @@
       ru: {
         signIn: "Войти", register: "Регистрация", emailLabel: "Электронная почта", passLabel: "Пароль",
         fullName: "Полное имя", phoneNum: "Номер телефона", regEnter: "Зарегистрироваться",
-        heroDesc: "Продвигайте
+        heroDesc: "Продвигайте заказы на Amazon, AliExpress и Shopify и получайте мгновенную ежедневную комиссию.",
+        guide: "Гид", howWorks: "Как это работает", cert: "Сертификат",
+        liveTx: "Транзакции участников", realTime: "Онлайн",
+        partnersTitle: "Глобальный E-Commerce и Маркетинг",
+        tgSupportTitle: "Добро пожаловать в службу поддержки",
+        tgSupportDesc: "Мы готовы помочь вам 24/7 в любое время",
+        openTg: "Открыть Telegram", accBalance: "Баланс аккаунта (USDT)", accBalanceShort: "Баланс:",
+        todayEarn: "Доход сегодня", accStatus: "Статус", totalTasks: "Всего задач", remTasks: "Осталось",
+        grabBtn: "Получить заказ сейчас", completedHistory: "История заказов", noOrders: "Завершенных заказов пока нет.",
+        deposit: "Депозит", withdraw: "Вывод", history: "История", bindWallet: "Привязать кошелек",
+        accSettings: "Настройки аккаунта", chgLoginPass: "Изменить пароль входа", chgWdPass: "Пароль вывода средств", logout: "Выйти",
+        navHome: "Главная", navService: "Сервис", navGrabbing: "Заказы", navOrders: "История", navProfile: "Профиль"
+      },
+      pt: {
+        signIn: "Entrar", register: "Registrar", emailLabel: "Endereço de E-mail", passLabel: "Senha",
+        fullName: "Nome Completo", phoneNum: "Telefone", regEnter: "Registrar e Entrar",
+        heroDesc: "Impulsione pedidos na Amazon, AliExpress e Shopify e ganhe comissões diárias instantâneas.",
+        guide: "Guia", howWorks: "Como Funciona", cert: "Certificado",
+        liveTx: "Transações ao Vivo", realTime: "Tempo Real",
+        partnersTitle: "E-Commerce Global e Marketing Digital",
+        tgSupportTitle: "Bem-vindo ao Serviço de Suporte ao Cliente",
+        tgSupportDesc: "Estamos aqui para ajudá-lo 24/7 a qualquer momento",
+        openTg: "Abrir Suporte Telegram", accBalance: "Saldo da Conta (USDT)", accBalanceShort: "Saldo:",
+        todayEarn: "Ganho Hoje", accStatus: "Status", totalTasks: "Total Tarefas", remTasks: "Restantes",
+        grabBtn: "Pegar Pedido Agora", completedHistory: "Histórico de Pedidos", noOrders: "Nenhum pedido concluído.",
+        deposit: "Depositar", withdraw: "Sacar", history: "Histórico", bindWallet: "Vincular Carteira / Banco",
+        accSettings: "Configurações", chgLoginPass: "Alterar Senha de Login", chgWdPass: "Alterar Senha de Saque", logout: "Sair",
+        navHome: "Início", navService: "Suporte", navGrabbing: "Pedidos", navOrders: "Histórico", navProfile: "Perfil"
+      },
+      it: {
+        signIn: "Accedi", register: "Registrati", emailLabel: "Indirizzo Email", passLabel: "Password",
+        fullName: "Nome Completo", phoneNum: "Numero di Telefono", regEnter: "Registrati ed Entra",
+        heroDesc: "Incrementa gli ordini su Amazon, AliExpress e Shopify e guadagna commissioni giornaliere istantanee.",
+        guide: "Guida", howWorks: "Come Funziona", cert: "Certificato",
+        liveTx: "Transazioni in Diretta", realTime: "Tempo Reale",
+        partnersTitle: "E-Commerce Globale e Digital Marketing",
+        tgSupportTitle: "Benvenuti nel Servizio di Supporto Clienti",
+        tgSupportDesc: "Siamo qui per assisterti 24/7 in ogni momento",
+        openTg: "Apri Supporto Telegram", accBalance: "Saldo Conto (USDT)", accBalanceShort: "Saldo:",
+        todayEarn: "Guadagno Oggi", accStatus: "Stato", totalTasks: "Attività Totali", remTasks: "Rimanenti",
+        grabBtn: "Prendi Ordine Ora", completedHistory: "Cronologia Ordini", noOrders: "Nessun ordine completato.",
+        deposit: "Deposita", withdraw: "Preleva", history: "Cronologia", bindWallet: "Collega Wallet / Banca",
+        accSettings: "Impostazioni Account", chgLoginPass: "Cambia Password Accesso", chgWdPass: "Cambia Password Prelievo", logout: "Esci",
+        navHome: "Home", navService: "Servizio", navGrabbing: "Ordini", navOrders: "Storico", navProfile: "Profilo"
+      },
+      id: {
+        signIn: "Masuk", register: "Daftar", emailLabel: "Alamat Email", passLabel: "Kata Sandi",
+        fullName: "Nama Lengkap", phoneNum: "Nomor Telepon", regEnter: "Daftar & Masuk",
+        heroDesc: "Tingkatkan pesanan merchant di Amazon, AliExpress & Shopify dan dapatkan komisi harian instan.",
+        guide: "Panduan", howWorks: "Cara Kerja", cert: "Sertifikat",
+        liveTx: "Transaksi Langsung", realTime: "Real-Time",
+        partnersTitle: "E-Commerce Global & Pemasaran Digital",
+        tgSupportTitle: "Selamat Datang di Layanan Dukungan Pelanggan",
+        tgSupportDesc: "Kami siap membantu Anda 24/7 setiap saat",
+        openTg: "Buka Dukungan Telegram", accBalance: "Saldo Akun (USDT)", accBalanceShort: "Saldo Akun:",
+        todayEarn: "Pendapatan Hari Ini", accStatus: "Status Akun", totalTasks: "Total Tugas", remTasks: "Sisa Tugas",
+        grabBtn: "Ambil Pesanan Sekarang", completedHistory: "Riwayat Pesanan Selesai", noOrders: "Belum ada pesanan selesai.",
+        deposit: "Deposit", withdraw: "Tarik", history: "Riwayat", bindWallet: "Tautkan Dompet / Bank",
+        accSettings: "Pengaturan Akun", chgLoginPass: "Ubah Sandi Masuk", chgWdPass: "Ubah Sandi Penarikan", logout: "Keluar",
+        navHome: "Beranda", navService: "Layanan", navGrabbing: "Ambil", navOrders: "Pesanan", navProfile: "Profil"
+      }
+    };
+
+    let currentLang = "en";
+    let showZeroBalAlert = false;
+
+    function changeLiveLanguage(langCode) {
+      currentLang = translations15[langCode] ? langCode : "en";
+      const dict = translations15[currentLang];
+      document.documentElement.dir = (currentLang === "ar" || currentLang === "ur") ? "rtl" : "ltr";
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.innerText = dict[key];
+      });
+      renderAll();
+    }
+
+    function toggleProfileSettingsCard() {
+      const body = document.getElementById('acc-settings-body');
+      const icon = document.getElementById('acc-settings-chevron');
+      const isOpen = body.classList.toggle('open');
+      icon.className = isOpen ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
+    }
+
+    const unique25Products = [
+      { name: "Sony WH-1000XM5 Wireless Headset", store: "Amazon", price: 275.00, comm: 7.50, img: "https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=" },
+      { name: "Omega Seamaster Diver Watch", store: "Shopify", price: 340.00, comm: 9.20, img: "https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg" },
+      { name: "Chloe Woody Tote Bag", store: "Shopify", price: 220.00, comm: 6.40, img: "https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg" },
+      { name: "Garmin Fenix 7 Pro Smartwatch", store: "Amazon", price: 310.00, comm: 8.50, img: "https://www.oozoo.com/cdn/shop/products/Q00137-1.png?v=1693205171" },
+      { name: "Dyson Airwrap Multi-Styler", store: "Shopify", price: 360.00, comm: 9.80, img: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&q=80" },
+      { name: "Canon EOS R50 Mirrorless Camera", store: "Amazon", price: 410.00, comm: 11.00, img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80" },
+      { name: "Nike Air Jordan 1 Retro High", store: "Shopify", price: 185.00, comm: 5.30, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
+      { name: "Marshall Stanmore III Speaker", store: "Amazon", price: 245.00, comm: 6.90, img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80" },
+      { name: "Leica M11 Rangefinder Lens Kit", store: "AliExpress", price: 480.00, comm: 12.50, img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&q=80" },
+      { name: "Breville Barista Express Machine", store: "Amazon", price: 390.00, comm: 10.40, img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
+      { name: "Ray-Ban Meta Wayfarer Smart Glasses", store: "Shopify", price: 260.00, comm: 7.10, img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80" },
+      { name: "Keychron Q1 Pro Mechanical Keyboard", store: "AliExpress", price: 165.00, comm: 4.80, img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80" },
+      { name: "Yeti Tundra 45 Hard Cooler", store: "Amazon", price: 230.00, comm: 6.50, img: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&q=80" },
+      { name: "Gucci Ophidia GG Shoulder Bag", store: "Shopify", price: 450.00, comm: 11.80, img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80" },
+      { name: "Bose SoundLink Max Portable", store: "Amazon", price: 215.00, comm: 6.10, img: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80" },
+      { name: "Montblanc Meisterstuck Fountain Pen", store: "Shopify", price: 330.00, comm: 8.90, img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&q=80" },
+      { name: "DJI Osmo Mobile 6 Gimbal", store: "AliExpress", price: 149.00, comm: 4.40, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" },
+      { name: "Aesop Resurrection Hand Balm Duo", store: "Shopify", price: 120.00, comm: 3.70, img: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" },
+      { name: "Samsung T9 2TB Portable SSD", store: "Amazon", price: 175.00, comm: 5.10, img: "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400&q=80" },
+      { name: "Tag Heuer Carrera Chronograph", store: "Shopify", price: 495.00, comm: 13.00, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&q=80" },
+      { name: "Hydro Flask 32oz Wide Mouth", store: "Amazon", price: 95.00, comm: 3.10, img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80" },
+      { name: "Shure SM7B Vocal Dynamic Mic", store: "AliExpress", price: 320.00, comm: 8.70, img: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80" },
+      { name: "Prada Re-Nylon Crossbody Pouch", store: "Shopify", price: 380.00, comm: 10.20, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80" },
+      { name: "Philips Sonicare Prestige 9900", store: "Amazon", price: 205.00, comm: 5.90, img: "https://images.unsplash.com/photo-1559599101-74659e7938e3?w=400&q=80" },
+      { name: "Fujifilm Instax Mini 12 Bundle", store: "AliExpress", price: 135.00, comm: 4.10, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" }
+    ];
+
+    function makeUserRecord(partial) {
+      return {
+        id: partial.id || ("usr_" + Date.now() + "_" + Math.floor(Math.random() * 1000)),
+        name: partial.name || "Sara Khan",
+        phone: partial.phone || "+971 50 987 6543",
+        email: partial.email || "sara.khan@email.com",
+        loginPassword: partial.loginPassword || "123456",
+        withdrawPassword: partial.withdrawPassword || "",
+        trc20Address: partial.trc20Address || "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
+        tier: partial.tier || "Regular Account",
+        accountStatus: partial.accountStatus || "Active",
+        withdrawBlocked: !!partial.withdrawBlocked,
+        tasksLocked: !!partial.tasksLocked,
+        balance: Number(partial.balance || 0),
+        todayEarn: Number(partial.todayEarn || 0),
+        completedTasks: Number(partial.completedTasks || 0),
+        totalTasks: 25,
+        boundWallet: partial.boundWallet || "TRC20 or Bank Transfer",
+        adminNotification: partial.adminNotification || "",
+        activeLuckyOrder: partial.activeLuckyOrder || null
+      };
+    }
+
+    const defaultState = {
+      adminCredentials: {
+        email: "admin@globalecom.com",
+        user: "admin",
+        pass: "admin123"
+      },
+      platformConfig: {
+        trc20Address: "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
+        telegramSupport: "@GlobalEcom_Help"
+      },
+      activeUserId: "usr_default_1",
+      customerLoggedIn: false,
+      users: [
+        makeUserRecord({
+          id: "usr_default_1",
+          name: "Sara Khan",
+          phone: "+971 50 987 6543",
+          email: "sara.khan@email.com",
+          loginPassword: "",
+          withdrawPassword: "",
+          balance: 0.00
+        })
+      ],
+      ordersHistory: [],
+      txHistory: []
+    };
+
+    let state = JSON.parse(JSON.stringify(defaultState));
+    let pendingDepositAmt = 0;
+    let openUserPanels = {};
+
+    function getActiveUser() {
+      if (!Array.isArray(state.users) || state.users.length === 0) {
+        state.users = [makeUserRecord({})];
+      }
+      let u = state.users.find(x => x.id === state.activeUserId);
+      if (!u) {
+        u = state.users[0];
+        state.activeUserId = u.id;
+      }
+      return u;
+    }
+
+    function normalizeState(rawObj) {
+      if (!rawObj || typeof rawObj !== "object") return JSON.parse(JSON.stringify(defaultState));
+      const mergedUsers = Array.isArray(rawObj.users) && rawObj.users.length > 0
+        ? rawObj.users.map(u => makeUserRecord(u))
+        : (rawObj.customer ? [makeUserRecord(rawObj.customer)] : JSON.parse(JSON.stringify(defaultState.users)));
+
+      return {
+        ...defaultState,
+        ...rawObj,
+        adminCredentials: { ...defaultState.adminCredentials, ...(rawObj.adminCredentials || {}) },
+        platformConfig: { ...defaultState.platformConfig, ...(rawObj.platformConfig || {}) },
+        users: mergedUsers,
+        activeUserId: rawObj.activeUserId || mergedUsers[0].id,
+        customerLoggedIn: !!rawObj.customerLoggedIn,
+        ordersHistory: Array.isArray(rawObj.ordersHistory) ? rawObj.ordersHistory : [],
+        txHistory: Array.isArray(rawObj.txHistory) ? rawObj.txHistory : []
+      };
+    }
+
+    function getEndpoint() {
+      const cleanBase = (FIREBASE_DB_URL || "").trim().replace(/\/+$/, "");
+      if (!cleanBase) return null;
+      return cleanBase + DB_NODE_PATH;
+    }
+
+    async function pullFromBackend() {
+      const url = getEndpoint();
+      const pill = document.getElementById("adm-live-sync-pill");
+      if (!url) return;
+
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("Backend fetch failed");
+        const remoteData = await res.json();
+        if (remoteData) {
+          state = normalizeState(remoteData);
+          applyRouting();
+          renderAll();
+        } else {
+          await pushToBackend();
+        }
+        if (pill) {
+          pill.style.background = "#dcfce7";
+          pill.style.color = "#15803d";
+          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Synced';
+        }
+      } catch (err) {
+        if (pill) {
+          pill.style.background = "#fee2e2";
+          pill.style.color = "#b91c1c";
+          pill.innerHTML = '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Offline';
+        }
+      }
+    }
+
+    async function pushToBackend() {
+      renderAll();
+      const url = getEndpoint();
+      if (!url) return;
+      try {
+        await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(state)
+        });
+      } catch (err) {}
+    }
+
+    function saveState() {
+      pushToBackend();
+    }
+
+    setInterval(pullFromBackend, 2500);
+
+    const demoFeed = [
+      { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
+      { user: "User***14", action: "Lucky Order Bonus", amount: "+$95.00", color: "#d97706" },
+      { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
+      { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
+    ];
+
+    function isAdminPath() {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      return (
+        path.endsWith("/admin/login") ||
+        path.includes("/admin/login") ||
+        hash === "#/admin/login" ||
+        hash === "#admin/login" ||
+        hash === "#admin" ||
+        search.includes("admin/login") ||
+        search.includes("admin=login")
+      );
+    }
+
+    function buildTelegramHref(raw) {
+      const clean = (raw || "").trim();
+      if (!clean) return "https://t.me/GlobalEcom_Help";
+      if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
+      return "https://t.me/" + clean.replace(/^@+/, "");
+    }
+
+    function applyRouting() {
+      const isAdmin = isAdminPath();
+      document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
+      document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+
+      if (!isAdmin) {
+        document.getElementById('cust-auth-screen').style.display = state.customerLoggedIn ? 'none' : 'flex';
+        document.getElementById('cust-app-screen').style.display = state.customerLoggedIn ? 'flex' : 'none';
+      }
+    }
+
+    window.addEventListener("hashchange", applyRouting);
+    window.addEventListener("popstate", applyRouting);
+    window.addEventListener("DOMContentLoaded", () => {
+      applyRouting();
+      renderLiveFeed();
+      renderAll();
+      pullFromBackend();
+    });
+
+    function renderLiveFeed() {
+      const el = document.getElementById('live-tx-container');
+      if (!el) return;
+      const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 3);
+      el.innerHTML = shuffled.map(x => `
+        <div class="tx-row">
+          <span><strong>${x.user}</strong> • ${x.action}</span>
+          <strong style="color:${x.color};">${x.amount}</strong>
+        </div>
+      `).join('');
+    }
+    setInterval(renderLiveFeed, 3000);
+
+    function renderAll() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+      const dict = translations15[currentLang] || translations15.en;
+
+      if (u.balance > 0) showZeroBalAlert = false;
+
+      document.getElementById('prof-name').innerText = u.name;
+      document.getElementById('prof-email').innerText = u.email;
+      document.getElementById('prof-phone').innerText = u.phone;
+      document.getElementById('prof-tier-badge').innerText = u.tier;
+      document.getElementById('bound-wallet-label').innerText = u.boundWallet;
+
+      const tgVal = state.platformConfig.telegramSupport;
+      document.getElementById('tg-handle-display').innerText = tgVal;
+      document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
+
+      const currentBalFormatted = `$${u.balance.toFixed(2)}`;
+      document.getElementById('profile-balance').innerText = currentBalFormatted;
+      document.getElementById('grab-balance').innerText = currentBalFormatted;
+      document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
+      document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
+      document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
+
+      const statusBadge = document.getElementById('home-account-status-badge');
+      statusBadge.innerText = u.accountStatus;
+      statusBadge.style.background = u.accountStatus === "Active" ? "#10b981" : "#dc2626";
+
+      const statusBanner = document.getElementById('cust-account-status-banner');
+      const alerts = [];
+      if (u.accountStatus !== "Active") alerts.push(`Account Status: ${u.accountStatus}`);
+      if (u.tasksLocked) alerts.push("Please contact with customer service");
+      if (u.withdrawBlocked) alerts.push("Withdrawals are currently BLOCKED");
+
+      statusBanner.innerHTML = alerts.length > 0
+        ? `<div class="status-banner-alert"><i class="fa-solid fa-triangle-exclamation"></i> ${alerts.join(" • ")}</div>`
+        : '';
+
+      const zeroAlertEl = document.getElementById('grab-zero-balance-alert');
+      if (zeroAlertEl) {
+        zeroAlertEl.innerHTML = (showZeroBalAlert && u.balance <= 0)
+          ? `<div class="status-banner-alert"><i class="fa-solid fa-circle-info"></i> Please contact with customer service for active your tasks</div>`
+          : '';
+      }
+
+      const notifArea = document.getElementById('cust-admin-notif-area');
+      if (u.adminNotification && u.adminNotification.trim()) {
+        notifArea.innerHTML = `
+          <div class="admin-push-notif">
+            <div><strong style="display:block; margin-bottom:2px;"><i class="fa-solid fa-bell"></i> Admin Notice</strong>${u.adminNotification}</div>
+            <span onclick="dismissCustomerNotification()" style="cursor:pointer; font-weight:700;">✕</span>
+          </div>
+        `;
+      } else {
+        notifArea.innerHTML = '';
+      }
+
+      const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
+      document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
+        ? u.accountStatus
+        : (u.tasksLocked ? "Contact Service" : (luckyLockedByFunds ? "Recharge Needed" : "Active"));
+      document.getElementById('prof-status-pill').innerText = u.accountStatus;
+
+      const stageArea = document.getElementById('grab-stage-area');
+      if (u.tasksLocked) {
+        stageArea.innerHTML = `
+          <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
+            <i class="fa-solid fa-headset" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+            Please contact with customer service
+          </div>
+        `;
+      } else if (lucky && lucky.triggered && !lucky.completed) {
+        const hasEnough = u.balance >= lucky.amount;
+        const rechargeNeeded = Math.max(0, lucky.amount - u.balance);
+        stageArea.innerHTML = `
+          <div class="lucky-product-card" onclick="openCustModal('deposit1')">
+            <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
+            <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+            <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
+            <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
+            <p style="font-size:11px; color:#9f1239;">
+              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
+            </p>
+            <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:5px;">
+              Commission Reward: +$${lucky.comm.toFixed(2)}
+            </p>
+          </div>
+          ${hasEnough
+            ? `<button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
+            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
+          }
+        `;
+      } else if (u.completedTasks >= u.totalTasks) {
+        stageArea.innerHTML = `
+          <div class="product-preview">
+            <i class="fa-solid fa-circle-check" style="font-size:40px; color:#059669; margin-bottom:8px;"></i>
+            <h4 style="font-size:16px; color:#1e1b4b;">All 25 Tasks Completed!</h4>
+            <p style="font-size:12px; color:#64748b; margin-top:4px;">Your daily task batch is complete. Contact support or wait for admin task reset.</p>
+          </div>
+          <button class="btn-primary" style="opacity:0.65; cursor:not-allowed;" disabled>
+            <i class="fa-solid fa-check"></i> 25 / 25 Tasks Completed
+          </button>
+        `;
+      } else {
+        const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
+        const previewItem = unique25Products[nextIdx];
+        stageArea.innerHTML = `
+          <div class="product-preview" id="product-display">
+            <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
+              TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
+            </span>
+            <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
+            <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
+            <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
+              Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${previewItem.comm.toFixed(2)}
+            </p>
+          </div>
+          <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
+            <i class="fa-solid fa-bolt"></i> ${dict.grabBtn}
+          </button>
+        `;
+      }
+
+      const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
+      const ordersEl = document.getElementById('orders-list');
+      if (userOrders.length === 0) {
+        ordersEl.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;">${dict.noOrders}</p>`;
+      } else {
+        ordersEl.innerHTML = userOrders.map(o => `
+          <div class="card-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <img src="${o.img}" class="order-thumb" alt="Order Item" />
+              <div>
+                <h4 style="font-size:12px; color:#0f172a;">Task #${o.taskNum} • ${o.name}</h4>
+                <p style="font-size:10px; color:#64748b;">${o.store} • Completed</p>
+              </div>
+            </div>
+            <strong style="color:#059669; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
+          </div>
+        `).join('');
+      }
+
+      if (document.activeElement !== document.getElementById('adm-set-email')) {
+        document.getElementById('adm-set-email').value = state.adminCredentials.email;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-adminpass')) {
+        document.getElementById('adm-set-adminpass').value = state.adminCredentials.pass;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-trc20')) {
+        document.getElementById('adm-set-trc20').value = state.platformConfig.trc20Address;
+      }
+      if (document.activeElement !== document.getElementById('adm-set-tg')) {
+        document.getElementById('adm-set-tg').value = state.platformConfig.telegramSupport;
+      }
+
+      renderAdminUserLines();
+      renderAdminTxLists();
+    }
+
+    // ==================== RENDER EACH USER IN ADMIN ====================
+    function renderAdminUserLines() {
+      const container = document.getElementById('admin-users-lines-container');
+      if (!container) return;
+
+      container.innerHTML = state.users.map(user => {
+        const panelMode = openUserPanels[user.id] || null;
+        const l = user.activeLuckyOrder;
+
+        return `
+          <div class="user-line-card" id="user-line-${user.id}">
+            <div class="user-line-top">
+              <div>
+                <h4 style="font-size:15px; color:#0f172a;">
+                  <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name}
+                  <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
+                    ${user.accountStatus}
+                  </span>
+                </h4>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:15px; font-weight:800; color:#059669; margin-right:6px;">$${user.balance.toFixed(2)}</span>
+                <input type="number" id="fund-input-${user.id}" placeholder="Amount ($)" style="width:105px; padding:7px 9px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px;" />
+                <button class="btn-sm" style="background:#059669;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
+                <button class="btn-sm" style="background:#dc2626;" onclick="userAdjustFunds('${user.id}', 'deduct')">- Deduct Funds</button>
+              </div>
+            </div>
+
+            <div class="user-meta-grid">
+              <div><span style="color:#64748b;">Name:</span> <strong>${user.name}</strong></div>
+              <div><span style="color:#64748b;">Phone:</span> <strong>${user.phone}</strong></div>
+              <div><span style="color:#64748b;">Email:</span> <strong>${user.email}</strong></div>
+              <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong> • <span style="color:#059669; font-weight:700;">Today: $${user.todayEarn.toFixed(2)}</span></div>
+            </div>
+
+            <div class="user-inline-controls">
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">Status:</span>
+                <select id="status-select-${user.id}" onchange="userSetStatus('${user.id}', this.value)" style="padding:4px 7px; border-radius:6px; border:1px solid #cbd5e1; font-size:11px; font-weight:600;">
+                  <option value="Active" ${user.accountStatus === 'Active' ? 'selected' : ''}>Active</option>
+                  <option value="Freeze" ${user.accountStatus === 'Freeze' ? 'selected' : ''}>Freeze</option>
+                  <option value="Deactive" ${user.accountStatus === 'Deactive' ? 'selected' : ''}>Deactive</option>
+                </select>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">Slide Lock:</span>
+                <label class="switch">
+                  <input type="checkbox" ${user.tasksLocked ? 'checked' : ''} onchange="userToggleSlideLock('${user.id}', this.checked)" />
+                  <span class="slider"></span>
+                </label>
+                <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#059669'}; font-weight:700;">
+                  ${user.tasksLocked ? 'ON (Service Msg)' : 'OFF'}
+                </span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+                <span style="font-size:11px; font-weight:700; color:#334155;">WD Block:</span>
+                <label class="switch">
+                  <input type="checkbox" ${user.withdrawBlocked ? 'checked' : ''} onchange="userToggleWdBlock('${user.id}', this.checked)" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <button class="btn-sm" style="background:#7c3aed;" onclick="userResetTasks('${user.id}')">
+                <i class="fa-solid fa-rotate-left"></i> Reset Tasks (0/25)
+              </button>
+
+              <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#4f46e5'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
+                <i class="fa-solid fa-gear"></i> User Setting
+              </button>
+
+              <button class="btn-sm" style="background:${panelMode === 'lucky' ? '#0f172a' : '#d97706'};" onclick="toggleUserSubpanel('${user.id}', 'lucky')">
+                <i class="fa-solid fa-star"></i> Lucky Order
+              </button>
+            </div>
+
+            ${panelMode === 'setting' ? `
+              <div class="user-subpanel">
+                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-gear"></i> ${user.name} — Account & Security Setting</h5>
+                <div class="admin-grid-2">
+                  <div class="input-group">
+                    <label>Customer Login Password</label>
+                    <input type="text" id="u-loginpass-${user.id}" value="${user.loginPassword || ''}" placeholder="Set login password" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer Withdraw Password</label>
+                    <input type="text" id="u-wdpass-${user.id}" value="${user.withdrawPassword || ''}" placeholder="Set withdraw password" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer TRC20 Address</label>
+                    <input type="text" id="u-trc20-${user.id}" value="${user.trc20Address || ''}" placeholder="TRC20 wallet address" />
+                  </div>
+                  <div class="input-group">
+                    <label>Customer Notice / Notification</label>
+                    <input type="text" id="u-notif-${user.id}" value="${user.adminNotification || ''}" placeholder="Live message for this user" />
+                  </div>
+                </div>
+                <button class="btn-sm" style="background:#059669; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
+                  <i class="fa-solid fa-check"></i> Save User Setting
+                </button>
+              </div>
+            ` : ''}
+
+            ${panelMode === 'lucky' ? `
+              <div class="user-subpanel">
+                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-star" style="color:#d97706;"></i> ${user.name} — Lucky Order Configuration</h5>
+                <div class="admin-grid-2">
+                  <div class="input-group">
+                    <label>Task Number (1 - 25)</label>
+                    <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="${l ? l.taskNum : 2}" />
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Product</label>
+                    <select id="u-lucky-prod-${user.id}">
+                      <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
+                      <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
+                      <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Order Amount (USDT)</label>
+                    <input type="number" id="u-lucky-amt-${user.id}" value="${l ? l.amount : 500}" />
+                  </div>
+                  <div class="input-group">
+                    <label>Lucky Commission (USDT)</label>
+                    <input type="number" id="u-lucky-comm-${user.id}" value="${l ? l.comm : 85}" />
+                  </div>
+                </div>
+                <button class="btn-sm" style="background:#d97706; padding:8px 14px;" onclick="saveUserLuckyOrder('${user.id}')">
+                  <i class="fa-solid fa-bolt"></i> Apply Lucky Order to User
+                </button>
+                ${l ? `<p style="font-size:11px; color:#9f1239; margin-top:8px; font-weight:700;">Current Lucky Order: Task #${l.taskNum} • ${l.product} (-$${l.amount}, Comm +$${l.comm})</p>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleUserSubpanel(userId, mode) {
+      openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
+      renderAdminUserLines();
+    }
+
+    function userResetTasks(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.completedTasks = 0;
+      u.todayEarn = 0;
+      if (u.activeLuckyOrder) {
+        u.activeLuckyOrder.triggered = false;
+        u.activeLuckyOrder.completed = false;
+      }
+      state.ordersHistory = state.ordersHistory.filter(o => o.userId !== userId);
+      saveState();
+      alert(`Tasks reset to 0/25, Today's Earn reset to $0.00, and previous order history cleared for ${u.name}!`);
+    }
+
+    function userAdjustFunds(userId, mode) {
+      const u = state.users.find(x => x.id === userId);
+      const amt = parseFloat(document.getElementById('fund-input-' + userId).value);
+      if (!u || !amt || amt <= 0) {
+        alert("Enter a valid amount.");
+        return;
+      }
+      u.balance = mode === 'add' ? u.balance + amt : Math.max(0, u.balance - amt);
+      saveState();
+      alert(`${mode === 'add' ? 'Added' : 'Deducted'} $${amt.toFixed(2)} for ${u.name}`);
+    }
+
+    function userSetStatus(userId, newStatus) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.accountStatus = newStatus;
+      saveState();
+    }
+
+    function userToggleSlideLock(userId, locked) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.tasksLocked = locked;
+      saveState();
+    }
+
+    function userToggleWdBlock(userId, blocked) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.withdrawBlocked = blocked;
+      saveState();
+    }
+
+    function saveUserSettings(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      u.loginPassword = document.getElementById('u-loginpass-' + userId).value.trim();
+      u.withdrawPassword = document.getElementById('u-wdpass-' + userId).value.trim();
+      u.trc20Address = document.getElementById('u-trc20-' + userId).value.trim() || state.platformConfig.trc20Address;
+      u.adminNotification = document.getElementById('u-notif-' + userId).value.trim();
+      saveState();
+      alert(`Settings saved for ${u.name}!`);
+    }
+
+    function saveUserLuckyOrder(userId) {
+      const u = state.users.find(x => x.id === userId);
+      if (!u) return;
+      const tNum = parseInt(document.getElementById('u-lucky-task-' + userId).value);
+      const prodSplit = document.getElementById('u-lucky-prod-' + userId).value.split('|');
+      const amt = parseFloat(document.getElementById('u-lucky-amt-' + userId).value);
+      const comm = parseFloat(document.getElementById('u-lucky-comm-' + userId).value);
+      if (!tNum || tNum < 1 || tNum > 25 || !amt || !comm) {
+        alert("Enter valid task number, amount, and commission.");
+        return;
+      }
+      u.activeLuckyOrder = {
+        taskNum: tNum,
+        product: prodSplit[0],
+        img: prodSplit[1],
+        amount: amt,
+        comm: comm,
+        triggered: u.completedTasks + 1 === tNum,
+        completed: false
+      };
+      saveState();
+      alert(`Lucky Order set for ${u.name} on Task #${tNum}!`);
+    }
+
+    // ==================== CUSTOMER VERIFYING & AUTH FLOW ====================
+    function showVerifyingThenEnter(onComplete) {
+      const overlay = document.getElementById('verifying-overlay');
+      const fill = document.getElementById('verify-progress-fill');
+      const title = document.getElementById('verify-title');
+      const sub = document.getElementById('verify-sub');
+
+      title.innerText = "Verifying Account...";
+      sub.innerText = "Checking security credentials & syncing real-time merchant session...";
+      fill.style.width = "0%";
+      overlay.style.display = "flex";
+
+      setTimeout(() => { fill.style.width = "65%"; }, 80);
+      setTimeout(() => {
+        title.innerText = "Security Verified ✓";
+        sub.innerText = "Opening Global E-Commerce Dashboard...";
+        fill.style.width = "100%";
+      }, 950);
+      setTimeout(() => {
+        overlay.style.display = "none";
+        fill.style.width = "0%";
+        onComplete();
+      }, 1750);
+    }
+
+    function switchAuthTab(mode) {
+      document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+      document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+      document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+      document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+    }
+
+    function handleCustLogin() {
+      const email = (document.getElementById('login-email').value.trim() || "sara.khan@email.com").toLowerCase();
+      const pass = document.getElementById('login-pass').value;
+      let existing = state.users.find(x => x.email.toLowerCase() === email);
+
+      if (existing) {
+        if (existing.loginPassword && pass !== existing.loginPassword) {
+          alert("Incorrect Login Password!");
+          return;
+        }
+        if (existing.accountStatus === "Deactive") {
+          alert("Your account is Deactivated. Please contact customer service.");
+          return;
+        }
+        state.activeUserId = existing.id;
+      } else {
+        const created = makeUserRecord({
+          name: email.split('@')[0].replace(/[._]/g, ' ').toUpperCase(),
+          phone: "+971 50 000 0000",
+          email: email,
+          loginPassword: pass
+        });
+        state.users.unshift(created);
+        state.activeUserId = created.id;
+      }
+
+      showVerifyingThenEnter(() => {
+        state.customerLoggedIn = true;
+        saveState();
+        applyRouting();
+      });
+    }
+
+    function handleCustRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+
+      if (!name || !phone || !email) {
+        alert("Please enter Name, Phone Number, and Email.");
+        return;
+      }
+
+      const newUser = makeUserRecord({
+        name,
+        phone,
+        email,
+        loginPassword: pass || "123456",
+        trc20Address: state.platformConfig.trc20Address,
+        balance: 0.00
+      });
+
+      showVerifyingThenEnter(() => {
+        state.users.unshift(newUser);
+        state.activeUserId = newUser.id;
+        state.customerLoggedIn = true;
+        saveState();
+        applyRouting();
+      });
+    }
+
+    function handleCustLogout() {
+      state.customerLoggedIn = false;
+      saveState();
+      applyRouting();
+    }
+
+    function switchCustPage(pageId, navEl) {
+      document.querySelectorAll('#cust-app-screen .page').forEach(p => p.classList.remove('active'));
+      document.getElementById('cust-page-' + pageId).classList.add('active');
+      document.querySelectorAll('#cust-app-screen .nav-item').forEach(n => n.classList.remove('active'));
+      navEl.classList.add('active');
+      renderAll();
+    }
+
+    function dismissCustomerNotification() {
+      const u = getActiveUser();
+      u.adminNotification = "";
+      saveState();
+    }
+
+    function grabOrder() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+
+      if (u.accountStatus !== "Active") {
+        alert(`Action blocked: Account is ${u.accountStatus}.`);
+        return;
+      }
+      if (u.tasksLocked) {
+        alert("Please contact with customer service");
+        return;
+      }
+      if (lucky && lucky.triggered && !lucky.completed) {
+        openCustModal('deposit1');
+        return;
+      }
+      // ZERO FUNDS / NEW ACCOUNT CHECK: SHOW ALERT ABOVE & OPEN DEPOSIT CARD
+      if (u.balance <= 0) {
+        showZeroBalAlert = true;
+        renderAll();
+        openCustModal('deposit1');
+        return;
+      }
+      if (u.completedTasks >= u.totalTasks) {
+        alert("All 25 unique tasks completed!");
+        return;
+      }
+
+      const nextTaskNum = u.completedTasks + 1;
+      const btn = document.getElementById('grab-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      }
+
+      setTimeout(() => {
+        if (lucky && !lucky.completed && lucky.taskNum === nextTaskNum) {
+          lucky.triggered = true;
+          if (u.balance < lucky.amount) {
+            saveState();
+            return;
+          } else {
+            completeLuckyOrder();
+            return;
+          }
+        }
+
+        const item = unique25Products[u.completedTasks % unique25Products.length];
+        u.completedTasks++;
+        u.balance += item.comm;
+        u.todayEarn += item.comm;
+
+        state.ordersHistory.unshift({
+          userId: u.id,
+          taskNum: nextTaskNum,
+          name: item.name,
+          store: item.store,
+          comm: item.comm,
+          img: item.img
+        });
+
+        saveState();
+      }, 450);
+    }
+
+    function completeLuckyOrder() {
+      const u = getActiveUser();
+      const lucky = u.activeLuckyOrder;
+      if (!lucky || u.balance < lucky.amount) {
+        openCustModal('deposit1');
+        return;
+      }
+
+      u.completedTasks++;
+      u.balance += lucky.comm;
+      u.todayEarn += lucky.comm;
+      lucky.completed = true;
+
+      state.ordersHistory.unshift({
+        userId: u.id,
+        taskNum: lucky.taskNum,
+        name: lucky.product + " (Lucky)",
+        store: "VIP Lucky",
+        comm: lucky.comm,
+        img: lucky.img
+      });
+
+      saveState();
+      alert(`Lucky Order Completed! +$${lucky.comm.toFixed(2)} commission credited.`);
+    }
+
+    function updateCustLoginPassInline() {
+      const u = getActiveUser();
+      const val = document.getElementById('inline-login-pass').value.trim();
+      if (!val) { alert("Enter a new login password."); return; }
+      u.loginPassword = val;
+      document.getElementById('inline-login-pass').value = "";
+      saveState();
+      alert("Login Password Updated!");
+    }
+
+    function updateCustWithdrawPassInline() {
+      const u = getActiveUser();
+      const val = document.getElementById('inline-wd-pass').value.trim();
+      if (!val) { alert("Enter a new withdraw password."); return; }
+      u.withdrawPassword = val;
+      document.getElementById('inline-wd-pass').value = "";
+      saveState();
+      alert("Withdraw Password Updated!");
+    }
+
+    function openCustModal(type) {
+      const u = getActiveUser();
+      if (type === 'withdraw' && u.withdrawBlocked) {
+        alert("Withdrawals are BLOCKED on your account.");
+        return;
+      }
+      if (u.accountStatus === "Deactive") {
+        alert("Your account is Deactivated.");
+        return;
+      }
+
+      const overlay = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      overlay.style.display = 'flex';
+
+      if (type === 'deposit1') {
+        const lucky = u.activeLuckyOrder;
+        const suggested = (lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount)
+          ? (lucky.amount - u.balance).toFixed(2)
+          : "";
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#059669; margin-bottom:6px;">Deposit Funds</h3>
+          ${u.balance <= 0 ? `<p style="font-size:11px; color:#b91c1c; background:#fef2f2; padding:7px 9px; border-radius:8px; margin-bottom:10px; font-weight:600;">Please contact with customer service for active your tasks</p>` : ''}
+          <div class="input-group">
+            <label>Deposit / Recharge Amount (USDT)</label>
+            <input type="number" id="dep-amt-input" value="${suggested}" placeholder="Enter amount" />
+          </div>
+          <button class="btn-primary" onclick="goDepositStep2()">Next: QR & TRC20</button>
+        `;
+      } else if (type === 'withdraw') {
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#4f46e5; margin-bottom:8px;">Withdraw Funds</h3>
+          <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Available Balance: <strong>$${u.balance.toFixed(2)}</strong></p>
+          <div class="input-group"><label>Withdraw Amount (USDT)</label><input type="number" id="wd-amt-input" placeholder="Enter amount" /></div>
+          <div class="input-group"><label>Withdraw Password</label><input type="password" id="wd-pass-input" placeholder="Enter withdraw password" /></div>
+          <button class="btn-primary" onclick="submitWithdraw()">Submit Withdrawal</button>
+        `;
+      } else if (type === 'history') {
+        const userTx = state.txHistory.filter(t => t.userId === u.id);
+        const rows = userTx.length === 0
+          ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No live transactions yet.</p>`
+          : userTx.map(t => {
+              const badgeCls = t.status === 'Approved' ? 'badge-approved' : (t.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+              return `
+                <div style="padding:9px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <strong style="font-size:12px;">${t.type} • $${t.amount.toFixed(2)}</strong>
+                    <p style="font-size:10px; color:#64748b;">${t.time}</p>
+                  </div>
+                  <span class="${badgeCls}">${t.status}</span>
+                </div>
+              `;
+            }).join('');
+        content.innerHTML = `<h3 style="font-size:15px; margin-bottom:8px;">Live Deposit & Withdraw History</h3>${rows}`;
+      } else if (type === 'bindWallet') {
+        content.innerHTML = `
+          <h3 style="font-size:15px; margin-bottom:10px;">Bind Wallet / Bank</h3>
+          <div class="input-group"><label>Method</label><select id="bind-type"><option>USDT (TRC20)</option><option>Bank Transfer</option></select></div>
+          <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
+          <button class="btn-primary" onclick="saveBind()">Save Binding</button>
+        `;
+      } else {
+        content.innerHTML = `
+          <h3 style="font-size:16px; color:#4f46e5; margin-bottom:8px;">Global E-Commerce</h3>
+          <p style="font-size:12px; color:#334155; line-height:1.6;">
+            Complete your 25 unique product promotion tasks in the Grabbing tab to earn instant commissions.
+          </p>
+        `;
+      }
+    }
+
+    function goDepositStep2() {
+      const u = getActiveUser();
+      const amt = parseFloat(document.getElementById('dep-amt-input').value);
+      if (!amt || amt <= 0) { alert("Enter a valid amount."); return; }
+      pendingDepositAmt = amt;
+      const addr = u.trc20Address || state.platformConfig.trc20Address;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(addr)}`;
+
+      document.getElementById('modal-content').innerHTML = `
+        <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
+        <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
+          <img src="${qrUrl}" style="width:145px; height:145px;" />
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:11px;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;">${addr}</span>
+            <button class="btn-sm" style="background:#4f46e5;" onclick="navigator.clipboard.writeText('${addr}'); alert('TRC20 Copied!');">Copy</button>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
+      `;
+    }
+
+    function confirmPaid() {
+      const u = getActiveUser();
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.txHistory.unshift({
+        id: Date.now(),
+        userId: u.id,
+        user: u.name,
+        type: "Deposit",
+        amount: pendingDepositAmt,
+        status: "Pending",
+        time: "Today, " + now
+      });
+      saveState();
+      alert("Deposit submitted live! Waiting for Admin approval.");
+      closeModal();
+    }
+
+    function submitWithdraw() {
+      const u = getActiveUser();
+      if (u.withdrawBlocked) {
+        alert("Withdrawals are BLOCKED on your account.");
+        return;
+      }
+      const amt = parseFloat(document.getElementById('wd-amt-input').value);
+      const wdPass = document.getElementById('wd-pass-input').value;
+      if (u.withdrawPassword && wdPass !== u.withdrawPassword) {
+        alert("Incorrect Withdraw Password!");
+        return;
+      }
+      if (!amt || amt <= 0 || amt > u.balance) {
+        alert("Invalid or insufficient balance.");
+        return;
+      }
+      u.balance -= amt;
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      state.txHistory.unshift({
+        id: Date.now(),
+        userId: u.id,
+        user: u.name,
+        type: "Withdraw",
+        amount: amt,
+        status: "Pending",
+        time: "Today, " + now
+      });
+      saveState();
+      alert("Withdrawal submitted live! Waiting for Admin approval.");
+      closeModal();
+    }
+
+    function saveBind() {
+      const u = getActiveUser();
+      const t = document.getElementById('bind-type').value;
+      const v = document.getElementById('bind-val').value.trim();
+      if (!v) return;
+      u.boundWallet = `${t}: ${v.slice(0, 12)}...`;
+      saveState();
+      closeModal();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    // ==================== ADMIN AUTH, TX APPROVE/REJECT & SETTINGS ====================
+    function handleAdminLogin() {
+      const u = document.getElementById('admin-login-user').value.trim().toLowerCase();
+      const p = document.getElementById('admin-login-pass').value.trim();
+      const validUser = u === state.adminCredentials.email.toLowerCase() || u === state.adminCredentials.user.toLowerCase();
+      if (validUser && p === state.adminCredentials.pass) {
+        document.getElementById('admin-auth-screen').style.display = 'none';
+        document.getElementById('admin-app-screen').style.display = 'block';
+        renderAll();
+      } else {
+        alert("Invalid Admin Login!");
+      }
+    }
+
+    function handleAdminLogout() {
+      document.getElementById('admin-app-screen').style.display = 'none';
+      document.getElementById('admin-auth-screen').style.display = 'flex';
+    }
+
+    function switchAdminPage(pageId, title, btnEl) {
+      document.querySelectorAll('#admin-app-screen .page').forEach(p => p.classList.remove('active'));
+      document.getElementById('admin-page-' + pageId).classList.add('active');
+      document.getElementById('admin-header-title').innerText = title;
+      document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderAll();
+    }
+
+    function renderAdminTxLists() {
+      const deps = state.txHistory.filter(t => t.type === 'Deposit');
+      document.getElementById('adm-deposits-list').innerHTML = deps.length === 0
+        ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No deposit requests.</p>`
+        : deps.map(d => {
+            const badgeCls = d.status === 'Approved' ? 'badge-approved' : (d.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+            return `
+              <div class="card-box" style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                  <strong>${d.user} • $${d.amount.toFixed(2)}</strong>
+                  <span class="${badgeCls}">${d.status}</span>
+                </div>
+                <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${d.time}</p>
+                ${d.status === 'Pending' ? `
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx(${d.id}, 'Approved')">Approve Deposit</button>
+                    <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${d.id}, 'Rejected')">Reject Deposit</button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+
+      const wds = state.txHistory.filter(t => t.type === 'Withdraw');
+      document.getElementById('adm-withdraws-list').innerHTML = wds.length === 0
+        ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
+        : wds.map(w => {
+            const badgeCls = w.status === 'Approved' ? 'badge-approved' : (w.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+            return `
+              <div class="card-box" style="margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                  <strong>${w.user} • $${w.amount.toFixed(2)}</strong>
+                  <span class="${badgeCls}">${w.status}</span>
+                </div>
+                <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${w.time}</p>
+                ${w.status === 'Pending' ? `
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx(${w.id}, 'Approved')">Approve Withdraw</button>
+                    <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(${w.id}, 'Rejected')">Reject Withdraw</button>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+    }
+
+    function decideAdminTx(id, decision) {
+      const tx = state.txHistory.find(t => t.id === id);
+      if (!tx || tx.status !== 'Pending') return;
+      const targetUser = state.users.find(x => x.id === tx.userId) || getActiveUser();
+
+      tx.status = decision;
+      if (tx.type === 'Deposit' && decision === 'Approved') {
+        targetUser.balance += tx.amount;
+      }
+      if (tx.type === 'Withdraw' && decision === 'Rejected') {
+        targetUser.balance += tx.amount;
+      }
+
+      saveState();
+      alert(`${tx.type} ${decision} live!`);
+    }
+
+    function adminSaveAdminAuthSettings() {
+      const email = document.getElementById('adm-set-email').value.trim();
+      const pass = document.getElementById('adm-set-adminpass').value.trim();
+      if (email) state.adminCredentials.email = email;
+      if (pass) state.adminCredentials.pass = pass;
+      saveState();
+      alert("Admin Email & Password updated live!");
+    }
+
+    function adminSavePlatformSettings() {
+      const newTrc = document.getElementById('adm-set-trc20').value.trim();
+      const newTg = document.getElementById('adm-set-tg').value.trim();
+      if (newTrc) {
+        state.platformConfig.trc20Address = newTrc;
+        state.users.forEach(u => { u.trc20Address = newTrc; });
+      }
+      if (newTg) {
+        state.platformConfig.telegramSupport = newTg;
+      }
+      saveState();
+      alert("Telegram & TRC20 updated in real time!");
+    }
+  </script>
+
+</body>
+</html>
