@@ -3309,6 +3309,7 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
+
 function grabOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
@@ -3331,29 +3332,34 @@ function grabOrder() {
           Number(o.taskNum) === nextTaskNum
       );
 
-    if (activeTaskDemo) {
-  const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
-  const currentBal = Number(u.balance || 0);
-  u.productRevealed = false;
-  u.pendingTaskCommission = null;
-  renderAll();
-  if (currentBal < reqAmt && reqAmt > 0) {
-    openCustModal('deposit1', reqAmt.toFixed(2));
-  }
-  return;
-}
+      if (activeTaskDemo) {
+        const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
+        const currentBal = Number(u.balance || 0);
+        u.productRevealed = false;
+        u.pendingTaskCommission = null;
+        renderAll();
+        if (currentBal < reqAmt && reqAmt > 0) {
+          openCustModal('deposit1', reqAmt.toFixed(2));
+        }
+        return;
+      }
 
       if (lucky && lucky.triggered && !lucky.completed) {
         const reqAmt = Math.abs(Number(lucky.amount || 0));
-        openCustModal('deposit1', reqAmt.toFixed(2));
+        renderAll();
+        if (Number(u.balance || 0) < reqAmt && reqAmt > 0) {
+          openCustModal('deposit1', reqAmt.toFixed(2));
+        }
         return;
       }
+
       if (u.balance <= 0) {
         showZeroBalAlert = true;
         renderAll();
         openCustModal('deposit1');
         return;
       }
+
       if (u.completedTasks >= u.totalTasks) {
         alert("All 25 unique tasks completed!");
         return;
@@ -3376,33 +3382,39 @@ function grabOrder() {
 
         if (matchedDemoOrder) {
           const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
+          const currentBal = Number(u.balance || 0);
           u.productRevealed = false;
           u.pendingTaskCommission = null;
           renderAll();
-          if (reqAmt > 0) {
+          if (currentBal < reqAmt && reqAmt > 0) {
             openCustModal('deposit1', reqAmt.toFixed(2));
           }
           return;
         }
 
-        if (lucky && !lucky.completed && lucky.taskNum === nextTaskNum) {
+        if (lucky && !lucky.completed && Number(lucky.taskNum) === nextTaskNum) {
           lucky.triggered = true;
-          if (u.balance < lucky.amount) {
-            saveState();
-            return;
-          } else {
-            completeLuckyOrder();
-            return;
+          u.productRevealed = false;
+          u.pendingTaskCommission = null;
+          renderAll();
+          saveState();
+          if (Number(u.balance || 0) < Math.abs(Number(lucky.amount || 0))) {
+            openCustModal('deposit1', Math.abs(Number(lucky.amount || 0)).toFixed(2));
           }
+          return;
         }
 
         const baseItem = unique25Products[u.completedTasks % unique25Products.length];
-        const item = { ...baseItem, comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u)) };
-        u.completedTasks++;
+        const item = {
+          ...baseItem,
+          comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
+        };
+
+        u.completedTasks = Math.min(u.totalTasks, Number(u.completedTasks || 0) + 1);
         u.productRevealed = false;
         u.pendingTaskCommission = null;
-        u.balance += item.comm;
-        u.todayEarn += item.comm;
+        u.balance = Number(u.balance || 0) + item.comm;
+        u.todayEarn = Number(u.todayEarn || 0) + item.comm;
 
         state.ordersHistory.unshift({
           userId: u.id,
@@ -3413,10 +3425,10 @@ function grabOrder() {
           img: item.img
         });
 
+        renderAll();
         saveState();
       }, 450);
-    }  
-async function completeDemoLuckyOrder(orderId) {
+    }async function completeDemoLuckyOrder(orderId) {
   const u = getActiveUser();
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
   const order = (orderId && demoLuckyOrders[orderId])
