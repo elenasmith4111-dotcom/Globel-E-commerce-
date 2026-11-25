@@ -923,7 +923,7 @@
   <!-- =====================================================================
        1. CUSTOMER FULL-FIT PAGE
        ===================================================================== -->
-  <div id="customer-outer" class="customer-outer">
+<div id="customer-outer" class="customer-outer" style="display:none;">
     <div class="mobile-container">
 
       <!-- AUTH SCREEN -->
@@ -961,7 +961,19 @@
               <label data-i18n="passLabel">Login Password</label>
               <input type="password" id="login-pass" value="123456" />
             </div>
-            <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
+<div class="input-group">
+  <label>Security Code</label>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="captcha-question"
+      style="background:#eef2ff;padding:12px;border-radius:8px;font-weight:800;letter-spacing:2px;">
+    </span>
+    <button type="button" class="btn-sm"
+      onclick="generateLoginCaptcha()">↻ Refresh</button>
+  </div>
+  <input type="number" id="captcha-answer"
+    placeholder="Enter security code answer" />
+</div>           
+ <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">Sign In</button>
           </div>
 
           <div id="form-register" style="display:none;">
@@ -1486,7 +1498,7 @@
   <!-- =====================================================================
        2. FULL DESKTOP / LAPTOP ADMIN PANEL (/admin/login)
        ===================================================================== -->
-  <div id="admin-outer" class="admin-outer">
+<div id="admin-outer" class="admin-outer" style="display:none;">
 
     <div id="admin-auth-screen" class="admin-login-full">
       <div class="admin-login-card">
@@ -2228,18 +2240,34 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
 
-      if (!isAdmin) {
-        document.getElementById('cust-auth-screen').style.display = state.customerLoggedIn ? 'none' : 'flex';
-        document.getElementById('cust-app-screen').style.display = state.customerLoggedIn ? 'flex' : 'none';
-      }
+    if (!isAdmin) {
+  const loggedIn = !!state.customerLoggedIn;
+
+  document.getElementById('cust-auth-screen').style.display =
+    loggedIn ? 'none' : 'flex';
+
+  document.getElementById('cust-app-screen').style.display =
+    loggedIn ? 'flex' : 'none';
+
+  if (loggedIn) {
+    const lastPage = sessionStorage.getItem('custLastPage') || 'home';
+
+    document.querySelectorAll('#cust-app-screen .page')
+      .forEach(p => p.classList.remove('active'));
+
+    const page = document.getElementById('cust-page-' + lastPage);
+    if (page) page.classList.add('active');
+    else document.getElementById('cust-page-home')?.classList.add('active');
+  }
+}
     }
 
     window.addEventListener("hashchange", applyRouting);
     window.addEventListener("popstate", applyRouting);
-    window.addEventListener("DOMContentLoaded", () => {
-      // Wait for Firebase Auth to resolve before showing either login or dashboard.
-      renderLiveFeed();
-    });
+  window.addEventListener("DOMContentLoaded", () => {
+  generateLoginCaptcha();
+  renderLiveFeed();
+});
 
     function renderLiveFeed() {
       const el = document.getElementById('live-tx-container');
@@ -2706,23 +2734,65 @@ if (todayProfitEl) {
       }, 1750);
     }
 
-    function switchAuthTab(mode) {
-      document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-      document.getElementById('tab-register').classList.toggle('active', mode === 'register');
-      document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
-      document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
-    }
+ function switchAuthTab(mode) {
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-register').classList.toggle('active', mode === 'register');
 
-    async function handleCustLogin() {
-      const email = document.getElementById('login-email').value.trim().toLowerCase();
-      const pass = document.getElementById('login-pass').value;
-      if (!email || !pass) { alert("Please enter email and password."); return; }
-      try {
-        await fbAuth.signInWithEmailAndPassword(email, pass);
-        // Firebase Auth observer loads the profile before opening the dashboard.
-      } catch (err) { alert(err.message || "Login failed."); }
-    }
+  document.getElementById('form-login').style.display =
+    mode === 'login' ? 'block' : 'none';
 
+  document.getElementById('form-register').style.display =
+    mode === 'register' ? 'block' : 'none';
+
+  if (mode === 'login') {
+    generateLoginCaptcha();
+  }
+}
+
+let loginCaptchaAnswer = null;
+
+function generateLoginCaptcha() {
+  const a = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * 9) + 1;
+
+  loginCaptchaAnswer = a + b;
+
+  const question = document.getElementById('captcha-question');
+  const answer = document.getElementById('captcha-answer');
+
+  if (question) question.textContent = `${a} + ${b} = ?`;
+  if (answer) answer.value = '';
+}
+   async function handleCustLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const answer = document.getElementById('captcha-answer').value.trim();
+
+  if (!email || !pass) {
+    alert("Please enter email and password.");
+    return;
+  }
+
+  if (loginCaptchaAnswer === null || answer === '') {
+    alert("Please complete the security code.");
+    return;
+  }
+
+  if (Number(answer) !== loginCaptchaAnswer) {
+    alert("Incorrect security code. Please try again.");
+    generateLoginCaptcha();
+    return;
+  }
+
+  loginCaptchaAnswer = null;
+
+  try {
+    await fbAuth.signInWithEmailAndPassword(email, pass);
+  } catch (err) {
+    alert(err.message || "Login failed.");
+    generateLoginCaptcha();
+  }
+}
     async function handleCustRegister() {
       const name = document.getElementById('reg-name').value.trim();
       const phone = document.getElementById('reg-phone').value.trim();
@@ -2764,15 +2834,21 @@ if (todayProfitEl) {
       try { await fbAuth.signOut(); state.customerLoggedIn = false; applyRouting(); }
       catch (err) { alert(err.message || "Could not sign out."); }
     }
+function switchCustPage(pageId, navEl) {
+  document.querySelectorAll('#cust-app-screen .page')
+    .forEach(p => p.classList.remove('active'));
 
-    function switchCustPage(pageId, navEl) {
-      document.querySelectorAll('#cust-app-screen .page').forEach(p => p.classList.remove('active'));
-      document.getElementById('cust-page-' + pageId).classList.add('active');
-      document.querySelectorAll('#cust-app-screen .nav-item').forEach(n => n.classList.remove('active'));
-      navEl.classList.add('active');
-      renderAll();
-    }
+  document.getElementById('cust-page-' + pageId).classList.add('active');
 
+  document.querySelectorAll('#cust-app-screen .nav-item')
+    .forEach(n => n.classList.remove('active'));
+
+  if (navEl) navEl.classList.add('active');
+
+  sessionStorage.setItem('custLastPage', pageId);
+
+  renderAll();
+}
     function dismissCustomerNotification() {
       const u = getActiveUser();
       u.adminNotification = "";
@@ -3186,7 +3262,10 @@ This is a proof of accreditation, licensing or regulatory authorization.
       document.getElementById('admin-header-title').innerText = title;
       document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
       btnEl.classList.add('active');
-      renderAll();
+    sessionStorage.setItem('adminLastPage', pageId);
+sessionStorage.setItem('adminLastTitle', title);
+
+  renderAll();
     }
 
     function renderAdminTxLists() {
