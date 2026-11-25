@@ -3427,17 +3427,37 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       alert(`Tasks reset to 0/25, Today's Earn reset to $0.00, and previous order history cleared for ${u.name}!`);
     }
 
-    function userAdjustFunds(userId, mode) {
-      const u = state.users.find(x => x.id === userId);
-      const amt = parseFloat(document.getElementById('fund-input-' + userId).value);
-      if (!u || !amt || amt <= 0) {
-        alert("Enter a valid amount.");
-        return;
-      }
-      u.balance = mode === 'add' ? u.balance + amt : Math.max(0, u.balance - amt);
-      saveState();
-      alert(`${mode === 'add' ? 'Added' : 'Deducted'} $${amt.toFixed(2)} for ${u.name}`);
-    }
+   
+async function userAdjustFunds(userId, mode) {
+  const u = state.users.find(x => x.id === userId);
+  const input = document.getElementById('fund-input-' + userId);
+  const amt = parseFloat(input?.value);
+
+  if (!u || !Number.isFinite(amt) || amt <= 0) {
+    alert("Enter a valid amount.");
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.rpc("admin_adjust_wallet", {
+      p_user_id: userId,
+      p_amount: amt,
+      p_action: mode,
+      p_reference: "Admin manual wallet adjustment"
+    });
+
+    if (error) throw error;
+
+    u.balance = Number(data);
+    renderAdminUserLines();
+
+    if (input) input.value = "";
+    alert(`${mode === "add" ? "Added" : "Deducted"} $${amt.toFixed(2)} successfully.`);
+  } catch (err) {
+    console.error("Wallet adjustment error:", err);
+    alert(err.message || "Wallet adjustment failed.");
+  }
+}
 
     function userSetStatus(userId, newStatus) {
       const u = state.users.find(x => x.id === userId);
@@ -4218,17 +4238,37 @@ async function completeDemoLuckyOrder(orderId) {
       `;
     }
 
-    function confirmPaid() {
-      const u = getActiveUser();
-      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const request = { id: Date.now(), userId: u.id, user: u.name, type: "Deposit", amount: pendingDepositAmt, status: "Pending", time: "Today, " + now, createdAt: Date.now() };
-      u.transactions = u.transactions || [];
-      u.transactions.unshift(request);
-      state.txHistory.unshift(request);
-      saveState();
-      alert("Deposit submitted live! Waiting for Admin approval.");
-      closeModal();
-    }
+
+async function confirmPaid() {
+  const u = getActiveUser();
+
+  if (!u || !u.id || !pendingDepositAmt || pendingDepositAmt <= 0) {
+    alert("Invalid deposit amount.");
+    return;
+  }
+
+  try {
+    const { data, error } = await sb
+      .from("deposit_requests")
+      .insert({
+        user_id: u.id,
+        amount: Number(pendingDepositAmt),
+        status: "pending"
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    alert("Deposit request submitted. Admin will review it after verifying your payment.");
+    closeModal();
+  } catch (err) {
+    console.error("Deposit request error:", err);
+    alert(err.message || "Could not submit deposit request.");
+  }
+}
+
+
 
     function submitWithdraw() {
       const u = getActiveUser();
@@ -4419,26 +4459,49 @@ renderAdminTxLists();
           }).join('');
     }
 
-    function decideAdminTx(id, decision) {
-      const tx = state.txHistory.find(t => t.id === id);
-      if (!tx || tx.status !== 'Pending') return;
-      const targetUser = state.users.find(x => x.id === tx.userId) || getActiveUser();
 
-      tx.status = decision;
-      tx.reviewedAt = Date.now();
-      targetUser.transactions = targetUser.transactions || [];
-      const profileTx = targetUser.transactions.find(t => String(t.id) === String(id));
-      if (profileTx) { profileTx.status = decision; profileTx.reviewedAt = tx.reviewedAt; }
-      if (tx.type === 'Deposit' && decision === 'Approved') {
-        targetUser.balance += tx.amount;
-      }
-      if (tx.type === 'Withdraw' && decision === 'Rejected') {
-        targetUser.balance += tx.amount;
-      }
+async function decideAdminTx(id, decision) {
+  const tx = state.txHistory.find(t => String(t.id) === String(id));
+  if (!tx || tx.status !== "Pending") return;
 
-      saveState();
-      alert(`${tx.type} ${decision} live!`);
+  if (tx.type !== "Deposit") {
+    alert("This update currently applies to deposit requests only.");
+    return;
+  }
+
+  const targetUser = state.users.find(x => x.id === tx.userId);
+  if (!targetUser) {
+    alert("Customer profile not found. Refresh the admin page.");
+    return;
+  }
+
+  try {
+    if (decision === "Approved") {
+      const { data, error } = await sb.rpc("admin_approve_deposit", {
+        p_request_id: id
+      });
+      if (error) throw error;
+      targetUser.balance = Number(data);
+    } else if (decision === "Rejected") {
+      const { error } = await sb.rpc("admin_reject_deposit", {
+        p_request_id: id
+      });
+      if (error) throw error;
+    } else {
+      return;
     }
+
+    tx.status = decision;
+    renderAdminUserLines();
+    renderAdminTxLists();
+
+    alert(`Deposit ${decision.toLowerCase()} successfully.`);
+  } catch (err) {
+    console.error("Deposit decision error:", err);
+    alert(err.message || "Could not update deposit.");
+  }
+}
+
 
     function adminSaveAdminAuthSettings() {
       const email = document.getElementById('adm-set-email').value.trim();
