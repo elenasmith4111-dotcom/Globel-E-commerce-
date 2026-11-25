@@ -3309,9 +3309,10 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
-
 function grabOrder() {
-      const u = getActiveUser();
+      const u = typeof getActiveUser === "function" ? getActiveUser() : null;
+      if (!u) return;
+
       const lucky = u.activeLuckyOrder;
       const nextTaskNum = Number(u.completedTasks || 0) + 1;
 
@@ -3353,14 +3354,14 @@ function grabOrder() {
         return;
       }
 
-      if (u.balance <= 0) {
+      if (Number(u.balance || 0) <= 0) {
         showZeroBalAlert = true;
         renderAll();
         openCustModal('deposit1');
         return;
       }
 
-      if (u.completedTasks >= u.totalTasks) {
+      if (Number(u.completedTasks || 0) >= Number(u.totalTasks || 25)) {
         alert("All 25 unique tasks completed!");
         return;
       }
@@ -3404,13 +3405,13 @@ function grabOrder() {
           return;
         }
 
-        const baseItem = unique25Products[u.completedTasks % unique25Products.length];
+        const baseItem = unique25Products[Number(u.completedTasks || 0) % unique25Products.length];
         const item = {
           ...baseItem,
           comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
         };
 
-        u.completedTasks = Math.min(u.totalTasks, Number(u.completedTasks || 0) + 1);
+        u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
         u.productRevealed = false;
         u.pendingTaskCommission = null;
         u.balance = Number(u.balance || 0) + item.comm;
@@ -3427,8 +3428,12 @@ function grabOrder() {
 
         renderAll();
         saveState();
-      }, 450);
-    }async function completeDemoLuckyOrder(orderId) {
+      }, 350);
+    }   
+
+
+
+ }async function completeDemoLuckyOrder(orderId) {
   const u = getActiveUser();
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
   const order = (orderId && demoLuckyOrders[orderId])
