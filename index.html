@@ -2278,7 +2278,10 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       }
     }
 
-    function saveState() { pushToBackend(); }
+   let LuckyOrders = {};
+let LuckyOrdersRef = null;
+
+ function saveState() { pushToBackend(); }
 
     fbAuth.onAuthStateChanged(async user => {
       firebaseUser = user;
@@ -2314,8 +2317,25 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         document.getElementById("admin-app-screen").style.display = "none";
         document.getElementById("admin-auth-screen").style.display = "flex";
       }
-      if (user) startRealtimeSync();
-      applyRouting();
+if (user) startRealtimeSync();
+
+if (demoLuckyOrdersRef) {
+  demoLuckyOrdersRef.off();
+  demoLuckyOrdersRef = null;
+}
+
+demoLuckyOrders = {};
+
+if (user && !isFirebaseAdmin(user)) {
+  demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + user.uid);
+
+  demoLuckyOrdersRef.on("value", snapshot => {
+    demoLuckyOrders = snapshot.val() || {};
+    renderAll();
+  }, error => {
+    console.error("Demo Lucky Order listener error:", error);
+  });
+}      applyRouting();
       renderAll();
     });
 
@@ -2416,8 +2436,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 
     function renderAll() {
       const u = getActiveUser();
-      const lucky = u.activeLuckyOrder;
-      const dict = translations15[currentLang] || translations15.en;
+const lucky = null;
+
+const demoOrder = Object.values(demoLuckyOrders || {})
+  .filter(o => o && o.status !== "Approved" && o.status !== "Deleted")
+  .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];      const dict = translations15[currentLang] || translations15.en;
 
       if (u.balance > 0) showZeroBalAlert = false;
 
@@ -2483,7 +2506,21 @@ if (todayProfitEl) {
       } else {
         notifArea.innerHTML = '';
       }
-
+if (demoOrder && notifArea) {
+  notifArea.innerHTML += `
+    <div class="admin-push-notif" style="border-left:4px solid #d97706;">
+      <div>
+        <strong style="display:block;margin-bottom:4px;">
+          <i class="fa-solid fa-bell"></i> New Demo Lucky Order
+        </strong>
+        ${demoOrder.product || "Demo Product"} —
+        Amount: -$${Number(demoOrder.amount || 0).toFixed(2)}
+        <br>
+        <strong>Status: Pending Admin Approval</strong>
+      </div>
+    </div>
+  `;
+}
       const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
       document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
         ? u.accountStatus
@@ -2491,7 +2528,45 @@ if (todayProfitEl) {
       document.getElementById('prof-status-pill').innerText = u.accountStatus;
 
       const stageArea = document.getElementById('grab-stage-area');
-      if (u.tasksLocked) {
+     
+if (demoOrder) {
+  const demoAmount = Number(demoOrder.amount || 0);
+  const demoCommission = Number(demoOrder.commission || 0);
+
+  stageArea.innerHTML = `
+    <div class="lucky-product-card" style="cursor:default;">
+      <img src="${demoOrder.img || ''}" class="prod-img" alt="Demo Lucky Order" />
+
+      <span style="background:#e11d48;color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
+        DEMO LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
+      </span>
+
+      <h4 style="font-size:15px;color:#881337;margin-top:8px;">
+        ${demoOrder.product || "Demo Product"}
+      </h4>
+
+      <div class="negative-order-amt">
+        -$${demoAmount.toFixed(2)}
+      </div>
+
+      <p style="font-size:12px;color:#9f1239;">
+        Demo Order Amount: <strong>-$${demoAmount.toFixed(2)}</strong>
+      </p>
+
+      <p style="font-size:12px;color:#059669;">
+        Demo Commission: <strong>+$${demoCommission.toFixed(2)}</strong>
+      </p>
+
+      <p style="margin-top:12px;padding:10px;background:#fff7ed;border-radius:8px;color:#9a3412;font-weight:700;">
+        Status: Pending Admin Approval
+      </p>
+
+      <p style="font-size:11px;color:#64748b;margin-top:8px;">
+        This is a simulated demo order. No payment or recharge is required.
+      </p>
+    </div>
+  `;
+} else if (u.tasksLocked) {
         stageArea.innerHTML = `
           <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
             <i class="fa-solid fa-headset" style="font-size:24px; display:block; margin-bottom:8px;"></i>
