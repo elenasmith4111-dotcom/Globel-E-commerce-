@@ -1995,6 +1995,14 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     }
     setInterval(renderLiveFeed, 3000);
 
+    // Demo commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
+    function getDemoCommissionForUser(u) {
+      const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
+      const min = isVip ? 5 : 1;
+      const max = isVip ? 40 : 2.5;
+      return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+    }
+
     function renderAll() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
@@ -2074,15 +2082,16 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         `;
       } else if (lucky && lucky.triggered && !lucky.completed) {
         const hasEnough = u.balance >= lucky.amount;
-        const rechargeNeeded = Math.max(0, lucky.amount - u.balance);
+        const rechargeNeeded = Number(lucky.amount) || 0;
         stageArea.innerHTML = `
           <div class="lucky-product-card" onclick="openCustModal('deposit1')">
             <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
             <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
             <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
             <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
+            <p style="font-size:10px; color:#92400e; font-weight:700;">DEMO ONLY — simulated order and recharge figure; no real payment is collected here.</p>
             <p style="font-size:11px; color:#9f1239;">
-              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
+              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Demo Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
             </p>
             <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:5px;">
               Commission Reward: +$${lucky.comm.toFixed(2)}
@@ -2090,7 +2099,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
           </div>
           ${hasEnough
             ? `<button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
-            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
+            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Demo Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
           }
         `;
       } else if (u.completedTasks >= u.totalTasks) {
@@ -2124,7 +2133,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
             <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
             <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
             <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
-              Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${previewItem.comm.toFixed(2)}
+              Order Value: $${previewItem.price.toFixed(2)} • Demo Commission: +$${(u.pendingTaskCommission || getDemoCommissionForUser(u)).toFixed(2)}
             </p>
           </div>
           <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
@@ -2505,6 +2514,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 
     function revealNextProduct() {
       const u = getActiveUser();
+      const item = unique25Products[Math.min(u.completedTasks, unique25Products.length - 1)];
+      u.pendingTaskCommission = getDemoCommissionForUser(u);
       u.productRevealed = true;
       renderAll();
     }
@@ -2512,6 +2523,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     function hideProductDetails() {
       const u = getActiveUser();
       u.productRevealed = false;
+      u.pendingTaskCommission = null;
       renderAll();
     }
 
@@ -2562,9 +2574,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
           }
         }
 
-        const item = unique25Products[u.completedTasks % unique25Products.length];
+        const baseItem = unique25Products[u.completedTasks % unique25Products.length];
+        const item = { ...baseItem, comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u)) };
         u.completedTasks++;
         u.productRevealed = false;
+        u.pendingTaskCommission = null;
         u.balance += item.comm;
         u.todayEarn += item.comm;
 
