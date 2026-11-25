@@ -4035,78 +4035,6 @@ async function completeDemoLuckyOrder(orderId) {
     alert(err.message || "Could not complete lucky order.");
   }
 }
-
-async function completeDemoLuckyOrder(orderId) {
-  const u = typeof getActiveUser === "function" ? getActiveUser() : null;
-  if (!u) return;
-
-  const nextTaskNum = Number(u.completedTasks || 0) + 1;
-  const order = (orderId && demoLuckyOrders[orderId])
-    ? demoLuckyOrders[orderId]
-    : Object.values(demoLuckyOrders || {}).find(
-        o => o && o.status !== "Approved" && o.status !== "Deleted" && Number(o.taskNum) === nextTaskNum
-      );
-
-  if (!order) return;
-
-  const reqAmt = Math.abs(Number(order.amount || 0));
-  const comm = Number(order.commission || 0);
-  const currentBal = Number(u.balance || 0);
-
-  if (currentBal < reqAmt) {
-    const needed = Math.max(0, reqAmt).toFixed(2);
-    openCustModal('deposit1', needed);
-    return;
-  }
-
-  u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-  u.balance = currentBal + comm;
-  u.todayEarn = Number(u.todayEarn || 0) + comm;
-  u.productRevealed = false;
-  u.pendingTaskCommission = null;
-
-  state.ordersHistory.unshift({
-    userId: u.id,
-    taskNum: Number(order.taskNum || u.completedTasks),
-    name: (order.product || "Lucky Order") + " (Lucky)",
-    store: "VIP Lucky",
-    comm: comm,
-    img: order.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80"
-  });
-
-  if (order.id && u.id) {
-    demoLuckyOrders[order.id] = { ...order, status: "Approved", completedAt: Date.now() };
-
-    if (typeof sb !== "undefined" && sb) {
-      try {
-        const { error } = await sb
-          .from("lucky_orders")
-          .update({ status: "Approved" })
-          .eq("id", order.id)
-          .eq("user_id", u.id);
-
-        if (error) {
-          console.warn("Supabase lucky_orders update warning:", error.message);
-        }
-      } catch (err) {
-        console.warn("Supabase lucky_orders update error:", err);
-      }
-    }
-  }
-
-  renderAll();
-  saveState();
-  alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
-}    function updateCustLoginPassInline() {
-      const u = getActiveUser();
-      const val = document.getElementById('inline-login-pass').value.trim();
-      if (!val) { alert("Enter a new login password."); return; }
-      u.loginPassword = val;
-      document.getElementById('inline-login-pass').value = "";
-      saveState();
-      alert("Login Password Updated!");
-    }
-
     function updateCustWithdrawPassInline() {
       const u = getActiveUser();
       const val = document.getElementById('inline-wd-pass').value.trim();
@@ -4516,52 +4444,6 @@ async function submitWithdraw() {
   }
 }
 
-function renderAdminTxLists() {
-  const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
-  document.getElementById('adm-deposits-list').innerHTML = deps.length === 0
-    ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No deposit requests.</p>`
-    : deps.map(d => {
-        const badgeCls = d.status === 'Approved' ? 'badge-approved' : (d.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-        return `
-          <div class="card-box" style="margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
-              <strong>${d.user} • $${Number(d.amount || 0).toFixed(2)}</strong>
-              <span class="${badgeCls}">${d.status}</span>
-            </div>
-            <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${d.time}</p>
-            ${d.status === 'Pending' ? `
-              <div style="display:flex; gap:8px;">
-                <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx('${d.id}', 'Approved')">Approve Deposit</button>
-                <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx('${d.id}', 'Rejected')">Reject Deposit</button>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-
-  const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
-  document.getElementById('adm-withdraws-list').innerHTML = wds.length === 0
-    ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
-    : wds.map(w => {
-        const badgeCls = w.status === 'Approved' ? 'badge-approved' : (w.status === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-        return `
-          <div class="card-box" style="margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
-              <strong>${w.user} • $${Number(w.amount || 0).toFixed(2)}</strong>
-              <span class="${badgeCls}">${w.status}</span>
-            </div>
-            <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${w.time}</p>
-            ${w.status === 'Pending' ? `
-              <div style="display:flex; gap:8px;">
-                <button class="btn-sm" style="background:#059669;" onclick="decideAdminTx('${w.id}', 'Approved')">Approve Withdraw</button>
-                <button class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx('${w.id}', 'Rejected')">Reject Withdraw</button>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-}
-
 async function decideAdminTx(id, decision) {
   const tx = (state.txHistory || []).find(t => String(t.id) === String(id));
   if (!tx || tx.status !== "Pending") return;
@@ -4761,48 +4643,6 @@ syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
           }).join('');
     }
 
-
-async function decideAdminTx(id, decision) {
-  const tx = state.txHistory.find(t => String(t.id) === String(id));
-  if (!tx || tx.status !== "Pending") return;
-
-  if (tx.type !== "Deposit") {
-    alert("This update currently applies to deposit requests only.");
-    return;
-  }
-
-  const targetUser = state.users.find(x => x.id === tx.userId);
-  if (!targetUser) {
-    alert("Customer profile not found. Refresh the admin page.");
-    return;
-  }
-
-  try {
-    if (decision === "Approved") {
-      const { data, error } = await sb.rpc("admin_approve_deposit", {
-        p_request_id: id
-      });
-      if (error) throw error;
-      targetUser.balance = Number(data);
-    } else if (decision === "Rejected") {
-      const { error } = await sb.rpc("admin_reject_deposit", {
-        p_request_id: id
-      });
-      if (error) throw error;
-    } else {
-      return;
-    }
-
-    tx.status = decision;
-    renderAdminUserLines();
-    renderAdminTxLists();
-
-    alert(`Deposit ${decision.toLowerCase()} successfully.`);
-  } catch (err) {
-    console.error("Deposit decision error:", err);
-    alert(err.message || "Could not update deposit.");
-  }
-}
 async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
   const usr = (state.users || []).find(u => u.id === userId);
   if (!usr || typeof sb === "undefined" || !sb) return;
