@@ -2241,7 +2241,6 @@ async function startRealtimeSync() {
     return;
   }
 
-
   // Remove channels from any previous session before creating fresh ones.
   for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel]) {
     if (channel) await sb.removeChannel(channel);
@@ -2249,7 +2248,6 @@ async function startRealtimeSync() {
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
-
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2267,9 +2265,9 @@ async function startRealtimeSync() {
         const existingUsers = state.users || [];
         Object.assign(state, data.state);
         state.users = existingUsers;
+        if (typeof renderAll === "function") renderAll();
       }
     };
-
 
     const loadCustomerProfiles = async () => {
       const { data: profiles, error } = await sb
@@ -2309,7 +2307,6 @@ async function startRealtimeSync() {
       setBackendStatus(true);
     };
 
-
     await loadGlobalState();
     await loadCustomerProfiles();
 
@@ -2327,14 +2324,13 @@ async function startRealtimeSync() {
 
     profileChannel = sb.channel("admin-wallet-ledger")
       .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "wallet_ledger"
+        event: "*", schema: "public", table: "wallet_ledger"
       }, loadCustomerProfiles)
       .subscribe();
 
     setBackendStatus(true);
     return;
   }
-
 
   // Customer session: load own profile and calculate balance from wallet ledger.
   const loadMyProfile = async () => {
@@ -2374,11 +2370,21 @@ async function startRealtimeSync() {
     state.users = [record];
     state.activeUserId = user.id;
     state.customerLoggedIn = true;
+
+    if (typeof demoLuckyOrders === "object" && demoLuckyOrders) {
+      Object.keys(demoLuckyOrders).forEach(key => {
+        const ord = demoLuckyOrders[key];
+        const reqAmt = Math.abs(Number(ord?.amount || 0));
+        if (ord && ord.status !== "Approved" && ord.status !== "Deleted" && reqAmt > 0 && balance >= reqAmt) {
+          demoLuckyOrders[key] = { ...ord, status: "FundsAdded" };
+        }
+      });
+    }
+
     applyRouting();
     renderAll();
     setBackendStatus(true);
   };
-
 
   await loadMyProfile();
   profileChannel = sb.channel("customer-profile-wallet-" + user.id)
@@ -2386,12 +2392,10 @@ async function startRealtimeSync() {
       event: "*", schema: "public", table: "profiles", filter: "id=eq." + user.id
     }, loadMyProfile)
     .on("postgres_changes", {
-      event: "INSERT", schema: "public", table: "wallet_ledger", filter: "user_id=eq." + user.id
+      event: "*", schema: "public", table: "wallet_ledger", filter: "user_id=eq." + user.id
     }, loadMyProfile)
     .subscribe();
 }
-
-
 // ================= SAVE DATA TO SUPABASE =================
 
 async function pushToBackend() {
@@ -2643,6 +2647,7 @@ renderAll();
     state.activeUserId = null;
     state.users = [];
   }
+
 await startRealtimeSync();
   authReady = true;
   applyRouting();
