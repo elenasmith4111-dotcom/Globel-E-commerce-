@@ -2305,125 +2305,101 @@ adminLuckyOrdersChannel = null;
       .subscribe();
 
     // Load all customer profiles
-    const loadCustomerProfiles = async () => {
-      const { data, error } = await sb
-        .from("profiles")
-        .select("*")
-        .eq("role", "customer");
 
-      if (error) {
-        console.error("Customer profiles load error:", error);
-        setBackendStatus(false);
-        return;
-      }
+const loadCustomerProfiles = async () => {
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("role", "customer");
 
-      const rows = data || [];
+  if (error) {
+    console.error("Customer profiles error:", error);
+    return;
+  }
 
-      state.users = rows.map(row =>
-        makeUserRecord({
-          ...(row.metadata || {}),
-          id: row.id,
-          name: row.display_name || row.metadata?.name || "",
-          phone: row.phone || row.metadata?.phone || "",
-          email: row.email || ""
-        })
-      );
+  const { data: ledger, error: ledgerError } = await sb
+    .from("wallet_ledger")
+    .select("user_id, amount");
 
-      state.txHistory = state.users
-        .flatMap(u =>
-          (u.transactions || []).map(t => ({
-            ...t,
-            userId: u.id,
-            user: u.name
-          }))
-        )
-        .sort((a, b) => Number(b.id) - Number(a.id));
+  if (ledgerError) {
+    console.error("Wallet ledger error:", ledgerError);
+    alert("Could not load wallet balances: " + ledgerError.message);
+    return;
+  }
 
-      renderAdminUserLines();
-      renderAdminTxLists();
-      setBackendStatus(true);
-    };
+  const balances = {};
+  (ledger || []).forEach(entry => {
+    balances[entry.user_id] =
+      (balances[entry.user_id] || 0) + Number(entry.amount);
+  });
 
-    await loadCustomerProfiles();
-adminLuckyOrdersChannel = sb
-  .channel("admin-lucky-orders-live")
-  .on("postgres_changes", {
-    event: "*",
-    schema: "public",
-    table: "lucky_orders"
-  }, () => {
-    (state.users || []).forEach(user => {
-      renderAdminLuckyOrders(user.id);
-    });
-  })
-  .subscribe();
-    customerProfilesChannel = sb
-      .channel("admin-customer-profiles")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "profiles"
-        },
-        loadCustomerProfiles
-      )
-      .subscribe();
+  state.users = (data || []).map(row =>
+    makeUserRecord({
+      ...(row.metadata || {}),
+      id: row.id,
+      name: row.display_name || row.metadata?.name || "",
+      phone: row.phone || row.metadata?.phone || "",
+      email: row.email || "",
+      balance: balances[row.id] || 0
+    })
+  );
 
-  } else {
+  renderAdminUserLines();
+  renderAdminTxLists();
+  setBackendStatus(true);
+};
+   
 
     // Customer's own profile updates
-    const loadMyProfile = async () => {
-      const { data, error } = await sb
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+    
+const loadMyProfile = async () => {
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-      if (error) {
-        console.error("Customer profile error:", error);
-        setBackendStatus(false);
-        return;
-      }
-
-      const record = makeUserRecord({
-        ...(data.metadata || {}),
-        id: user.id,
-        name: data.display_name || data.metadata?.name || "",
-        phone: data.phone || data.metadata?.phone || "",
-        email: data.email || user.email || ""
-      });
-
-      delete record.loginPassword;
-      delete record.withdrawPassword;
-
-      state.users = [record];
-      state.activeUserId = user.id;
-      state.customerLoggedIn = true;
-
-      applyRouting();
-      renderAll();
-      setBackendStatus(true);
-    };
-
-    await loadMyProfile();
-
-    profileChannel = sb
-      .channel("customer-profile-" + user.id)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "profiles",
-          filter: "id=eq." + user.id
-        },
-        loadMyProfile
-      )
-      .subscribe();
+  if (error) {
+    console.error("Customer profile error:", error);
+    return;
   }
-}
 
+  const { data: ledger, error: ledgerError } = await sb
+    .from("wallet_ledger")
+    .select("amount")
+    .eq("user_id", user.id);
+
+  if (ledgerError) {
+    console.error("Customer wallet error:", ledgerError);
+    alert("Could not load wallet balance: " + ledgerError.message);
+    return;
+  }
+
+  const walletBalance = (ledger || []).reduce(
+    (total, entry) => total + Number(entry.amount),
+    0
+  );
+
+  const record = makeUserRecord({
+    ...(data.metadata || {}),
+    id: user.id,
+    name: data.display_name || data.metadata?.name || "",
+    phone: data.phone || data.metadata?.phone || "",
+    email: data.email || user.email || "",
+    balance: walletBalance
+  });
+
+  delete record.loginPassword;
+  delete record.withdrawPassword;
+
+  state.users = [record];
+  state.activeUserId = user.id;
+  state.customerLoggedIn = true;
+
+  applyRouting();
+  renderAll();
+  setBackendStatus(true);
+};
 
 // ================= SAVE DATA TO SUPABASE =================
 
