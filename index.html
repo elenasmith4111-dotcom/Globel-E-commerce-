@@ -2336,7 +2336,7 @@ async function startRealtimeSync() {
       if (existingWd) await sb.removeChannel(existingWd);
     }
 
-    await syncLiveTransactionsFromSupabase();
+   await syncLiveTransactionsFromSupabase();
     renderAdminTxLists();
 
     adminDepositChannel = sb
@@ -2349,14 +2349,6 @@ async function startRealtimeSync() {
 
     adminWithdrawChannel = sb
       .channel("admin-withdraw-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
-        await syncLiveTransactionsFromSupabase();
-        renderAdminTxLists();
-      })
-      .subscribe();
-      .subscribe();
-
-    sb.channel("admin-withdraw-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
