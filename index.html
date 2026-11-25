@@ -2724,59 +2724,50 @@ function isAdminPath() {
   );
 }
 
-
 async function adminAddDemoLuckyFunds(userId, orderId, amount) {
-  if (!firebaseUser || !isFirebaseAdmin(firebaseUser)) {
-    alert("Admin access required.");
-    return;
-  }
-
   const value = Number(amount);
 
   if (!Number.isFinite(value) || value <= 0) {
-    alert("Enter a valid demo amount.");
+    alert("Enter a valid credit amount.");
     return;
   }
 
-  const orderRef = fbDb.ref(
-    "demo_lucky_orders/" + userId + "/" + orderId
-  );
-
-  const snap = await orderRef.once("value");
-  const order = snap.val();
-
-  if (!order || order.status === "Deleted") {
-    alert("Demo order not found.");
+  if (!confirm(
+    "Credit " + value.toFixed(2) +
+    " to this customer's wallet? Only use for verified funds."
+  )) {
     return;
   }
-
-  const required = Math.abs(Number(order.amount || 0));
-
-  if (value !== required) {
-    alert("Enter exactly the Lucky Order amount: " + required);
-    return;
-  }
-
-  const fundsRef = fbDb.ref(
-    "demo_lucky_funds/" + userId + "/" + orderId
-  );
 
   try {
-    await fundsRef.set({
-      amount: value,
-      status: "Approved",
-      approvedAt: Date.now(),
-      approvedBy: firebaseUser.uid
-    });
+    const { data, error } = await sb.rpc(
+      "admin_credit_customer",
+      {
+        p_user_id: userId,
+        p_amount: value,
+        p_reference: "Admin wallet credit"
+      }
+    );
 
-    alert("Demo Lucky Funds added successfully.");
+    if (error) throw error;
+
+    const customer = state.users.find(u => u.id === userId);
+
+    if (customer) {
+      customer.balance = Number(data);
+    }
+
+    renderAll();
+    saveState();
+
+    alert("Customer wallet credited successfully. New balance: " +
+      Number(data).toFixed(2));
+
   } catch (error) {
-    console.error(error);
-    alert("Could not add demo funds: " + error.message);
+    console.error("Wallet credit error:", error);
+    alert("Could not credit wallet: " + error.message);
   }
 }
-
-
 function buildTelegramHref(raw) {
   const clean = (raw || "").trim();
   if (!clean) return "https://t.me/GlobalEcom_Help";
@@ -3645,10 +3636,19 @@ async function handleCustRegister() {
   }
 
   try {
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password: pass
-    });
+   
+console.log("REGISTER EMAIL:", JSON.stringify(email));
+
+const { data, error } = await sb.auth.signUp({
+  email,
+  password: pass,
+  options: {
+    data: {
+      name: name,
+      phone: phone
+    }
+  }
+});
 
     if (error) throw error;
 
@@ -3669,18 +3669,7 @@ async function handleCustRegister() {
     delete profile.loginPassword;
     delete profile.withdrawPassword;
 
-    const { error: profileError } = await sb
-      .from('profiles')
-      .insert({
-        id: data.user.id,
-        email,
-        role: 'customer',
-        display_name: name,
-        phone,
-        metadata: profile
-      });
-
-    if (profileError) throw profileError;
+  
 
     alert(
       data.session
@@ -4015,21 +4004,6 @@ async function completeDemoLuckyOrder(orderId) {
   alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
 }
 
-async function deleteDemoLuckyOrder(userId, orderId) {
-  if (!confirm("Delete this demo Lucky Order?")) return;
-
-  try {
-    await fbDb.ref(
-      "demo_lucky_orders/" + userId + "/" + orderId
-    ).remove();
-
-    alert("Demo Lucky Order deleted.");
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-
     function updateCustLoginPassInline() {
       const u = getActiveUser();
       const val = document.getElementById('inline-login-pass').value.trim();
@@ -4277,9 +4251,9 @@ async function deleteDemoLuckyOrder(userId, orderId) {
     }
 
     // ==================== ADMIN AUTH, TX APPROVE/REJECT & SETTINGS ====================
-   async function handleAdminLogin() {
-  const email = document.getElementById("admin-email").value.trim().toLowerCase();
-  const password = document.getElementById("admin-password").value;
+  async function handleAdminLogin() {
+  const email = document.getElementById("admin-login-user").value.trim().toLowerCase();
+  const password = document.getElementById("admin-login-pass").value;
 
   if (!email || !password) {
     alert("Please enter admin email and password.");
@@ -4304,20 +4278,16 @@ async function deleteDemoLuckyOrder(userId, orderId) {
 
     if (profile.role !== "admin") {
       await sb.auth.signOut();
-      throw new Error("Admin access denied.");
+      throw new Error("This account does not have admin access.");
     }
 
-    document.getElementById("admin-auth-screen").style.display = "none";
-    document.getElementById("admin-app-screen").style.display = "block";
-
-    alert("Admin login successful.");
+    console.log("Admin authenticated:", data.user.id);
 
   } catch (err) {
     console.error("Admin login error:", err);
     alert(err.message || "Admin login failed.");
   }
 }
-   
 async function handleAdminLogout() {
   try {
     const { error } = await sb.auth.signOut();
@@ -4352,7 +4322,8 @@ async function handleAdminLogout() {
     sessionStorage.setItem('adminLastPage', pageId);
 sessionStorage.setItem('adminLastTitle', title);
 
-  renderAll();
+renderAdminUserLines();
+renderAdminTxLists();
     }
 
     function renderAdminTxLists() {
@@ -4446,39 +4417,6 @@ sessionStorage.setItem('adminLastTitle', title);
       saveState();
       alert("Telegram, WhatsApp & TRC20 settings updated!");
     }
-
-function renderAdminLuckyOrders(userId) {
-  const list = document.getElementById("u-lucky-list-" + userId);
-  if (!list) return;
-
-  fbDb.ref("demo_lucky_orders/" + userId).once("value")
-    .then(snapshot => {
-      const orders = snapshot.val() || {};
-      const entries = Object.entries(orders);
-
-      list.innerHTML = entries.length
-        ? entries.map(([id, o]) => `
-          <div class="card-box" style="margin-top:10px;">
-            <strong>${o.product}</strong>
-            <p>Task: ${o.taskNum}</p>
-            <p>Demo Order Amount: ${Number(o.amount).toFixed(2)}</p>
-            <p>Demo Commission: ${Number(o.commission).toFixed(2)}</p>
-            <p>Status: ${o.status}</p>
-            <button class="btn-sm"
-              onclick="editDemoLuckyOrder('${userId}','${id}')">
-              Edit
-            </button>
-            <button class="btn-sm"
-              style="background:#dc2626"
-              onclick="deleteDemoLuckyOrder('${userId}','${id}')">
-              Delete
-            </button>
-          </div>
-        `).join("")
-        : "<p>No demo Lucky Orders assigned.</p>";
-    });
-}
-
   </script>
 
 </body>
