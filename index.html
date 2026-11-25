@@ -3643,17 +3643,29 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       saveState();
     }
 
-    function saveUserSettings(userId) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      u.loginPassword = document.getElementById('u-loginpass-' + userId).value.trim();
-      u.withdrawPassword = document.getElementById('u-wdpass-' + userId).value.trim();
-      u.trc20Address = document.getElementById('u-trc20-' + userId).value.trim() || state.platformConfig.trc20Address;
-      u.adminNotification = document.getElementById('u-notif-' + userId).value.trim();
-      saveState();
-      alert(`Settings saved for ${u.name}!`);
-    }
+   async function saveUserSettings(userId) {
+  const inputLoginPassword = document.getElementById(`u-loginpass-${userId}`)?.value || "";
+  const inputWithdrawPassword = document.getElementById(`u-wdpass-${userId}`)?.value || "";
+  const inputTrc20 = document.getElementById(`u-trc20-${userId}`)?.value?.trim() || "";
+  const inputNotif = document.getElementById(`u-notif-${userId}`)?.value?.trim() || "";
 
+  const patchObj = {
+    trc20Address: inputTrc20,
+    adminNotification: inputNotif
+  };
+
+  if (inputWithdrawPassword.trim() !== "") {
+    patchObj.withdrawPassword = inputWithdrawPassword.trim();
+  }
+
+  await adminUpdateCustomerProfile(
+    userId,
+    patchObj,
+    inputLoginPassword.trim()
+  );
+
+  alert("User settings saved and synced!");
+}
 async function saveUserLuckyOrder(userId) {
   const user = state.users.find(u => u.id === userId);
 
@@ -4343,6 +4355,16 @@ async function syncLiveTransactionsFromSupabase() {
       });
     }
 
+if (wdErr) {
+      const missingTable =
+        wdErr.code === "PGRST205" ||
+        String(wdErr.message || "").toLowerCase().includes("does not exist") ||
+        String(wdErr.message || "").toLowerCase().includes("schema cache");
+      if (!missingTable) {
+        console.error("Withdraw requests load error:", wdErr);
+      }
+    }
+
     if (!wdErr && Array.isArray(wds)) {
       wds.forEach(w => {
         const usr = (state.users || []).find(x => x.id === w.user_id);
@@ -4781,9 +4803,81 @@ async function decideAdminTx(id, decision) {
     alert(err.message || "Could not update deposit.");
   }
 }
+async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
+  const usr = (state.users || []).find(u => u.id === userId);
+  if (!usr || typeof sb === "undefined" || !sb) return;
 
+  // Local state update
+  Object.assign(usr, patchObj);
 
-    function adminSaveAdminAuthSettings() {
+  // Supabase profiles row fetch & merge metadata
+  const { data: row, error: fetchErr } = await sb
+    .from("profiles")
+    .select("display_name, phone, metadata")
+    .eq("id", userId)
+    .single();
+
+  if (fetchErr) {
+    console.error("Profile fetch error:", fetchErr);
+    alert("Failed to load user profile: " + fetchErr.message);
+    return;
+  }
+
+  const nextMeta = {
+    ...(row?.metadata || {}),
+    ...patchObj
+  };
+  delete nextMeta.balance;
+  delete nextMeta.id;
+  delete nextMeta.email;
+  delete nextMeta.loginPassword; // plain login password metadata mein save na karein
+
+  const { error: updErr } = await sb
+    .from("profiles")
+    .update({
+      display_name: usr.name || row?.display_name || "",
+      phone: usr.phone || row?.phone || "",
+      metadata: nextMeta
+    })
+    .eq("id", userId);
+
+  if (updErr) {
+    console.error("Admin profile update error:", updErr);
+    alert("Update failed: " + updErr.message);
+    return;
+  }
+
+  // Agar admin ne naya Login Password diya hai to Supabase Auth password bhi update karein
+  if (newLoginPassword && newLoginPassword.trim().length >= 6) {
+    const { error: pwErr } = await sb.rpc("admin_update_user_password", {
+      target_user_id: userId,
+      new_password: newLoginPassword.trim()
+    });
+    if (pwErr) {
+      console.error("Login password reset error:", pwErr);
+      alert("Login password update failed: " + pwErr.message);
+      return;
+    }
+  }
+
+  if (typeof renderAll === "function") renderAll();
+}
+
+  
+async function onAdminStatusChange(userId, newStatus) {
+  await adminUpdateCustomerProfile(userId, { status: newStatus });
+}
+async function onAdminSlideLockToggle(userId, isLocked) {
+  await adminUpdateCustomerProfile(userId, { slideLock: Boolean(isLocked) });
+}
+async function onAdminWdBlockToggle(userId, isBlocked) {
+  await adminUpdateCustomerProfile(userId, { wdBlock: Boolean(isBlocked) });
+}
+async function onAdminResetTasks(userId) {
+  await adminUpdateCustomerProfile(userId, { tasksCompleted: 0, todayCommission: 0 });
+}
+
+  function adminSaveAdminAuthSettings() {
       const email = document.getElementById('adm-set-email').value.trim();
       const pass = document.getElementById('adm-set-adminpass').value.trim();
       if (email) state.adminCredentials.email = email;
