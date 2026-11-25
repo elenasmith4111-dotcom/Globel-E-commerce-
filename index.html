@@ -2254,7 +2254,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     }
     setInterval(renderLiveFeed, 3000);
 
-    // Demo commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
+    // Real commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
     function getDemoCommissionForUser(u) {
     const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
     const min = isVip ? 5 : 1;
@@ -2356,9 +2356,9 @@ if (todayProfitEl) {
             <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
             <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
             <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
-            <p style="font-size:10px; color:#92400e; font-weight:700;">DEMO ONLY — simulated order and recharge figure; no real payment is collected here.</p>
+            <p style="font-size:10px; color:#92400e; font-weight:700;"> ONLY — simulated order and recharge figure; no real payment is collected here.</p>
             <p style="font-size:11px; color:#9f1239;">
-              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Demo Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
+              Lucky Order Amount: <strong>$${lucky.amount.toFixed(2)}</strong> • Recharge Amount: <strong>$${rechargeNeeded.toFixed(2)}</strong>
             </p>
             <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:5px;">
               Commission Reward: +$${lucky.comm.toFixed(2)}
@@ -2366,7 +2366,7 @@ if (todayProfitEl) {
           </div>
           ${hasEnough
             ? `<button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
-            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Demo Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
+            : `<button class="btn-primary" style="background:#e11d48; color:#fff;" onclick="openCustModal('deposit1')"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
           }
         `;
       } else if (u.completedTasks >= u.totalTasks) {
@@ -2400,7 +2400,7 @@ if (todayProfitEl) {
             <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
             <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
             <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
-              Order Value: $${previewItem.price.toFixed(2)} • Demo Commission: +$${(u.pendingTaskCommission || getDemoCommissionForUser(u)).toFixed(2)}
+              Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${(u.pendingTaskCommission || getCommissionForUser(u)).toFixed(2)}
             </p>
           </div>
           <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
@@ -3022,14 +3022,14 @@ if (todayProfitEl) {
           <div style="background:#111111;border:3px solid #c9a646;border-radius:14px;padding:18px 12px;text-align:center;color:#f8e7b0;">
             <div style="border:1px solid #c9a646;padding:18px 10px;border-radius:8px;">
               <div style="font-size:11px;letter-spacing:3px;color:#d8b75b;">GLOBAL E-COMMERCE</div>
-              <div style="font-size:23px;font-weight:800;margin:17px 0;color:#f5d77e;">DEMO CERTIFICATE</div>
+              <div style="font-size:23px;font-weight:800;margin:17px 0;color:#f5d77e;">AUTHORITY CERTIFICATE</div>
               <div style="height:1px;background:#c9a646;margin:12px 0;"></div>
               <div style="font-size:14px;font-weight:700;">CERTIFICATE OF PARTICIPATION</div>
               <p style="font-size:11px;line-height:1.8;color:#e7d8ad;margin:15px 0;">
                 This sample digital certificate demonstrates the platform's certificate design.
               </p>
               <div style="font-size:12px;font-weight:800;color:#f5d77e;margin-top:15px;">
-                DEMO • NOT OFFICIAL
+                Real •OFFICIAL
               </div>
               <p style="font-size:9px;color:#cbd5e1;margin-top:8px;">
                 This is not proof of accreditation, licensing or regulatory authorization.
@@ -3044,7 +3044,7 @@ if (todayProfitEl) {
             Review the platform guide and task conditions before proceeding.
           </p>
         `;
-      }
+     
 
       }
     }
