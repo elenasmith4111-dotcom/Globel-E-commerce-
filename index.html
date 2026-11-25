@@ -1766,18 +1766,7 @@ const sb = window.supabase.createClient(
 
 console.log("Supabase client initialized");
 
-(async () => {
-  const { data, error } = await sb
-    .from("profiles")
-    .select("id")
-    .limit(1);
 
-  if (error) {
-    console.error("Supabase test failed:", error.message);
-  } else {
-    console.log("SUPABASE CONNECTED SUCCESSFULLY ✅");
-  }
-})();
 
 
 
