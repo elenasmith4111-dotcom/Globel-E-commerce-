@@ -1360,6 +1360,9 @@
     let firebaseUser = null;
     let profileListener = null;
     let globalStateListener = null;
+    let customerProfilesListener = null;
+    let authReady = false;
+    let pendingRegistrationProfile = null;
 
     const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app";
 const DB_NODE_PATH = "/global_ecommerce_state.json";
@@ -1777,32 +1780,46 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     function startRealtimeSync() {
       if (!firebaseUser) return;
       if (globalStateListener) fbDb.ref("global_ecommerce_state").off("value", globalStateListener);
-      if (profileListener && firebaseUser) fbDb.ref("customer_profiles/" + firebaseUser.uid).off("value", profileListener);
+      if (customerProfilesListener) fbDb.ref("customer_profiles").off("value", customerProfilesListener);
+      if (profileListener) fbDb.ref("customer_profiles/" + firebaseUser.uid).off("value", profileListener);
+
       if (isFirebaseAdmin(firebaseUser)) {
         globalStateListener = snap => {
           const data = snap.val();
           if (data) applyRemoteState(data);
-          else fbDb.ref("global_ecommerce_state").set(state);
-          backendHasInitialData = true; setBackendStatus(true);
-          // Admin panel receives customer profiles as a UID-keyed collection.
-          fbDb.ref("customer_profiles").once("value").then(ps => {
-            const profiles = ps.val() || {};
-            const byUid = Object.entries(profiles).map(([uid, profile]) => makeUserRecord({ ...profile, id: uid }));
-            if (byUid.length) { state.users = byUid; renderAll(); }
-          }).catch(() => {});
+          else fbDb.ref("global_ecommerce_state").set(state).catch(err => console.error(err));
+          backendHasInitialData = true;
+          setBackendStatus(true);
         };
         fbDb.ref("global_ecommerce_state").on("value", globalStateListener, () => setBackendStatus(false));
+
+        // Listen to the whole profiles collection so new registrations appear immediately.
+        customerProfilesListener = snap => {
+          const profiles = snap.val() || {};
+          const byUid = Object.entries(profiles).map(([uid, profile]) =>
+            makeUserRecord({ ...profile, id: uid })
+          );
+          const demoUsers = (state.users || []).filter(u => String(u.id).startsWith("usr_"));
+          state.users = [...byUid, ...demoUsers.filter(d => !byUid.some(u => u.id === d.id))];
+          renderAdminUserLines();
+          renderAdminTxLists();
+          setBackendStatus(true);
+        };
+        fbDb.ref("customer_profiles").on("value", customerProfilesListener, err => {
+          console.error("Customer list permission error:", err);
+          setBackendStatus(false);
+        });
       } else {
         profileListener = snap => {
           const profile = snap.val();
-          if (profile) {
-            const record = makeUserRecord({ ...profile, id: firebaseUser.uid, email: firebaseUser.email });
-            const idx = state.users.findIndex(x => x.id === firebaseUser.uid);
-            if (idx >= 0) state.users[idx] = record; else state.users = [record];
-            state.activeUserId = firebaseUser.uid;
-            state.customerLoggedIn = true;
-            applyRouting(); renderAll();
-          }
+          if (!profile) return;
+          const record = makeUserRecord({ ...profile, id: firebaseUser.uid, email: firebaseUser.email });
+          const idx = state.users.findIndex(x => x.id === firebaseUser.uid);
+          if (idx >= 0) state.users[idx] = record; else state.users = [record];
+          state.activeUserId = firebaseUser.uid;
+          state.customerLoggedIn = true;
+          applyRouting();
+          renderAll();
           setBackendStatus(true);
         };
         fbDb.ref("customer_profiles/" + firebaseUser.uid).on("value", profileListener, () => setBackendStatus(false));
@@ -1838,27 +1855,43 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 
     function saveState() { pushToBackend(); }
 
-    fbAuth.onAuthStateChanged(user => {
+    fbAuth.onAuthStateChanged(async user => {
       firebaseUser = user;
-      if (user) {
-        if (isFirebaseAdmin(user)) {
-          document.getElementById("admin-auth-screen").style.display = "none";
-          document.getElementById("admin-app-screen").style.display = "block";
+      try {
+        if (user && !isFirebaseAdmin(user)) {
+          const profileRef = fbDb.ref("customer_profiles/" + user.uid);
+          let profileSnap = await profileRef.once("value");
+          if (!profileSnap.exists() && pendingRegistrationProfile) {
+            await profileRef.set(pendingRegistrationProfile);
+            profileSnap = await profileRef.once("value");
+          }
+          if (profileSnap.exists()) {
+            const profile = makeUserRecord({ ...profileSnap.val(), id: user.uid, email: user.email });
+            const idx = state.users.findIndex(x => x.id === user.uid);
+            if (idx >= 0) state.users[idx] = profile; else state.users = [profile];
+            state.activeUserId = user.uid;
+            state.customerLoggedIn = true;
+          } else {
+            state.customerLoggedIn = false;
+          }
         } else {
-          state.activeUserId = user.uid;
-          state.customerLoggedIn = true;
-          const idx = state.users.findIndex(x => x.id === user.uid);
-          if (idx < 0) state.users.unshift(makeUserRecord({ id: user.uid, email: user.email }));
+          state.customerLoggedIn = false;
         }
-        startRealtimeSync(); applyRouting(); renderAll();
-      } else {
+      } catch (err) {
+        console.error("Could not load signed-in profile:", err);
         state.customerLoggedIn = false;
-        if (isAdminPath()) {
-          document.getElementById("admin-app-screen").style.display = "none";
-          document.getElementById("admin-auth-screen").style.display = "flex";
-        }
-        applyRouting();
       }
+      authReady = true;
+      if (user && isFirebaseAdmin(user)) {
+        document.getElementById("admin-auth-screen").style.display = "none";
+        document.getElementById("admin-app-screen").style.display = "block";
+      } else if (isAdminPath()) {
+        document.getElementById("admin-app-screen").style.display = "none";
+        document.getElementById("admin-auth-screen").style.display = "flex";
+      }
+      if (user) startRealtimeSync();
+      applyRouting();
+      renderAll();
     });
 
     const demoFeed = [
@@ -1891,6 +1924,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     }
 
     function applyRouting() {
+      if (!authReady) {
+        document.getElementById('admin-outer').style.display = 'none';
+        document.getElementById('customer-outer').style.display = 'none';
+        return;
+      }
       const isAdmin = isAdminPath();
       document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
@@ -1904,10 +1942,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     window.addEventListener("hashchange", applyRouting);
     window.addEventListener("popstate", applyRouting);
     window.addEventListener("DOMContentLoaded", () => {
-      applyRouting();
+      // Wait for Firebase Auth to resolve before showing either login or dashboard.
       renderLiveFeed();
-      renderAll();
-      startRealtimeSync();
     });
 
     function renderLiveFeed() {
@@ -2348,7 +2384,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       if (!email || !pass) { alert("Please enter email and password."); return; }
       try {
         await fbAuth.signInWithEmailAndPassword(email, pass);
-        showVerifyingThenEnter(() => { applyRouting(); });
+        // Firebase Auth observer loads the profile before opening the dashboard.
       } catch (err) { alert(err.message || "Login failed."); }
     }
 
@@ -2361,15 +2397,32 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         alert("Please enter Name, Phone Number, Email, and Password."); return;
       }
       if (pass.length < 6) { alert("Password must be at least 6 characters."); return; }
+      const registerButton = document.querySelector('#form-register .btn-primary');
+      if (registerButton) { registerButton.disabled = true; registerButton.textContent = "Creating account..."; }
       try {
+        const profile = makeUserRecord({
+          name, phone, email, balance: 0,
+          trc20Address: state.platformConfig.trc20Address
+        });
+        delete profile.loginPassword;
+        delete profile.withdrawPassword;
+        pendingRegistrationProfile = profile;
         const credential = await fbAuth.createUserWithEmailAndPassword(email, pass);
-        const profile = makeUserRecord({ id: credential.user.uid, name, phone, email, trc20Address: state.platformConfig.trc20Address, balance: 0 });
-        delete profile.loginPassword; delete profile.withdrawPassword;
-        await fbDb.ref("customer_profiles/" + credential.user.uid).set(profile);
-        state.users.unshift(makeUserRecord({ ...profile, id: credential.user.uid }));
-        state.activeUserId = credential.user.uid; state.customerLoggedIn = true;
-        showVerifyingThenEnter(() => { applyRouting(); renderAll(); });
-      } catch (err) { alert(err.message || "Registration failed."); }
+        await fbDb.ref("customer_profiles/" + credential.user.uid).set({ ...profile, id: credential.user.uid, email });
+        state.users = [makeUserRecord({ ...profile, id: credential.user.uid, email })];
+        state.activeUserId = credential.user.uid;
+        state.customerLoggedIn = true;
+        pendingRegistrationProfile = null;
+        // No artificial verification delay: auth observer routes only after profile is saved.
+        authReady = true;
+        applyRouting();
+        renderAll();
+      } catch (err) {
+        pendingRegistrationProfile = null;
+        alert(err.message || "Registration failed.");
+      } finally {
+        if (registerButton) { registerButton.disabled = false; registerButton.textContent = "Register & Enter"; }
+      }
     }
 
     async function handleCustLogout() {
