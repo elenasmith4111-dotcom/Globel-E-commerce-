@@ -2223,185 +2223,174 @@ let profileChannel = null;
 let adminLuckyOrdersChannel = null;
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
-
-  if (authError || !authData.user) {
+  if (authError || !authData?.user) {
     setBackendStatus(false);
     return;
   }
 
   const user = authData.user;
-
-  const { data: myProfile, error: myProfileError } = await sb
+  const { data: myProfile, error: profileError } = await sb
     .from("profiles")
     .select("id, role")
     .eq("id", user.id)
     .single();
 
-  if (myProfileError || !myProfile) {
-    console.error("Profile check failed:", myProfileError);
+  if (profileError || !myProfile) {
+    console.error("Profile check failed:", profileError);
     setBackendStatus(false);
     return;
   }
 
-  // Remove old channels
- for (const channel of [
-  globalStateChannel,
-  customerProfilesChannel,
-  profileChannel,
-  adminLuckyOrdersChannel
-]) {
-  if (channel) await sb.removeChannel(channel);
-}
 
-globalStateChannel = null;
-customerProfilesChannel = null;
-profileChannel = null;
-adminLuckyOrdersChannel = null;
-
+  // Remove channels from any previous session before creating fresh ones.
+  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel]) {
+    if (channel) await sb.removeChannel(channel);
+  }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
 
-  if (myProfile.role === "admin") {
 
-    // Load admin global settings
+  if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
       const { data, error } = await sb
         .from("app_state")
         .select("state")
         .eq("state_key", "main")
         .maybeSingle();
-
       if (error) {
         console.error("Global state load error:", error);
         setBackendStatus(false);
         return;
       }
-
       if (data?.state) {
-        const savedUsers = state.users || [];
+        const existingUsers = state.users || [];
         Object.assign(state, data.state);
-        state.users = savedUsers;
+        state.users = existingUsers;
       }
-
-      setBackendStatus(true);
-      renderAll();
     };
 
-    await loadGlobalState();
 
-    globalStateChannel = sb
-      .channel("admin-global-state")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "app_state",
-          filter: "state_key=eq.main"
-        },
-        loadGlobalState
-      )
-     .subscribe();
+    const loadCustomerProfiles = async () => {
+      const { data: profiles, error } = await sb
+        .from("profiles")
+        .select("id,email,role,display_name,phone,metadata")
+        .eq("role", "customer");
+      if (error) {
+        console.error("Customer profiles error:", error);
+        setBackendStatus(false);
+        return;
+      }
+
+      const { data: ledger, error: ledgerError } = await sb
+        .from("wallet_ledger")
+        .select("user_id,amount");
+      if (ledgerError) {
+        console.error("Wallet ledger error:", ledgerError);
+        setBackendStatus(false);
+        return;
+      }
+
+      const balances = {};
+      (ledger || []).forEach(row => {
+        balances[row.user_id] = (balances[row.user_id] || 0) + Number(row.amount || 0);
+      });
+
+      state.users = (profiles || []).map(row => makeUserRecord({
+        ...(row.metadata || {}),
+        id: row.id,
+        name: row.display_name || row.metadata?.name || "",
+        phone: row.phone || row.metadata?.phone || "",
+        email: row.email || "",
+        balance: balances[row.id] || 0
+      }));
+      renderAdminUserLines();
+      renderAdminTxLists();
+      setBackendStatus(true);
+    };
+
+
+    await loadGlobalState();
+    await loadCustomerProfiles();
+
+    globalStateChannel = sb.channel("admin-global-state")
+      .on("postgres_changes", {
+        event: "*", schema: "public", table: "app_state", filter: "state_key=eq.main"
+      }, loadGlobalState)
+      .subscribe();
+
+    customerProfilesChannel = sb.channel("admin-customer-profiles")
+      .on("postgres_changes", {
+        event: "*", schema: "public", table: "profiles", filter: "role=eq.customer"
+      }, loadCustomerProfiles)
+      .subscribe();
+
+    profileChannel = sb.channel("admin-wallet-ledger")
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "wallet_ledger"
+      }, loadCustomerProfiles)
+      .subscribe();
+
+    setBackendStatus(true);
+    return;
   }
+
+
+  // Customer session: load own profile and calculate balance from wallet ledger.
+  const loadMyProfile = async () => {
+    const { data, error } = await sb
+      .from("profiles")
+      .select("id,email,role,display_name,phone,metadata")
+      .eq("id", user.id)
+      .single();
+    if (error) {
+      console.error("Customer profile error:", error);
+      setBackendStatus(false);
+      return;
+    }
+
+    const { data: ledger, error: ledgerError } = await sb
+      .from("wallet_ledger")
+      .select("amount")
+      .eq("user_id", user.id);
+    if (ledgerError) {
+      console.error("Customer wallet error:", ledgerError);
+      setBackendStatus(false);
+      return;
+    }
+
+    const balance = (ledger || []).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const record = makeUserRecord({
+      ...(data.metadata || {}),
+      id: user.id,
+      name: data.display_name || data.metadata?.name || "",
+      phone: data.phone || data.metadata?.phone || "",
+      email: data.email || user.email || "",
+      balance
+    });
+    delete record.loginPassword;
+    delete record.withdrawPassword;
+
+    state.users = [record];
+    state.activeUserId = user.id;
+    state.customerLoggedIn = true;
+    applyRouting();
+    renderAll();
+    setBackendStatus(true);
+  };
+
+
+  await loadMyProfile();
+  profileChannel = sb.channel("customer-profile-wallet-" + user.id)
+    .on("postgres_changes", {
+      event: "*", schema: "public", table: "profiles", filter: "id=eq." + user.id
+    }, loadMyProfile)
+    .on("postgres_changes", {
+      event: "INSERT", schema: "public", table: "wallet_ledger", filter: "user_id=eq." + user.id
+    }, loadMyProfile)
+    .subscribe();
 }
 
-    // Load all customer profiles
-
-const loadCustomerProfiles = async () => {
-  const { data, error } = await sb
-    .from("profiles")
-    .select("*")
-    .eq("role", "customer");
-
-  if (error) {
-    console.error("Customer profiles error:", error);
-    return;
-  }
-
-  const { data: ledger, error: ledgerError } = await sb
-    .from("wallet_ledger")
-    .select("user_id, amount");
-
-  if (ledgerError) {
-    console.error("Wallet ledger error:", ledgerError);
-    alert("Could not load wallet balances: " + ledgerError.message);
-    return;
-  }
-
-  const balances = {};
-  (ledger || []).forEach(entry => {
-    balances[entry.user_id] =
-      (balances[entry.user_id] || 0) + Number(entry.amount);
-  });
-
-  state.users = (data || []).map(row =>
-    makeUserRecord({
-      ...(row.metadata || {}),
-      id: row.id,
-      name: row.display_name || row.metadata?.name || "",
-      phone: row.phone || row.metadata?.phone || "",
-      email: row.email || "",
-      balance: balances[row.id] || 0
-    })
-  );
-
-  renderAdminUserLines();
-  renderAdminTxLists();
-  setBackendStatus(true);
-};
-   
-
-    // Customer's own profile updates
-    
-const loadMyProfile = async () => {
-  const { data, error } = await sb
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (error) {
-    console.error("Customer profile error:", error);
-    return;
-  }
-
-  const { data: ledger, error: ledgerError } = await sb
-    .from("wallet_ledger")
-    .select("amount")
-    .eq("user_id", user.id);
-
-  if (ledgerError) {
-    console.error("Customer wallet error:", ledgerError);
-    alert("Could not load wallet balance: " + ledgerError.message);
-    return;
-  }
-
-  const walletBalance = (ledger || []).reduce(
-    (total, entry) => total + Number(entry.amount),
-    0
-  );
-
-  const record = makeUserRecord({
-    ...(data.metadata || {}),
-    id: user.id,
-    name: data.display_name || data.metadata?.name || "",
-    phone: data.phone || data.metadata?.phone || "",
-    email: data.email || user.email || "",
-    balance: walletBalance
-  });
-
-  delete record.loginPassword;
-  delete record.withdrawPassword;
-
-  state.users = [record];
-  state.activeUserId = user.id;
-  state.customerLoggedIn = true;
-
-  applyRouting();
-  renderAll();
-  setBackendStatus(true);
-};
 
 // ================= SAVE DATA TO SUPABASE =================
 
@@ -4484,10 +4473,7 @@ async function decideAdminTx(id, decision) {
          alert("Telegram, WhatsApp & TRC20 settings updated!");
     }
 
-  }
-  }
 </script>
-  </script>
 
 </body>
 </html>
