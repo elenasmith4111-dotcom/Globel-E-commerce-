@@ -1767,7 +1767,12 @@
     firebase.initializeApp(firebaseConfig);
     const fbAuth = firebase.auth();
     const fbDb = firebase.database();
-    let firebaseUser = null;
+fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch(error => {
+    console.error("Auth persistence error:", error);
+  });    
+
+let firebaseUser = null;
     let profileListener = null;
     let globalStateListener = null;
     let customerProfilesListener = null;
@@ -2310,7 +2315,9 @@ let LuckyOrdersRef = null;
         state.customerLoggedIn = false;
       }
       authReady = true;
-      if (user && isFirebaseAdmin(user)) {
+     
+
+ if (user && isFirebaseAdmin(user)) {
         document.getElementById("admin-auth-screen").style.display = "none";
         document.getElementById("admin-app-screen").style.display = "block";
       } else if (isAdminPath()) {
@@ -2323,7 +2330,30 @@ if (demoLuckyOrdersRef) {
   demoLuckyOrdersRef.off();
   demoLuckyOrdersRef = null;
 }
+demoLuckyOrders = {};
 
+if (user && !isFirebaseAdmin(user)) {
+  demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + user.uid);
+
+  demoLuckyOrdersRef.on("value", snapshot => {
+    demoLuckyOrders = snapshot.val() || {};
+    renderAll();
+  }, error => {
+    console.error("Demo Lucky Order listener error:", error);
+  });
+}
+
+if (user) {
+  startRealtimeSync();
+} else {
+  state.customerLoggedIn = false;
+  state.activeUserId = null;
+  state.users = [];
+  state.ordersHistory = [];
+}
+
+applyRouting();
+renderAll();
 demoLuckyOrders = {};
 
 if (user && !isFirebaseAdmin(user)) {
@@ -3159,11 +3189,35 @@ if (answer.toUpperCase() !== loginCaptchaAnswer) {
         if (registerButton) { registerButton.disabled = false; registerButton.textContent = "Register & Enter"; }
       }
     }
-
-    async function handleCustLogout() {
-      try { await fbAuth.signOut(); state.customerLoggedIn = false; applyRouting(); }
-      catch (err) { alert(err.message || "Could not sign out."); }
+async function handleCustLogout() {
+  try {
+    // Firebase listener band karein
+    if (demoLuckyOrdersRef) {
+      demoLuckyOrdersRef.off();
+      demoLuckyOrdersRef = null;
     }
+
+    // Temporary customer data clear karein
+    demoLuckyOrders = {};
+
+    // Firebase se logout
+    await fbAuth.signOut();
+
+    state.customerLoggedIn = false;
+    state.activeUserId = null;
+    state.users = [];
+    state.ordersHistory = [];
+
+    // Last opened customer page clear karein
+    sessionStorage.removeItem("custLastPage");
+
+    applyRouting();
+    renderAll();
+
+  } catch (err) {
+    alert(err.message || "Could not sign out.");
+  }
+}
 function switchCustPage(pageId, navEl) {
   document.querySelectorAll('#cust-app-screen .page')
     .forEach(p => p.classList.remove('active'));
