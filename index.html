@@ -4325,6 +4325,8 @@ async function confirmPaid() {
     alert(err.message || "Admin login failed.");
   }
 }
+
+
 async function handleAdminLogout() {
   try {
     const { error } = await sb.auth.signOut();
@@ -4477,8 +4479,12 @@ async function decideAdminTx(id, decision) {
       }
       state.platformConfig.whatsappSupport = newWa;
       saveState();
-      alert("Telegram, WhatsApp & TRC20 settings updated!");
+         alert("Telegram, WhatsApp & TRC20 settings updated!");
     }
+
+  }
+  }
+</script>
   </script>
 
 </body>
