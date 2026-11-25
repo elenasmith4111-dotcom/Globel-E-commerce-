@@ -2927,20 +2927,22 @@ function renderAll() {
     `;
   }
 
-  const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
+ const lucky = u.activeLuckyOrder || null;
+  const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < Math.abs(Number(lucky.amount || 0)));
   document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
     ? u.accountStatus
-    : (u.tasksLocked ? "Contact Service" : (demoOrder || luckyLockedByFunds ? "Recharge Needed" : "Active"));
+    : (u.tasksLocked ? "Contact Service" : ((demoOrder && Number(u.balance || 0) < Math.abs(Number(demoOrder.amount || 0))) || luckyLockedByFunds ? "Recharge Needed" : "Active"));
   document.getElementById('prof-status-pill').innerText = u.accountStatus;
 
   const stageArea = document.getElementById('grab-stage-area');
 
- if (demoOrder) {
+  if (demoOrder) {
     const absAmount = Math.abs(Number(demoOrder.amount || 0));
     const demoCommission = Number(demoOrder.commission || 0);
     const currentBal = Number(u.balance || 0);
-    const hasFullFunds = currentBal >= absAmount && absAmount > 0;
-    const rechargeAmount = hasFullFunds ? 0 : Math.max(0, absAmount - currentBal);
+    // Recharge amount hamesha exact Lucky Order amount ke barabar rahegi (purana balance minus nahi hoga)
+    const rechargeAmount = absAmount;
+    const hasFullFunds = (currentBal >= absAmount && absAmount > 0) || demoOrder.status === "FundsAdded";
     const negativeDisplay = `-$${absAmount.toFixed(2)}`;
 
     if (!hasFullFunds) {
@@ -2968,7 +2970,7 @@ function renderAll() {
               $${rechargeAmount.toFixed(2)}
             </div>
             <div style="font-size:11px;margin-top:4px;">
-              Negative Amount: <strong>${negativeDisplay}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
+              Order Amount: <strong>${negativeDisplay}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
             </div>
           </div>
 
@@ -2983,22 +2985,22 @@ function renderAll() {
       `;
     } else {
       stageArea.innerHTML = `
-        <div class="lucky-product-card" style="background:#fffbeb;border-color:#d97706;cursor:pointer;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
+        <div class="lucky-product-card" style="background:#ecfdf5;border-color:#059669;cursor:pointer;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
           <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
 
-          <span style="background:#d97706;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
+          <span style="background:#059669;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
             LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
           </span>
 
-          <h4 style="font-size:15px;color:#78350f;margin-top:8px;">
+          <h4 style="font-size:15px;color:#065f46;margin-top:8px;">
             ${demoOrder.product || "Lucky Product"}
           </h4>
 
-          <div class="negative-order-amt" style="color:#d97706;">
-            ${negativeDisplay}
+          <div class="negative-order-amt" style="color:#059669;">
+            $${absAmount.toFixed(2)}
           </div>
 
-          <p style="font-size:12px;color:#92400e;margin-top:6px;">
+          <p style="font-size:12px;color:#047857;margin-top:6px;">
             Required Amount: <strong>$${absAmount.toFixed(2)}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
           </p>
 
@@ -3008,7 +3010,7 @@ function renderAll() {
         </div>
 
         <button class="btn-primary" style="background:#059669;color:#fff;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
-          <i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${demoCommission.toFixed(2)})
+          <i class="fa-solid fa-bolt"></i> Grab Now (+$${demoCommission.toFixed(2)})
         </button>
       `;
     }
@@ -3023,7 +3025,7 @@ function renderAll() {
     const absLuckyAmt = Math.abs(Number(lucky.amount || 0));
     const currentBal = Number(u.balance || 0);
     const hasEnough = currentBal >= absLuckyAmt && absLuckyAmt > 0;
-    const rechargeNeeded = hasEnough ? 0 : Math.max(0, absLuckyAmt - currentBal);
+    const rechargeNeeded = absLuckyAmt;
 
     if (!hasEnough) {
       stageArea.innerHTML = `
@@ -3046,17 +3048,17 @@ function renderAll() {
       `;
     } else {
       stageArea.innerHTML = `
-        <div class="lucky-product-card" style="background:#fffbeb;border-color:#d97706;cursor:pointer;" onclick="completeLuckyOrder()">
+        <div class="lucky-product-card" style="background:#ecfdf5;border-color:#059669;cursor:pointer;" onclick="completeDemoLuckyOrder('')">
           <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
-          <span style="background:#d97706; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-          <h4 style="font-size:15px; color:#78350f; margin-top:8px;">${lucky.product}</h4>
-          <div class="negative-order-amt" style="color:#d97706;">-$${absLuckyAmt.toFixed(2)}</div>
+          <span style="background:#059669; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+          <h4 style="font-size:15px; color:#065f46; margin-top:8px;">${lucky.product}</h4>
+          <div class="negative-order-amt" style="color:#059669;">$${absLuckyAmt.toFixed(2)}</div>
           <p style="font-size:12px; color:#059669; font-weight:800; margin-top:8px;">
             Commission Reward: +$${Number(lucky.comm || 0).toFixed(2)}
           </p>
         </div>
-        <button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()">
-          <i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${Number(lucky.comm || 0).toFixed(2)})
+        <button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeDemoLuckyOrder('')">
+          <i class="fa-solid fa-bolt"></i> Grab Now (+$${Number(lucky.comm || 0).toFixed(2)})
         </button>
       `;
     }
