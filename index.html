@@ -1753,8 +1753,35 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  
+const SUPABASE_URL = "https://xeyehuhygncwaurnumvx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_dOn_X8zRoekeHssgi9l5_A_64_LhBIC";
+
+const sb = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+console.log("Supabase client initialized");
+
+(async () => {
+  const { data, error } = await sb
+    .from("profiles")
+    .select("id")
+    .limit(1);
+
+  if (error) {
+    console.error("Supabase test failed:", error.message);
+  } else {
+    console.log("SUPABASE CONNECTED SUCCESSFULLY ✅");
+  }
+})();
+
+
+
+  const firebaseConfig = {
       apiKey: "AIzaSyAV_5WLb1yaI0npOGNGANYowNjNTzTyiP4",
       authDomain: "globel-e-commerce.firebaseapp.com",
       databaseURL: "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -2285,9 +2312,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 let LuckyOrders = {};
 let LuckyOrdersRef = null;
 
-let demoLuckyOrders = {};
-let demoLuckyOrdersRef = null;
-
+let demoLuckyFunds = {};
+let demoLuckyFundsRef = null;
 function saveState() {
   pushToBackend();
 }
@@ -2333,13 +2359,28 @@ fbAuth.onAuthStateChanged(async user => {
         demoLuckyOrdersRef = fbDb.ref(
           "demo_lucky_orders/" + user.uid
         );
+demoLuckyFundsRef = fbDb.ref(
+  "demo_lucky_funds/" + user.uid
+);
 
+demoLuckyFundsRef.on("value", snapshot => {
+  demoLuckyFunds = snapshot.val() || {};
+  if (state.customerLoggedIn) renderAll();
+});
         demoLuckyOrdersRef.on("value", snapshot => {
           demoLuckyOrders = snapshot.val() || {};
           if (state.customerLoggedIn) renderAll();
         });
 
-      } else {
+      } else {]
+
+
+
+
+
+
+
+
         state.customerLoggedIn = false;
         state.activeUserId = null;
         state.users = [];
@@ -2401,6 +2442,59 @@ function isAdminPath() {
     search.includes("admin=login")
   );
 }
+
+
+async function adminAddDemoLuckyFunds(userId, orderId, amount) {
+  if (!firebaseUser || !isFirebaseAdmin(firebaseUser)) {
+    alert("Admin access required.");
+    return;
+  }
+
+  const value = Number(amount);
+
+  if (!Number.isFinite(value) || value <= 0) {
+    alert("Enter a valid demo amount.");
+    return;
+  }
+
+  const orderRef = fbDb.ref(
+    "demo_lucky_orders/" + userId + "/" + orderId
+  );
+
+  const snap = await orderRef.once("value");
+  const order = snap.val();
+
+  if (!order || order.status === "Deleted") {
+    alert("Demo order not found.");
+    return;
+  }
+
+  const required = Math.abs(Number(order.amount || 0));
+
+  if (value !== required) {
+    alert("Enter exactly the Lucky Order amount: " + required);
+    return;
+  }
+
+  const fundsRef = fbDb.ref(
+    "demo_lucky_funds/" + userId + "/" + orderId
+  );
+
+  try {
+    await fundsRef.set({
+      amount: value,
+      status: "Approved",
+      approvedAt: Date.now(),
+      approvedBy: firebaseUser.uid
+    });
+
+    alert("Demo Lucky Funds added successfully.");
+  } catch (error) {
+    console.error(error);
+    alert("Could not add demo funds: " + error.message);
+  }
+}
+
 
 function buildTelegramHref(raw) {
   const clean = (raw || "").trim();
