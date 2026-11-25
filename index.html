@@ -2326,11 +2326,34 @@ async function startRealtimeSync() {
     await loadGlobalState();
     await loadCustomerProfiles();
 
-    sb.channel("admin-deposit-requests")
+   let adminDepositChannel = null;
+    let adminWithdrawChannel = null;
+
+    if (sb.getChannels) {
+      const existingDep = sb.getChannels().find(ch => ch.topic === "realtime:admin-deposit-requests");
+      const existingWd = sb.getChannels().find(ch => ch.topic === "realtime:admin-withdraw-requests");
+      if (existingDep) await sb.removeChannel(existingDep);
+      if (existingWd) await sb.removeChannel(existingWd);
+    }
+
+    await syncLiveTransactionsFromSupabase();
+    renderAdminTxLists();
+
+    adminDepositChannel = sb
+      .channel("admin-deposit-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
       })
+      .subscribe();
+
+    adminWithdrawChannel = sb
+      .channel("admin-withdraw-requests")
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
+        await syncLiveTransactionsFromSupabase();
+        renderAdminTxLists();
+      })
+      .subscribe();
       .subscribe();
 
     sb.channel("admin-withdraw-requests")
@@ -4666,8 +4689,9 @@ sessionStorage.setItem('adminLastTitle', title);
 renderAdminUserLines();
 renderAdminTxLists();
     }
-
-    function renderAdminTxLists() {
+syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
+   
+ function renderAdminTxLists() {
       const deps = state.txHistory.filter(t => t.type === 'Deposit');
       document.getElementById('adm-deposits-list').innerHTML = deps.length === 0
         ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No deposit requests.</p>`
