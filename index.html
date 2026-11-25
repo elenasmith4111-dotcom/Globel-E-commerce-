@@ -3309,6 +3309,7 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
+
 function grabOrder() {
       const u = typeof getActiveUser === "function" ? getActiveUser() : null;
       if (!u) return;
@@ -3429,11 +3430,8 @@ function grabOrder() {
         renderAll();
         saveState();
       }, 350);
-    }   
-
-
-
- }async function completeDemoLuckyOrder(orderId) {
+      }
+async function completeDemoLuckyOrder(orderId) {
   const u = getActiveUser();
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
   const order = (orderId && demoLuckyOrders[orderId])
