@@ -2047,33 +2047,33 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       icon.className = isOpen ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
     }
 
-    const unique25Products = [
-      { name: "Sony WH-1000XM5 Wireless Headset", store: "Amazon", price: 275.00, comm: 7.50, img: "https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=" },
-      { name: "Omega Seamaster Diver Watch", store: "Shopify", price: 340.00, comm: 9.20, img: "https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg" },
-      { name: "Chloe Woody Tote Bag", store: "Shopify", price: 220.00, comm: 6.40, img: "https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg" },
-      { name: "Garmin Fenix 7 Pro Smartwatch", store: "Amazon", price: 310.00, comm: 8.50, img: "https://www.oozoo.com/cdn/shop/products/Q00137-1.png?v=1693205171" },
-      { name: "Dyson Airwrap Multi-Styler", store: "Shopify", price: 360.00, comm: 9.80, img: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&q=80" },
-      { name: "Canon EOS R50 Mirrorless Camera", store: "Amazon", price: 410.00, comm: 11.00, img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80" },
-      { name: "Nike Air Jordan 1 Retro High", store: "Shopify", price: 185.00, comm: 5.30, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
-      { name: "Marshall Stanmore III Speaker", store: "Amazon", price: 245.00, comm: 6.90, img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80" },
-      { name: "Leica M11 Rangefinder Lens Kit", store: "AliExpress", price: 480.00, comm: 12.50, img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&q=80" },
-      { name: "Breville Barista Express Machine", store: "Amazon", price: 390.00, comm: 10.40, img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
-      { name: "Ray-Ban Meta Wayfarer Smart Glasses", store: "Shopify", price: 260.00, comm: 7.10, img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80" },
-      { name: "Keychron Q1 Pro Mechanical Keyboard", store: "AliExpress", price: 165.00, comm: 4.80, img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80" },
-      { name: "Yeti Tundra 45 Hard Cooler", store: "Amazon", price: 230.00, comm: 6.50, img: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&q=80" },
-      { name: "Gucci Ophidia GG Shoulder Bag", store: "Shopify", price: 450.00, comm: 11.80, img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80" },
-      { name: "Bose SoundLink Max Portable", store: "Amazon", price: 215.00, comm: 6.10, img: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80" },
-      { name: "Montblanc Meisterstuck Fountain Pen", store: "Shopify", price: 330.00, comm: 8.90, img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&q=80" },
-      { name: "DJI Osmo Mobile 6 Gimbal", store: "AliExpress", price: 149.00, comm: 4.40, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" },
-      { name: "Aesop Resurrection Hand Balm Duo", store: "Shopify", price: 120.00, comm: 3.70, img: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" },
-      { name: "Samsung T9 2TB Portable SSD", store: "Amazon", price: 175.00, comm: 5.10, img: "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400&q=80" },
-      { name: "Tag Heuer Carrera Chronograph", store: "Shopify", price: 495.00, comm: 13.00, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&q=80" },
-      { name: "Hydro Flask 32oz Wide Mouth", store: "Amazon", price: 95.00, comm: 3.10, img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80" },
-      { name: "Shure SM7B Vocal Dynamic Mic", store: "AliExpress", price: 320.00, comm: 8.70, img: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80" },
-      { name: "Prada Re-Nylon Crossbody Pouch", store: "Shopify", price: 380.00, comm: 10.20, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80" },
-      { name: "Philips Sonicare Prestige 9900", store: "Amazon", price: 205.00, comm: 5.90, img: "https://images.unsplash.com/photo-1559599101-74659e7938e3?w=400&q=80" },
-      { name: "Fujifilm Instax Mini 12 Bundle", store: "AliExpress", price: 135.00, comm: 4.10, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" }
-    ];
+   const unique25Products = [
+  { name: "Sony WH-1000XM5 Wireless Headset", store: "Amazon", price: 275.00, comm: 7.50, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" },
+  { name: "Omega Seamaster Diver Watch", store: "Shopify", price: 340.00, comm: 9.20, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" },
+  { name: "Chloe Woody Tote Bag", store: "Shopify", price: 220.00, comm: 6.40, img: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80" },
+  { name: "Garmin Fenix 7 Pro Smartwatch", store: "Amazon", price: 310.00, comm: 8.50, img: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=400&q=80" },
+  { name: "Dyson Airwrap Multi-Styler", store: "Shopify", price: 360.00, comm: 9.80, img: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&q=80" },
+  { name: "Canon EOS R50 Mirrorless Camera", store: "Amazon", price: 410.00, comm: 11.00, img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80" },
+  { name: "Nike Air Jordan 1 Retro High", store: "Shopify", price: 185.00, comm: 5.30, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
+  { name: "Marshall Stanmore III Speaker", store: "Amazon", price: 245.00, comm: 6.90, img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80" },
+  { name: "Leica M11 Rangefinder Lens Kit", store: "AliExpress", price: 480.00, comm: 12.50, img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&q=80" },
+  { name: "Breville Barista Express Machine", store: "Amazon", price: 390.00, comm: 10.40, img: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&q=80" },
+  { name: "Ray-Ban Meta Wayfarer Smart Glasses", store: "Shopify", price: 260.00, comm: 7.10, img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80" },
+  { name: "Keychron Q1 Pro Mechanical Keyboard", store: "AliExpress", price: 165.00, comm: 4.80, img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80" },
+  { name: "Yeti Tundra 45 Hard Cooler", store: "Amazon", price: 230.00, comm: 6.50, img: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&q=80" },
+  { name: "Gucci Ophidia GG Shoulder Bag", store: "Shopify", price: 450.00, comm: 11.80, img: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80" },
+  { name: "Bose SoundLink Max Portable", store: "Amazon", price: 215.00, comm: 6.10, img: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80" },
+  { name: "Montblanc Meisterstuck Fountain Pen", store: "Shopify", price: 330.00, comm: 8.90, img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&q=80" },
+  { name: "DJI Osmo Mobile 6 Gimbal", store: "AliExpress", price: 149.00, comm: 4.40, img: "https://images.unsplash.com/photo-1512790182412-b19e6d62bc39?w=400&q=80" },
+  { name: "Aesop Resurrection Hand Balm Duo", store: "Shopify", price: 120.00, comm: 3.70, img: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" },
+  { name: "Samsung T9 2TB Portable SSD", store: "Amazon", price: 175.00, comm: 5.10, img: "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400&q=80" },
+  { name: "Tag Heuer Carrera Chronograph", store: "Shopify", price: 495.00, comm: 13.00, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&q=80" },
+  { name: "Hydro Flask 32oz Wide Mouth", store: "Amazon", price: 95.00, comm: 3.10, img: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80" },
+  { name: "Shure SM7B Vocal Dynamic Mic", store: "AliExpress", price: 320.00, comm: 8.70, img: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80" },
+  { name: "Prada Re-Nylon Crossbody Pouch", store: "Shopify", price: 380.00, comm: 10.20, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80" },
+  { name: "Philips Sonicare Prestige 9900", store: "Amazon", price: 205.00, comm: 5.90, img: "https://images.unsplash.com/photo-1559599101-74659e7938e3?w=400&q=80" },
+  { name: "Fujifilm Instax Mini 12 Bundle", store: "AliExpress", price: 135.00, comm: 4.10, img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&q=80" }
+];
 
     function makeUserRecord(partial) {
       return {
@@ -2581,49 +2581,83 @@ function renderAll() {
 
   const stageArea = document.getElementById('grab-stage-area');
 
-  if (demoOrder) {
+ if (demoOrder) {
     const absAmount = Math.abs(Number(demoOrder.amount || 0));
-    const rechargeAmount = absAmount;
-    const negativeDisplay = `-$${absAmount.toFixed(2)}`;
     const demoCommission = Number(demoOrder.commission || 0);
+    const currentBal = Number(u.balance || 0);
+    const hasFullFunds = currentBal >= absAmount && absAmount > 0;
+    const rechargeAmount = hasFullFunds ? 0 : Math.max(0, absAmount - currentBal);
+    const negativeDisplay = `-$${absAmount.toFixed(2)}`;
 
-    stageArea.innerHTML = `
-      <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
-        <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" />
+    if (!hasFullFunds) {
+      stageArea.innerHTML = `
+        <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+          <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
 
-        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
-          LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
-        </span>
+          <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
+            LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
+          </span>
 
-        <h4 style="font-size:15px;color:#881337;margin-top:8px;">
-          ${demoOrder.product || "Lucky Product"}
-        </h4>
+          <h4 style="font-size:15px;color:#881337;margin-top:8px;">
+            ${demoOrder.product || "Lucky Product"}
+          </h4>
 
-        <div class="negative-order-amt">
-          ${negativeDisplay}
+          <div class="negative-order-amt">
+            ${negativeDisplay}
+          </div>
+
+          <div style="background:#dc2626;color:#fff;border-radius:12px;padding:12px;margin-top:10px;text-align:center;box-shadow:0 6px 16px rgba(220,38,38,0.28);">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
+              Recharge Amount
+            </div>
+            <div style="font-size:22px;font-weight:800;margin-top:2px;">
+              $${rechargeAmount.toFixed(2)}
+            </div>
+            <div style="font-size:11px;margin-top:4px;">
+              Negative Amount: <strong>${negativeDisplay}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
+            </div>
+          </div>
+
+          <p style="font-size:12px;color:#059669;font-weight:700;margin-top:10px;">
+            Commission: +$${demoCommission.toFixed(2)}
+          </p>
         </div>
 
-        <div style="background:#dc2626;color:#fff;border-radius:12px;padding:12px;margin-top:10px;text-align:center;box-shadow:0 6px 16px rgba(220,38,38,0.28);">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
-            Recharge Amount
+        <button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+          <i class="fa-solid fa-wallet"></i> Recharge $${rechargeAmount.toFixed(2)}
+        </button>
+      `;
+    } else {
+      stageArea.innerHTML = `
+        <div class="lucky-product-card" style="background:#fffbeb;border-color:#d97706;cursor:pointer;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
+          <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
+
+          <span style="background:#d97706;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
+            LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
+          </span>
+
+          <h4 style="font-size:15px;color:#78350f;margin-top:8px;">
+            ${demoOrder.product || "Lucky Product"}
+          </h4>
+
+          <div class="negative-order-amt" style="color:#d97706;">
+            ${negativeDisplay}
           </div>
-          <div style="font-size:22px;font-weight:800;margin-top:2px;">
-            $${rechargeAmount.toFixed(2)}
-          </div>
-          <div style="font-size:11px;margin-top:4px;">
-            Negative Amount: <strong>${negativeDisplay}</strong>
-          </div>
+
+          <p style="font-size:12px;color:#92400e;margin-top:6px;">
+            Required Amount: <strong>$${absAmount.toFixed(2)}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
+          </p>
+
+          <p style="font-size:13px;color:#059669;font-weight:800;margin-top:6px;">
+            Commission: +$${demoCommission.toFixed(2)}
+          </p>
         </div>
 
-        <p style="font-size:12px;color:#059669;font-weight:700;margin-top:10px;">
-          Commission: +$${demoCommission.toFixed(2)}
-        </p>
-      </div>
-
-      <button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
-        <i class="fa-solid fa-wallet"></i> Recharge $${rechargeAmount.toFixed(2)}
-      </button>
-    `;
+        <button class="btn-primary" style="background:#059669;color:#fff;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
+          <i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${demoCommission.toFixed(2)})
+        </button>
+      `;
+    }
   } else if (u.tasksLocked) {
     stageArea.innerHTML = `
       <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
@@ -2633,25 +2667,45 @@ function renderAll() {
     `;
   } else if (lucky && lucky.triggered && !lucky.completed) {
     const absLuckyAmt = Math.abs(Number(lucky.amount || 0));
-    const rechargeNeeded = absLuckyAmt;
-    stageArea.innerHTML = `
-      <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-        <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
-        <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-        <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
-        <div class="negative-order-amt">-$${absLuckyAmt.toFixed(2)}</div>
-        <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;">
-          <div style="font-size:10px;font-weight:700;">RECHARGE AMOUNT</div>
-          <div style="font-size:20px;font-weight:800;">$${rechargeNeeded.toFixed(2)}</div>
+    const currentBal = Number(u.balance || 0);
+    const hasEnough = currentBal >= absLuckyAmt && absLuckyAmt > 0;
+    const rechargeNeeded = hasEnough ? 0 : Math.max(0, absLuckyAmt - currentBal);
+
+    if (!hasEnough) {
+      stageArea.innerHTML = `
+        <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
+          <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
+          <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+          <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
+          <div class="negative-order-amt">-$${absLuckyAmt.toFixed(2)}</div>
+          <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;">RECHARGE AMOUNT</div>
+            <div style="font-size:20px;font-weight:800;">$${rechargeNeeded.toFixed(2)}</div>
+          </div>
+          <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:8px;">
+            Commission Reward: +$${Number(lucky.comm || 0).toFixed(2)}
+          </p>
         </div>
-        <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:8px;">
-          Commission Reward: +$${lucky.comm.toFixed(2)}
-        </p>
-      </div>
-      <button class="btn-primary" style="background:#dc2626; color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-        <i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)}
-      </button>
-    `;
+        <button class="btn-primary" style="background:#dc2626; color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
+          <i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)}
+        </button>
+      `;
+    } else {
+      stageArea.innerHTML = `
+        <div class="lucky-product-card" style="background:#fffbeb;border-color:#d97706;cursor:pointer;" onclick="completeLuckyOrder()">
+          <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
+          <span style="background:#d97706; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+          <h4 style="font-size:15px; color:#78350f; margin-top:8px;">${lucky.product}</h4>
+          <div class="negative-order-amt" style="color:#d97706;">-$${absLuckyAmt.toFixed(2)}</div>
+          <p style="font-size:12px; color:#059669; font-weight:800; margin-top:8px;">
+            Commission Reward: +$${Number(lucky.comm || 0).toFixed(2)}
+          </p>
+        </div>
+        <button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()">
+          <i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${Number(lucky.comm || 0).toFixed(2)})
+        </button>
+      `;
+    }
   } else if (u.completedTasks >= u.totalTasks) {
     stageArea.innerHTML = `
       <div class="product-preview">
@@ -2680,7 +2734,7 @@ function renderAll() {
           <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
             TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
           </span>
-          <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
+          <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
           <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
           <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
             Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${(u.pendingTaskCommission || getDemoCommissionForUser(u)).toFixed(2)}
@@ -2693,7 +2747,6 @@ function renderAll() {
       `;
     }
   }
-
   const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
   const ordersEl = document.getElementById('orders-list');
   if (userOrders.length === 0) {
@@ -3278,16 +3331,17 @@ function grabOrder() {
           Number(o.taskNum) === nextTaskNum
       );
 
-      if (activeTaskDemo) {
-        const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
-        u.productRevealed = false;
-        u.pendingTaskCommission = null;
-        renderAll();
-        if (reqAmt > 0) {
-          openCustModal('deposit1', reqAmt.toFixed(2));
-        }
-        return;
-      }
+    if (activeTaskDemo) {
+  const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
+  const currentBal = Number(u.balance || 0);
+  u.productRevealed = false;
+  u.pendingTaskCommission = null;
+  renderAll();
+  if (currentBal < reqAmt && reqAmt > 0) {
+    openCustModal('deposit1', reqAmt.toFixed(2));
+  }
+  return;
+}
 
       if (lucky && lucky.triggered && !lucky.completed) {
         const reqAmt = Math.abs(Number(lucky.amount || 0));
@@ -3362,34 +3416,53 @@ function grabOrder() {
         saveState();
       }, 450);
     }  
+async function completeDemoLuckyOrder(orderId) {
+  const u = getActiveUser();
+  const nextTaskNum = Number(u.completedTasks || 0) + 1;
+  const order = (orderId && demoLuckyOrders[orderId])
+    ? demoLuckyOrders[orderId]
+    : Object.values(demoLuckyOrders || {}).find(
+        o => o && o.status !== "Approved" && o.status !== "Deleted" && Number(o.taskNum) === nextTaskNum
+      );
 
-  function completeLuckyOrder() {
-      const u = getActiveUser();
-      const lucky = u.activeLuckyOrder;
-      if (!lucky || u.balance < lucky.amount) {
-        openCustModal('deposit1');
-        return;
-      }
+  if (!order) return;
 
-      u.completedTasks++;
-      u.balance += lucky.comm;
-      u.todayEarn += lucky.comm;
-      lucky.completed = true;
+  const reqAmt = Math.abs(Number(order.amount || 0));
+  const comm = Number(order.commission || 0);
 
-      state.ordersHistory.unshift({
-        userId: u.id,
-        taskNum: lucky.taskNum,
-        name: lucky.product + " (Lucky)",
-        store: "VIP Lucky",
-        comm: lucky.comm,
-        img: lucky.img
-      });
+  if (Number(u.balance || 0) < reqAmt) {
+    const needed = Math.max(0, reqAmt - Number(u.balance || 0)).toFixed(2);
+    openCustModal('deposit1', needed);
+    return;
+  }
 
-      saveState();
-      alert(`Lucky Order Completed! +$${lucky.comm.toFixed(2)} commission credited.`);
-    }
+  u.completedTasks = Math.min(u.totalTasks, Number(u.completedTasks || 0) + 1);
+  u.balance = Number(u.balance || 0) + comm;
+  u.todayEarn = Number(u.todayEarn || 0) + comm;
+  u.productRevealed = false;
+  u.pendingTaskCommission = null;
 
+  state.ordersHistory.unshift({
+    userId: u.id,
+    taskNum: Number(order.taskNum || u.completedTasks),
+    name: (order.product || "Lucky Order") + " (Lucky)",
+    store: "VIP Lucky",
+    comm: comm,
+    img: order.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80"
+  });
 
+  if (order.id && u.id) {
+    demoLuckyOrders[order.id] = { ...order, status: "Approved", completedAt: Date.now() };
+    await fbDb.ref("demo_lucky_orders/" + u.id + "/" + order.id).update({
+      status: "Approved",
+      completedAt: Date.now()
+    });
+  }
+
+  renderAll();
+  saveState();
+  alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
+}
 async function editDemoLuckyOrder(userId, orderId) {
   const orderRef = fbDb.ref(
     "demo_lucky_orders/" + userId + "/" + orderId
