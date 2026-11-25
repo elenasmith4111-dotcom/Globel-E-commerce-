@@ -3167,7 +3167,7 @@ if (answer.toUpperCase() !== loginCaptchaAnswer) {
     generateLoginCaptcha();
   }
 }
-    async function handleCustRegister() {
+  async function handleCustRegister() {
       const name = document.getElementById('reg-name').value.trim();
       const phone = document.getElementById('reg-phone').value.trim();
       const email = document.getElementById('reg-email').value.trim().toLowerCase();
@@ -3192,7 +3192,16 @@ if (answer.toUpperCase() !== loginCaptchaAnswer) {
         state.activeUserId = credential.user.uid;
         state.customerLoggedIn = true;
         pendingRegistrationProfile = null;
-        // No artificial verification delay: auth observer routes only after profile is saved.
+
+        if (demoLuckyOrdersRef) {
+          demoLuckyOrdersRef.off();
+        }
+        demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + credential.user.uid);
+        demoLuckyOrdersRef.on("value", snapshot => {
+          demoLuckyOrders = snapshot.val() || {};
+          if (state.customerLoggedIn) renderAll();
+        });
+
         authReady = true;
         applyRouting();
         renderAll();
@@ -3203,35 +3212,6 @@ if (answer.toUpperCase() !== loginCaptchaAnswer) {
         if (registerButton) { registerButton.disabled = false; registerButton.textContent = "Register & Enter"; }
       }
     }
-async function handleCustLogout() {
-  try {
-    // Firebase listener band karein
-    if (demoLuckyOrdersRef) {
-      demoLuckyOrdersRef.off();
-      demoLuckyOrdersRef = null;
-    }
-
-    // Temporary customer data clear karein
-    demoLuckyOrders = {};
-
-    // Firebase se logout
-    await fbAuth.signOut();
-
-    state.customerLoggedIn = false;
-    state.activeUserId = null;
-    state.users = [];
-    state.ordersHistory = [];
-
-    // Last opened customer page clear karein
-    sessionStorage.removeItem("custLastPage");
-
-    applyRouting();
-    renderAll();
-
-  } catch (err) {
-    alert(err.message || "Could not sign out.");
-  }
-}
 function switchCustPage(pageId, navEl) {
   document.querySelectorAll('#cust-app-screen .page')
     .forEach(p => p.classList.remove('active'));
@@ -3873,7 +3853,7 @@ function renderAdminLuckyOrders(userId) {
             </button>
           </div>
         `).join("")
-        : "<p>No demo Lucky Orders assigned.</p>";
+        : "<p>No demo Lucky Orders assigned.</p>";s
     });
 }
 
