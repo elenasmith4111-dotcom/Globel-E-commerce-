@@ -574,6 +574,14 @@
       font-weight: 600;
     }
 
+    /* Customer page headings: warm gold accent */
+    #cust-app-screen .page h3,
+    #cust-app-screen .page h4 { color: #eab308 !important; }
+
+    .grab-intro-card { background: linear-gradient(145deg,#fffdf2,#fff7d6); border:1px solid #facc15; border-radius:18px; padding:24px 16px; text-align:center; }
+    .grab-product-detail { background:linear-gradient(145deg,#fffdf2,#fff7ed); border:1px solid #fbbf24; border-radius:18px; padding:18px; text-align:center; box-shadow:0 8px 24px rgba(180,120,0,.10); }
+    .grab-product-detail .prod-img { width:190px; max-width:100%; height:190px; object-fit:contain; border-radius:14px; background:#fff; margin:12px auto; }
+
     /* ==================== GRABBING VIEW ==================== */
     .grab-stats-card {
       background: linear-gradient(135deg, #1e1b4b, #4338ca, #6d28d9);
@@ -1071,6 +1079,9 @@
               <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary">
                 <i class="fa-brands fa-telegram"></i> <span data-i18n="openTg">Open Telegram Support</span> (<span id="tg-handle-display">@GlobalEcom_Help</span>)
               </a>
+              <a id="cust-whatsapp-direct-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:9px;background:#16a34a;">
+                <i class="fa-brands fa-whatsapp"></i> Contact on WhatsApp
+              </a>
             </div>
           </div>
 
@@ -1322,7 +1333,11 @@
                     <label>Telegram Username or Link</label>
                     <input type="text" id="adm-set-tg" />
                   </div>
-                  <button class="btn-primary" onclick="adminSavePlatformSettings()">Update TRC20 & Telegram Live</button>
+                  <div class="input-group">
+                    <label>WhatsApp number (country code, digits only)</label>
+                    <input type="text" id="adm-set-wa" placeholder="e.g. 971501234567" />
+                  </div>
+                  <button class="btn-primary" onclick="adminSavePlatformSettings()">Update TRC20, Telegram & WhatsApp</button>
                 </div>
               </div>
             </div>
@@ -1695,7 +1710,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       },
       platformConfig: {
         trc20Address: "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
-        telegramSupport: "@GlobalEcom_Help"
+        telegramSupport: "@GlobalEcom_Help",
+        whatsappSupport: ""
       },
       activeUserId: "usr_default_1",
       customerLoggedIn: false,
@@ -1938,6 +1954,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       return "https://t.me/" + clean.replace(/^@+/, "");
     }
 
+    function buildWhatsappHref(raw) {
+      const digits = String(raw || "").replace(/[^0-9]/g, "");
+      return digits ? "https://wa.me/" + digits : "https://wa.me/";
+    }
+
     function applyRouting() {
       if (!authReady) {
         document.getElementById('admin-outer').style.display = 'none';
@@ -1990,6 +2011,12 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       const tgVal = state.platformConfig.telegramSupport;
       document.getElementById('tg-handle-display').innerText = tgVal;
       document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
+      const waLink = document.getElementById('cust-whatsapp-direct-link');
+      if (waLink) {
+        waLink.href = buildWhatsappHref(state.platformConfig.whatsappSupport);
+        waLink.style.opacity = state.platformConfig.whatsappSupport ? '1' : '.65';
+        waLink.title = state.platformConfig.whatsappSupport ? 'Open WhatsApp support' : 'Admin must add a WhatsApp number in Settings';
+      }
 
       const currentBalFormatted = `$${u.balance.toFixed(2)}`;
       document.getElementById('profile-balance').innerText = currentBalFormatted;
@@ -2080,8 +2107,17 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       } else {
         const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
         const previewItem = unique25Products[nextIdx];
-        stageArea.innerHTML = `
-          <div class="product-preview" id="product-display">
+        if (!u.productRevealed) {
+          stageArea.innerHTML = `
+            <div class="grab-intro-card">
+              <i class="fa-solid fa-box-open" style="font-size:38px;color:#d97706;margin-bottom:10px;"></i>
+              <h4 style="font-size:17px;margin-bottom:7px;">Your next product is ready</h4>
+              <p style="font-size:12px;color:#64748b;margin-bottom:14px;">Tap below to view the product details on a full page.</p>
+              <button class="btn-primary" onclick="revealNextProduct()"><i class="fa-solid fa-bolt"></i> Grab Order Now</button>
+            </div>`;
+        } else {
+          stageArea.innerHTML = `
+          <div class="grab-product-detail" id="product-display">
             <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
               TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
             </span>
@@ -2092,9 +2128,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
             </p>
           </div>
           <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
-            <i class="fa-solid fa-bolt"></i> ${dict.grabBtn}
+            <i class="fa-solid fa-check"></i> Confirm Task
           </button>
+          <button class="btn-primary" style="margin-top:8px;background:#64748b;" onclick="hideProductDetails()">Back</button>
         `;
+        }
       }
 
       const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
@@ -2127,6 +2165,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       }
       if (document.activeElement !== document.getElementById('adm-set-tg')) {
         document.getElementById('adm-set-tg').value = state.platformConfig.telegramSupport;
+      const waInput = document.getElementById('adm-set-wa');
+      if (waInput) waInput.value = state.platformConfig.whatsappSupport || '';
       }
 
       renderAdminUserLines();
@@ -2463,6 +2503,18 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       saveState();
     }
 
+    function revealNextProduct() {
+      const u = getActiveUser();
+      u.productRevealed = true;
+      renderAll();
+    }
+
+    function hideProductDetails() {
+      const u = getActiveUser();
+      u.productRevealed = false;
+      renderAll();
+    }
+
     function grabOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
@@ -2512,6 +2564,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 
         const item = unique25Products[u.completedTasks % unique25Products.length];
         u.completedTasks++;
+        u.productRevealed = false;
         u.balance += item.comm;
         u.todayEarn += item.comm;
 
@@ -2830,6 +2883,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     function adminSavePlatformSettings() {
       const newTrc = document.getElementById('adm-set-trc20').value.trim();
       const newTg = document.getElementById('adm-set-tg').value.trim();
+      const newWa = (document.getElementById('adm-set-wa')?.value || '').trim().replace(/[^0-9]/g, '');
       if (newTrc) {
         state.platformConfig.trc20Address = newTrc;
         state.users.forEach(u => { u.trc20Address = newTrc; });
@@ -2837,8 +2891,9 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       if (newTg) {
         state.platformConfig.telegramSupport = newTg;
       }
+      state.platformConfig.whatsappSupport = newWa;
       saveState();
-      alert("Telegram & TRC20 updated in real time!");
+      alert("Telegram, WhatsApp & TRC20 settings updated!");
     }
   </script>
 
