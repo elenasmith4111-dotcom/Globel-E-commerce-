@@ -2215,207 +2215,491 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       applyRouting();
       renderAll();
     }
+// ================= SUPABASE REALTIME SYNC =================
 
-    function startRealtimeSync() {
-      if (!firebaseUser) return;
-      if (globalStateListener) fbDb.ref("global_ecommerce_state").off("value", globalStateListener);
-      if (customerProfilesListener) fbDb.ref("customer_profiles").off("value", customerProfilesListener);
-      if (profileListener) fbDb.ref("customer_profiles/" + firebaseUser.uid).off("value", profileListener);
+let globalStateChannel = null;
+let customerProfilesChannel = null;
+let profileChannel = null;
+let adminLuckyOrdersChannel = null;
+async function startRealtimeSync() {
+  const { data: authData, error: authError } = await sb.auth.getUser();
 
-      if (isFirebaseAdmin(firebaseUser)) {
-        globalStateListener = snap => {
-          const data = snap.val();
-          if (data) applyRemoteState(data);
-          else fbDb.ref("global_ecommerce_state").set(state).catch(err => console.error(err));
-          backendHasInitialData = true;
-          setBackendStatus(true);
-        };
-        fbDb.ref("global_ecommerce_state").on("value", globalStateListener, () => setBackendStatus(false));
+  if (authError || !authData.user) {
+    setBackendStatus(false);
+    return;
+  }
 
-        // Listen to the whole profiles collection so new registrations appear immediately.
-        customerProfilesListener = snap => {
-          const profiles = snap.val() || {};
-          const byUid = Object.entries(profiles).map(([uid, profile]) =>
-            makeUserRecord({ ...profile, id: uid })
-          );
-          // Assign human-readable sequential customer numbers once, from the admin session.
-          let nextNo = byUid.reduce((m, u) => Math.max(m, Number((u.customerCode || "").replace(/^a/i, "")) || 0), 20122) + 1;
-          const missingCodes = [];
-          byUid.forEach(u => {
-            if (!u.customerCode) {
-              u.customerCode = "a" + nextNo++;
-              u.createdAt = u.createdAt || Date.now();
-              missingCodes.push(fbDb.ref("customer_profiles/" + u.id).update({ customerCode: u.customerCode, createdAt: u.createdAt }));
-            }
-          });
-          state.users = byUid.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-          state.txHistory = byUid.flatMap(u => (u.transactions || []).map(t => ({ ...t, userId: u.id, user: u.name }))).sort((a,b) => Number(b.id)-Number(a.id));
-          if (missingCodes.length) Promise.all(missingCodes).catch(err => console.error("Could not assign customer numbers", err));
-          renderAdminUserLines();
-          renderAdminTxLists();
-          setBackendStatus(true);
-        };
-        fbDb.ref("customer_profiles").on("value", customerProfilesListener, err => {
-          console.error("Customer list permission error:", err);
-          setBackendStatus(false);
-        });
-      } else {
-        profileListener = snap => {
-          const profile = snap.val();
-          if (!profile) return;
-          const record = makeUserRecord({ ...profile, id: firebaseUser.uid, email: firebaseUser.email });
-          const idx = state.users.findIndex(x => x.id === firebaseUser.uid);
-          if (idx >= 0) state.users[idx] = record; else state.users = [record];
-          state.activeUserId = firebaseUser.uid;
-          state.customerLoggedIn = true;
-          applyRouting();
-          renderAll();
-          setBackendStatus(true);
-        };
-        fbDb.ref("customer_profiles/" + firebaseUser.uid).on("value", profileListener, () => setBackendStatus(false));
-      }
-    }
+  const user = authData.user;
 
-    async function pushToBackend() {
-      if (!firebaseUser) return;
-      try {
-        if (isFirebaseAdmin(firebaseUser)) {
-          await fbDb.ref("global_ecommerce_state").set(state);
-          const profileWrites = {};
-          (state.users || []).forEach(user => {
-            if (!user.id || String(user.id).startsWith("usr_")) return;
-            const clean = { ...user };
-            delete clean.loginPassword; delete clean.withdrawPassword;
-            profileWrites["customer_profiles/" + user.id] = clean;
-          });
-          if (Object.keys(profileWrites).length) await fbDb.ref().update(profileWrites);
-        } else {
-          const user = getActiveUser();
-          const profile = { ...user, id: firebaseUser.uid, email: firebaseUser.email, transactions: user.transactions || [] };
-          delete profile.loginPassword; delete profile.withdrawPassword;
-          await fbDb.ref("customer_profiles/" + firebaseUser.uid).update(profile);
-        }
-        setBackendStatus(true);
-      } catch (err) {
-        console.error("Firebase save failed:", err);
+  const { data: myProfile, error: myProfileError } = await sb
+    .from("profiles")
+    .select("id, role")
+    .eq("id", user.id)
+    .single();
+
+  if (myProfileError || !myProfile) {
+    console.error("Profile check failed:", myProfileError);
+    setBackendStatus(false);
+    return;
+  }
+
+  // Remove old channels
+ for (const channel of [
+  globalStateChannel,
+  customerProfilesChannel,
+  profileChannel,
+  adminLuckyOrdersChannel
+]) {
+  if (channel) await sb.removeChannel(channel);
+}
+
+globalStateChannel = null;
+customerProfilesChannel = null;
+profileChannel = null;
+adminLuckyOrdersChannel = null;
+
+  globalStateChannel = null;
+  customerProfilesChannel = null;
+  profileChannel = null;
+
+  if (myProfile.role === "admin") {
+
+    // Load admin global settings
+    const loadGlobalState = async () => {
+      const { data, error } = await sb
+        .from("app_state")
+        .select("state")
+        .eq("state_key", "main")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Global state load error:", error);
         setBackendStatus(false);
-        alert("Firebase save failed. Please check database rules and sign-in.");
+        return;
       }
+
+      if (data?.state) {
+        const savedUsers = state.users || [];
+        Object.assign(state, data.state);
+        state.users = savedUsers;
+      }
+
+      setBackendStatus(true);
+      renderAll();
+    };
+
+    await loadGlobalState();
+
+    globalStateChannel = sb
+      .channel("admin-global-state")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "app_state",
+          filter: "state_key=eq.main"
+        },
+        loadGlobalState
+      )
+      .subscribe();
+
+    // Load all customer profiles
+    const loadCustomerProfiles = async () => {
+      const { data, error } = await sb
+        .from("profiles")
+        .select("*")
+        .eq("role", "customer");
+
+      if (error) {
+        console.error("Customer profiles load error:", error);
+        setBackendStatus(false);
+        return;
+      }
+
+      const rows = data || [];
+
+      state.users = rows.map(row =>
+        makeUserRecord({
+          ...(row.metadata || {}),
+          id: row.id,
+          name: row.display_name || row.metadata?.name || "",
+          phone: row.phone || row.metadata?.phone || "",
+          email: row.email || ""
+        })
+      );
+
+      state.txHistory = state.users
+        .flatMap(u =>
+          (u.transactions || []).map(t => ({
+            ...t,
+            userId: u.id,
+            user: u.name
+          }))
+        )
+        .sort((a, b) => Number(b.id) - Number(a.id));
+
+      renderAdminUserLines();
+      renderAdminTxLists();
+      setBackendStatus(true);
+    };
+
+    await loadCustomerProfiles();
+adminLuckyOrdersChannel = sb
+  .channel("admin-lucky-orders-live")
+  .on("postgres_changes", {
+    event: "*",
+    schema: "public",
+    table: "lucky_orders"
+  }, () => {
+    (state.users || []).forEach(user => {
+      renderAdminLuckyOrders(user.id);
+    });
+  })
+  .subscribe();
+    customerProfilesChannel = sb
+      .channel("admin-customer-profiles")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "profiles"
+        },
+        loadCustomerProfiles
+      )
+      .subscribe();
+
+  } else {
+
+    // Customer's own profile updates
+    const loadMyProfile = async () => {
+      const { data, error } = await sb
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Customer profile error:", error);
+        setBackendStatus(false);
+        return;
+      }
+
+      const record = makeUserRecord({
+        ...(data.metadata || {}),
+        id: user.id,
+        name: data.display_name || data.metadata?.name || "",
+        phone: data.phone || data.metadata?.phone || "",
+        email: data.email || user.email || ""
+      });
+
+      delete record.loginPassword;
+      delete record.withdrawPassword;
+
+      state.users = [record];
+      state.activeUserId = user.id;
+      state.customerLoggedIn = true;
+
+      applyRouting();
+      renderAll();
+      setBackendStatus(true);
+    };
+
+    await loadMyProfile();
+
+    profileChannel = sb
+      .channel("customer-profile-" + user.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "profiles",
+          filter: "id=eq." + user.id
+        },
+        loadMyProfile
+      )
+      .subscribe();
+  }
+}
+
+
+// ================= SAVE DATA TO SUPABASE =================
+
+async function pushToBackend() {
+  const { data: authData, error: authError } = await sb.auth.getUser();
+
+  if (authError || !authData.user) {
+    console.error("Supabase authentication required.");
+    setBackendStatus(false);
+    return;
+  }
+
+  const authUser = authData.user;
+
+  const { data: profile, error: profileError } = await sb
+    .from("profiles")
+    .select("role")
+    .eq("id", authUser.id)
+    .single();
+
+  if (profileError || !profile) {
+    console.error("Could not verify account role:", profileError);
+    setBackendStatus(false);
+    return;
+  }
+
+  try {
+    if (profile.role === "admin") {
+
+      // Never save passwords or private credentials in app_state.
+      const cleanState = { ...state };
+
+      delete cleanState.users;
+      delete cleanState.txHistory;
+      delete cleanState.adminCredentials;
+
+      const { error } = await sb
+        .from("app_state")
+        .upsert({
+          state_key: "main",
+          state: cleanState,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: "state_key"
+        });
+
+      if (error) throw error;
+
+    } else {
+
+      const user = getActiveUser();
+
+      if (!user || user.id !== authUser.id) {
+        throw new Error("Customer session does not match profile.");
+      }
+
+      const metadata = { ...user };
+
+      delete metadata.id;
+      delete metadata.email;
+      delete metadata.loginPassword;
+      delete metadata.withdrawPassword;
+
+      const { error } = await sb
+        .from("profiles")
+        .update({
+          display_name: user.name || "",
+          phone: user.phone || "",
+          metadata: metadata
+        })
+        .eq("id", authUser.id);
+
+      if (error) throw error;
     }
 
-let LuckyOrders = {};
-let LuckyOrdersRef = null;
+    setBackendStatus(true);
 
-let demoLuckyOrders = {};
-let demoLuckyOrdersRef = null;
-
-let demoLuckyFunds = {};
-let demoLuckyFundsRef = null;
+  } catch (err) {
+    console.error("Supabase save failed:", err);
+    setBackendStatus(false);
+    alert("Supabase save failed: " + err.message);
+  }
+}
 
 function saveState() {
   pushToBackend();
 }
+// ================= SUPABASE AUTH LISTENER =================
 
-fbAuth.onAuthStateChanged(async user => {
-  firebaseUser = user;
+let luckyOrdersChannel = null;
 
-  if (demoLuckyOrdersRef) {
-    demoLuckyOrdersRef.off();
-    demoLuckyOrdersRef = null;
+async function handleSupabaseAuth(user) {
+  firebaseUser = null;
+  demoLuckyOrders = {};
+  demoLuckyFunds = {};
+
+  if (luckyOrdersChannel) {
+    await sb.removeChannel(luckyOrdersChannel);
+    luckyOrdersChannel = null;
+  }
+
+  state.customerLoggedIn = false;
+  state.activeUserId = null;
+
+  if (!user) {
+    state.users = [];
+    state.ordersHistory = [];
+
+ authReady = true;
+    applyRouting();
+    return;
+  }
+
+  try {
+    // Load signed-in user's profile
+    const { data: profileRow, error: profileError } = await sb
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+
+    if (!profileRow) {
+      throw new Error("Your profile was not found. Please contact support.");
+    }
+
+    // Admin account
+    if (profileRow.role === "admin") {
+      const { data: appData, error: appError } = await sb
+        .from("app_state")
+        .select("state")
+        .eq("state_key", "main")
+        .maybeSingle();
+
+      if (appError) throw appError;
+
+      if (appData?.state) {
+        Object.assign(state, appData.state);
+      }
+
+      document.getElementById("admin-auth-screen").style.display = "none";
+      document.getElementById("admin-app-screen").style.display = "block";
+    } else {
+      // Customer account
+      const profile = makeUserRecord({
+        ...(profileRow.metadata || {}),
+        id: user.id,
+        name: profileRow.display_name || profileRow.metadata?.name || "",
+        phone: profileRow.phone || profileRow.metadata?.phone || "",
+        email: user.email || profileRow.email || ""
+      });
+
+      delete profile.loginPassword;
+      delete profile.withdrawPassword;
+
+      state.users = [profile];
+      state.activeUserId = user.id;
+      state.customerLoggedIn = true;
+
+      // Load customer's Lucky Orders
+      const { data: orders, error: ordersError } = await sb
+        .from("lucky_orders")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (ordersError) throw ordersError;
+
+      demoLuckyOrders = {};
+
+      (orders || []).forEach(order => {
+        demoLuckyOrders[order.id] = {
+          id: String(order.id),
+          taskNum: order.task_number,
+          product: order.product,
+          img: order.image_url,
+          amount: Number(order.amount || 0),
+          commission: Number(order.commission || 0),
+          status: order.status,
+          createdAt: new Date(order.created_at).getTime()
+        };
+      });
+
+    // Realtime Lucky Orders — Supabase
+
+if (luckyOrdersChannel) {
+  await sb.removeChannel(luckyOrdersChannel);
+  luckyOrdersChannel = null;
+}
+
+async function loadCustomerLuckyOrders() {
+  const { data, error } = await sb
+    .from("lucky_orders")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Lucky Orders load error:", error);
+    return;
   }
 
   demoLuckyOrders = {};
 
-  try {
-    if (user && !isFirebaseAdmin(user)) {
-      const profileRef = fbDb.ref("customer_profiles/" + user.uid);
-      let profileSnap = await profileRef.once("value");
+  (data || []).forEach(order => {
+    demoLuckyOrders[order.id] = {
+      id: String(order.id),
+      taskNum: order.task_number,
+      product: order.product,
+      img: order.image_url,
+      amount: Number(order.amount || 0),
+      commission: Number(order.commission || 0),
+      status: order.status,
+      createdAt: order.created_at
+        ? new Date(order.created_at).getTime()
+        : Date.now()
+    };
+  });
 
-      if (!profileSnap.exists() && pendingRegistrationProfile) {
-        await profileRef.set(pendingRegistrationProfile);
-        profileSnap = await profileRef.once("value");
-      }
-
-      if (profileSnap.exists()) {
-        const profile = makeUserRecord({
-          ...profileSnap.val(),
-          id: user.uid,
-          email: user.email
-        });
-
-        const idx = state.users.findIndex(x => x.id === user.uid);
-
-        if (idx >= 0) {
-          state.users[idx] = profile;
-        } else {
-          state.users = [profile];
-        }
-
-        state.activeUserId = user.uid;
-        state.customerLoggedIn = true;
-
-        demoLuckyOrdersRef = fbDb.ref(
-          "demo_lucky_orders/" + user.uid
-        );
-demoLuckyFundsRef = fbDb.ref(
-  "demo_lucky_funds/" + user.uid
-);
-
-demoLuckyFundsRef.on("value", snapshot => {
-  demoLuckyFunds = snapshot.val() || {};
   if (state.customerLoggedIn) renderAll();
-});
-        demoLuckyOrdersRef.on("value", snapshot => {
-          demoLuckyOrders = snapshot.val() || {};
-          if (state.customerLoggedIn) renderAll();
-        });
+}
 
-} else {
+await loadCustomerLuckyOrders();
 
+luckyOrdersChannel = sb
+  .channel("customer-lucky-orders-" + user.id)
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "lucky_orders",
+      filter: "user_id=eq." + user.id
+    },
+    loadCustomerLuckyOrders
+  )
+  .subscribe((status, err) => {
+    console.log("Customer Lucky Orders Realtime:", status, err || "");
+  });
 
-
-
-
-
-
-        state.customerLoggedIn = false;
-        state.activeUserId = null;
-        state.users = [];
-      }
-    } else {
-      state.customerLoggedIn = false;
-
-      if (!user) {
-        state.activeUserId = null;
-        state.users = [];
-        state.ordersHistory = [];
-      }
+renderAll();
     }
+
   } catch (err) {
-    console.error("Could not load signed-in profile:", err);
+    console.error("Supabase profile loading error:", err);
+    alert(err.message || "Could not load your account.");
+
     state.customerLoggedIn = false;
     state.activeUserId = null;
+    state.users = [];
   }
-
+await startRealtimeSync();
   authReady = true;
-
-  if (user && isFirebaseAdmin(user)) {
-    document.getElementById("admin-auth-screen").style.display = "none";
-    document.getElementById("admin-app-screen").style.display = "block";
-  } else if (isAdminPath()) {
-    document.getElementById("admin-app-screen").style.display = "none";
-    document.getElementById("admin-auth-screen").style.display = "flex";
-  }
-
-  if (user) {
-    startRealtimeSync();
-  }
-
   applyRouting();
 
   if (state.customerLoggedIn) {
     renderAll();
   }
+}
+
+// Supabase auth event
+sb.auth.onAuthStateChange((event, session) => {
+  setTimeout(() => {
+    handleSupabaseAuth(session?.user || null);
+  }, 0);
+});
+
+// Initial session check
+sb.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error("Session error:", error);
+    return;
+  }
+
+  handleSupabaseAuth(data.session?.user || null);
 });
 
 const demoFeed = [
@@ -3036,68 +3320,82 @@ function renderAdminUserLines() {
     }
   });
 }
+function escapeLuckyText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
 
-function renderAdminLuckyOrders(userId) {
+async function renderAdminLuckyOrders(userId) {
   const list = document.getElementById("u-lucky-list-" + userId);
   if (!list) return;
 
-  list.innerHTML = "<p>Loading demo orders...</p>";
+  list.textContent = "Loading demo orders...";
 
-  fbDb.ref("demo_lucky_orders/" + userId)
-    .once("value")
-    .then(snapshot => {
-      const orders = snapshot.val() || {};
-      const entries = Object.entries(orders);
+  try {
+    const { data: orders, error } = await sb
+      .from("lucky_orders")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
-      if (entries.length === 0) {
-        list.innerHTML = "<p>No demo Lucky Orders assigned.</p>";
-        return;
-      }
+    if (error) throw error;
 
-      list.innerHTML = entries.map(([id, o]) => `
-        <div class="card-box" style="margin-top:10px;padding:12px;">
-          <strong>${o.product || "Demo Product"}</strong>
+    if (!orders || orders.length === 0) {
+      list.textContent = "No demo Lucky Orders assigned.";
+      return;
+    }
 
-          <p>Task Number: ${o.taskNum || 0}</p>
-          <p>Demo Amount: ${Number(o.amount || 0).toFixed(2)}</p>
-          <p>Demo Commission: ${Number(o.commission || 0).toFixed(2)}</p>
-          <p>Status: ${o.status || "Pending"}</p>
+    list.innerHTML = orders.map(o => `
+      <div class="card-box" style="margin-top:10px;padding:12px;">
+        <strong>${escapeLuckyText(o.product || "Demo Product")}</strong>
+        <p>Task Number: ${Number(o.task_number || 0)}</p>
+        <p>Demo Amount: ${Number(o.amount || 0).toFixed(2)}</p>
+        <p>Demo Commission: ${Number(o.commission || 0).toFixed(2)}</p>
+        <p>Status: ${escapeLuckyText(o.status || "Pending")}</p>
+        <p style="font-size:11px;color:#64748b;">
+          Order ID: ${o.id}
+        </p>
+        <button class="btn-sm"
+          style="background:#dc2626;margin-top:8px;"
+          onclick="deleteDemoLuckyOrder('${userId}', ${Number(o.id)})">
+          Delete Demo Order
+        </button>
+      </div>
+    `).join("");
 
-          <p style="font-size:11px;color:#64748b;">
-            Order ID: ${id}
-          </p>
-
-          <button
-            class="btn-sm"
-            style="background:#dc2626;margin-top:8px;"
-            onclick="deleteDemoLuckyOrder('${userId}','${id}')">
-            Delete Demo Order
-          </button>
-        </div>
-      `).join("");
-    })
-    .catch(err => {
-      console.error("Demo Lucky Order Error:", err);
-      list.textContent = "Could not load orders: " + err.message;
-    });
+  } catch (err) {
+    console.error("Supabase Lucky Order Error:", err);
+    list.textContent = "Could not load orders: " + err.message;
+  }
 }
 
-function deleteDemoLuckyOrder(userId, orderId) {
+async function deleteDemoLuckyOrder(userId, orderId) {
   if (!confirm("Are you sure you want to delete this demo order?")) {
     return;
   }
 
-  fbDb.ref("demo_lucky_orders/" + userId + "/" + orderId)
-    .remove()
-    .then(() => {
-      alert("Demo Lucky Order deleted successfully!");
-      renderAdminLuckyOrders(userId);
-    })
-    .catch(err => {
-      alert("Delete failed: " + err.message);
-    });
-}
+  try {
+    const { error } = await sb
+      .from("lucky_orders")
+      .delete()
+      .eq("id", orderId)
+      .eq("user_id", userId);
 
+    if (error) throw error;
+
+    alert("Demo Lucky Order deleted successfully!");
+    await renderAdminLuckyOrders(userId);
+
+  } catch (err) {
+    console.error("Delete Lucky Order Error:", err);
+    alert("Delete failed: " + err.message);
+  }
+}
     function toggleUserSubpanel(userId, mode) {
       openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
       renderAdminUserLines();
@@ -3161,7 +3459,6 @@ function deleteDemoLuckyOrder(userId, orderId) {
       alert(`Settings saved for ${u.name}!`);
     }
 
- 
 async function saveUserLuckyOrder(userId) {
   const user = state.users.find(u => u.id === userId);
 
@@ -3176,7 +3473,7 @@ async function saveUserLuckyOrder(userId) {
   const commissionInput = document.getElementById("u-lucky-comm-" + userId);
 
   if (!taskInput || !productInput || !amountInput || !commissionInput) {
-    alert("Lucky Order form not found. Please open the Lucky Order panel again.");
+    alert("Lucky Order form not found.");
     return;
   }
 
@@ -3195,41 +3492,36 @@ async function saveUserLuckyOrder(userId) {
     return;
   }
 
-  if (!Number.isFinite(amount) || amount <= 0) {
-    alert("Enter a valid demo order amount.");
+  if (!Number.isFinite(amount) || amount <= 0 ||
+      !Number.isFinite(commission) || commission < 0) {
+    alert("Please enter valid demo amounts.");
     return;
   }
-
-  if (!Number.isFinite(commission) || commission < 0) {
-    alert("Enter a valid demo commission.");
-    return;
-  }
-
-  const orderRef = fbDb.ref("demo_lucky_orders/" + userId).push();
-
-  const demoOrder = {
-    id: orderRef.key,
-    taskNum: taskNum,
-    product: productParts[0],
-    img: productParts[1],
-    amount: amount,
-    commission: commission,
-    status: "Pending",
-    createdAt: Date.now()
-  };
 
   try {
-    await orderRef.set(demoOrder);
+    const { error } = await sb
+      .from("lucky_orders")
+      .insert({
+        user_id: userId,
+        task_number: taskNum,
+        product: productParts[0],
+        image_url: productParts[1],
+        amount: amount,
+        commission: commission,
+        status: "Pending"
+      });
 
-    alert(" Lucky Order added successfully!");
+    if (error) throw error;
 
-    renderAdminLuckyOrders(userId);
+    alert("Demo Lucky Order added successfully!");
 
     amountInput.value = "";
     commissionInput.value = "";
 
+    await renderAdminLuckyOrders(userId);
+
   } catch (error) {
-    console.error(" Lucky Order Error:", error);
+    console.error("Supabase Lucky Order Error:", error);
     alert("Could not save demo order: " + error.message);
   }
 }
@@ -3290,7 +3582,8 @@ function generateLoginCaptcha() {
 
   if (question) question.textContent = code;
   if (answer) answer.value = '';
-}   async function handleCustLogin() {
+} 
+async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
   const answer = document.getElementById('captcha-answer').value.trim();
@@ -3300,71 +3593,112 @@ function generateLoginCaptcha() {
     return;
   }
 
-  if (loginCaptchaAnswer === null || answer === '') {
+  if (!answer || loginCaptchaAnswer === null) {
     alert("Please complete the security code.");
     return;
   }
 
-if (answer.toUpperCase() !== loginCaptchaAnswer) {
-  alert("Incorrect security code. Please try again.");
-  generateLoginCaptcha();
-  return;
-}
+  if (answer.toUpperCase() !== loginCaptchaAnswer) {
+    alert("Incorrect security code. Please try again.");
+    generateLoginCaptcha();
+    return;
+  }
 
   loginCaptchaAnswer = null;
 
   try {
-    await fbAuth.signInWithEmailAndPassword(email, pass);
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: email,
+      password: pass
+    });
+
+    if (error) throw error;
+
+    console.log("Supabase customer login successful:", data.user.id);
+
   } catch (err) {
     alert(err.message || "Login failed.");
     generateLoginCaptcha();
   }
 }
-  async function handleCustRegister() {
-      const name = document.getElementById('reg-name').value.trim();
-      const phone = document.getElementById('reg-phone').value.trim();
-      const email = document.getElementById('reg-email').value.trim().toLowerCase();
-      const pass = document.getElementById('reg-pass').value;
-      if (!name || !phone || !email || !pass) {
-        alert("Please enter Name, Phone Number, Email, and Password."); return;
-      }
-      if (pass.length < 6) { alert("Password must be at least 6 characters."); return; }
-      const registerButton = document.querySelector('#form-register .btn-primary');
-      if (registerButton) { registerButton.disabled = true; registerButton.textContent = "Creating account..."; }
-      try {
-        const profile = makeUserRecord({
-          name, phone, email, balance: 0, createdAt: Date.now(), transactions: [],
-          trc20Address: state.platformConfig.trc20Address
-        });
-        delete profile.loginPassword;
-        delete profile.withdrawPassword;
-        pendingRegistrationProfile = profile;
-        const credential = await fbAuth.createUserWithEmailAndPassword(email, pass);
-        await fbDb.ref("customer_profiles/" + credential.user.uid).set({ ...profile, id: credential.user.uid, email });
-        state.users = [makeUserRecord({ ...profile, id: credential.user.uid, email })];
-        state.activeUserId = credential.user.uid;
-        state.customerLoggedIn = true;
-        pendingRegistrationProfile = null;
+async function handleCustRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('reg-pass').value;
 
-        if (demoLuckyOrdersRef) {
-          demoLuckyOrdersRef.off();
-        }
-        demoLuckyOrdersRef = fbDb.ref("demo_lucky_orders/" + credential.user.uid);
-        demoLuckyOrdersRef.on("value", snapshot => {
-          demoLuckyOrders = snapshot.val() || {};
-          if (state.customerLoggedIn) renderAll();
-        });
+  if (!name || !phone || !email || !pass) {
+    alert("Please enter Name, Phone Number, Email, and Password.");
+    return;
+  }
 
-        authReady = true;
-        applyRouting();
-        renderAll();
-      } catch (err) {
-        pendingRegistrationProfile = null;
-        alert(err.message || "Registration failed.");
-      } finally {
-        if (registerButton) { registerButton.disabled = false; registerButton.textContent = "Register & Enter"; }
-      }
+  if (pass.length < 6) {
+    alert("Password must be at least 6 characters.");
+    return;
+  }
+
+  const registerButton = document.querySelector('#form-register .btn-primary');
+
+  if (registerButton) {
+    registerButton.disabled = true;
+    registerButton.textContent = "Creating account...";
+  }
+
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pass
+    });
+
+    if (error) throw error;
+
+    if (!data.user) {
+      throw new Error("Account could not be created.");
     }
+
+    const profile = makeUserRecord({
+      name,
+      phone,
+      email,
+      balance: 0,
+      createdAt: Date.now(),
+      transactions: [],
+      trc20Address: state.platformConfig.trc20Address
+    });
+
+    delete profile.loginPassword;
+    delete profile.withdrawPassword;
+
+    const { error: profileError } = await sb
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        email,
+        role: 'customer',
+        display_name: name,
+        phone,
+        metadata: profile
+      });
+
+    if (profileError) throw profileError;
+
+    alert(
+      data.session
+        ? "Account created successfully!"
+        : "Account created! Please verify your email, then login."
+    );
+
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert(err.message || "Registration failed.");
+  } finally {
+    if (registerButton) {
+      registerButton.disabled = false;
+      registerButton.textContent = "Register & Enter";
+    }
+  }
+}
+
 function switchCustPage(pageId, navEl) {
   document.querySelectorAll('#cust-app-screen .page')
     .forEach(p => p.classList.remove('active'));
@@ -3522,6 +3856,115 @@ function grabOrder() {
   }, 350);
 }
 
+async function editDemoLuckyOrder(userId, orderId) {
+  try {
+    const { data: order, error } = await sb
+      .from("lucky_orders")
+      .select("*")
+      .eq("id", orderId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) throw error;
+
+    if (!order) {
+      alert("Order not found.");
+      return;
+    }
+
+    document.getElementById("u-lucky-task-" + userId).value =
+      order.task_number;
+
+    document.getElementById("u-lucky-amt-" + userId).value =
+      order.amount;
+
+    document.getElementById("u-lucky-comm-" + userId).value =
+      order.commission;
+
+    const select = document.getElementById("u-lucky-prod-" + userId);
+
+    const option = [...select.options].find(
+      o => o.value.split("|")[0] === order.product
+    );
+
+    if (option) select.value = option.value;
+
+    const btn = document.getElementById("u-lucky-save-" + userId);
+
+    if (btn) {
+      btn.textContent = "Update Lucky Order";
+      btn.onclick = () => updateDemoLuckyOrder(userId, orderId);
+    }
+
+  } catch (err) {
+    console.error("Edit Lucky Order Error:", err);
+    alert("Could not load order: " + err.message);
+  }
+}
+async function updateDemoLuckyOrder(userId, orderId) {
+  const taskInput = document.getElementById("u-lucky-task-" + userId);
+  const productInput = document.getElementById("u-lucky-prod-" + userId);
+  const amountInput = document.getElementById("u-lucky-amt-" + userId);
+  const commissionInput = document.getElementById("u-lucky-comm-" + userId);
+
+  if (!taskInput || !productInput || !amountInput || !commissionInput) {
+    alert("Lucky Order form not found.");
+    return;
+  }
+
+  const taskNum = Number(taskInput.value);
+  const prodSplit = productInput.value.split("|");
+  const amount = Number(amountInput.value);
+  const commission = Number(commissionInput.value);
+
+  if (
+    !Number.isInteger(taskNum) ||
+    taskNum < 1 ||
+    taskNum > 25 ||
+    !Number.isFinite(amount) ||
+    amount <= 0 ||
+    !Number.isFinite(commission) ||
+    commission < 0 ||
+    !prodSplit[0] ||
+    !prodSplit[1]
+  ) {
+    alert("Enter valid demo order values.");
+    return;
+  }
+
+  try {
+    const { error } = await sb
+      .from("lucky_orders")
+      .update({
+        task_number: taskNum,
+        product: prodSplit[0],
+        image_url: prodSplit[1],
+        amount: amount,
+        commission: commission,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", orderId)
+      .eq("user_id", userId);
+
+    if (error) throw error;
+
+    alert("Demo Lucky Order updated successfully!");
+
+    const btn = document.getElementById("u-lucky-save-" + userId);
+
+    if (btn) {
+      btn.textContent = "Add Lucky Order";
+      btn.onclick = () => saveUserLuckyOrder(userId);
+    }
+
+    await renderAdminLuckyOrders(userId);
+
+  } catch (err) {
+    console.error("Update Lucky Order Error:", err);
+    alert("Update failed: " + err.message);
+  }
+}
+
 async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
@@ -3570,79 +4013,6 @@ async function completeDemoLuckyOrder(orderId) {
   renderAll();
   saveState();
   alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
-}
-
-
-
-async function editDemoLuckyOrder(userId, orderId) {
-  const orderRef = fbDb.ref(
-    "demo_lucky_orders/" + userId + "/" + orderId
-  );
-
-  const snap = await orderRef.once("value");
-  const order = snap.val();
-
-  if (!order) {
-    alert("Order not found.");
-    return;
-  }
-
-  document.getElementById('u-lucky-task-' + userId).value = order.taskNum;
-  document.getElementById('u-lucky-amt-' + userId).value = order.amount;
-  document.getElementById('u-lucky-comm-' + userId).value = order.commission;
-
-  const select = document.getElementById('u-lucky-prod-' + userId);
-  const option = [...select.options].find(
-    o => o.value.split('|')[0] === order.product
-  );
-
-  if (option) select.value = option.value;
-
-  const btn = document.getElementById('u-lucky-save-' + userId);
-  if (btn) {
-    btn.textContent = "Update Lucky Order";
-    btn.onclick = () => updateDemoLuckyOrder(userId, orderId);
-  }
-}
-
-async function updateDemoLuckyOrder(userId, orderId) {
-  const tNum = parseInt(
-    document.getElementById('u-lucky-task-' + userId).value
-  );
-  const prodSplit = document.getElementById(
-    'u-lucky-prod-' + userId
-  ).value.split('|');
-  const amt = parseFloat(
-    document.getElementById('u-lucky-amt-' + userId).value
-  );
-  const comm = parseFloat(
-    document.getElementById('u-lucky-comm-' + userId).value
-  );
-
-  if (!Number.isInteger(tNum) || tNum < 1 || tNum > 25 ||
-    !Number.isFinite(amt) || amt <= 0 ||
-    !Number.isFinite(comm) || comm < 0 ||
-    !prodSplit[0] || !prodSplit[1]) {
-  alert("Enter valid demo order values.");
-  return;
-}
-
-  try {
-    await fbDb.ref(
-      "demo_lucky_orders/" + userId + "/" + orderId
-    ).update({
-      taskNum: tNum,
-      product: prodSplit[0],
-      img: prodSplit[1],
-      amount: amt,
-      commission: comm,
-      updatedAt: Date.now()
-    });
-
-    alert("Demo Lucky Order updated.");
-  } catch (err) {
-    alert(err.message);
-  }
 }
 
 async function deleteDemoLuckyOrder(userId, orderId) {
@@ -3907,28 +4277,72 @@ async function deleteDemoLuckyOrder(userId, orderId) {
     }
 
     // ==================== ADMIN AUTH, TX APPROVE/REJECT & SETTINGS ====================
-    async function handleAdminLogin() {
-      const email = document.getElementById('admin-login-user').value.trim().toLowerCase();
-      const password = document.getElementById('admin-login-pass').value;
-      try {
-        const credential = await fbAuth.signInWithEmailAndPassword(email, password);
-        const uid = credential.user.uid;
-        const adminSnap = await fbDb.ref("admins/" + uid).once("value");
-        if (adminSnap.val() !== true || uid !== "FmwIss9uTdXwGLUnUWLusGHlYp33") {
-          await fbAuth.signOut(); alert("This Firebase account is not authorized as admin."); return;
-        }
-        document.getElementById('admin-auth-screen').style.display = 'none';
-        document.getElementById('admin-app-screen').style.display = 'block';
-        renderAll();
-      } catch (err) { alert(err.message || "Invalid admin login."); }
+   async function handleAdminLogin() {
+  const email = document.getElementById("admin-email").value.trim().toLowerCase();
+  const password = document.getElementById("admin-password").value;
+
+  if (!email || !password) {
+    alert("Please enter admin email and password.");
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const { data: profile, error: profileError } = await sb
+      .from("profiles")
+      .select("id, role")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profileError) throw profileError;
+
+    if (profile.role !== "admin") {
+      await sb.auth.signOut();
+      throw new Error("Admin access denied.");
     }
 
-    async function handleAdminLogout() {
-      await fbAuth.signOut();
-      document.getElementById('admin-app-screen').style.display = 'none';
-      document.getElementById('admin-auth-screen').style.display = 'flex';
+    document.getElementById("admin-auth-screen").style.display = "none";
+    document.getElementById("admin-app-screen").style.display = "block";
+
+    alert("Admin login successful.");
+
+  } catch (err) {
+    console.error("Admin login error:", err);
+    alert(err.message || "Admin login failed.");
+  }
+}
+   
+async function handleAdminLogout() {
+  try {
+    const { error } = await sb.auth.signOut();
+
+    if (error) throw error;
+
+    state.customerLoggedIn = false;
+    state.activeUserId = null;
+    state.users = [];
+
+    if (luckyOrdersChannel) {
+      await sb.removeChannel(luckyOrdersChannel);
+      luckyOrdersChannel = null;
     }
 
+    document.getElementById("admin-app-screen").style.display = "none";
+    document.getElementById("admin-auth-screen").style.display = "flex";
+
+    applyRouting();
+
+  } catch (err) {
+    console.error("Admin logout error:", err);
+    alert(err.message || "Logout failed.");
+  }
+}
     function switchAdminPage(pageId, title, btnEl) {
       document.querySelectorAll('#admin-app-screen .page').forEach(p => p.classList.remove('active'));
       document.getElementById('admin-page-' + pageId).classList.add('active');
