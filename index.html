@@ -1279,6 +1279,7 @@
 
           <div class="admin-content-area">
             <div id="admin-page-users" class="page active">
+              <div style="margin-bottom:12px;"><input id="admin-user-search" type="search" placeholder="Search customers by ID, name, email or phone..." oninput="renderAdminUserLines()" style="width:100%;max-width:460px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:13px;" /></div>
               <div id="admin-users-lines-container"></div>
             </div>
 
@@ -1663,6 +1664,9 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     function makeUserRecord(partial) {
       return {
         id: partial.id || ("usr_" + Date.now() + "_" + Math.floor(Math.random() * 1000)),
+        customerCode: partial.customerCode || "",
+        createdAt: Number(partial.createdAt || Date.now()),
+        transactions: Array.isArray(partial.transactions) ? partial.transactions : [],
         name: partial.name || "Sara Khan",
         phone: partial.phone || "+971 50 987 6543",
         email: partial.email || "sara.khan@email.com",
@@ -1799,8 +1803,19 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
           const byUid = Object.entries(profiles).map(([uid, profile]) =>
             makeUserRecord({ ...profile, id: uid })
           );
-          const demoUsers = (state.users || []).filter(u => String(u.id).startsWith("usr_"));
-          state.users = [...byUid, ...demoUsers.filter(d => !byUid.some(u => u.id === d.id))];
+          // Assign human-readable sequential customer numbers once, from the admin session.
+          let nextNo = byUid.reduce((m, u) => Math.max(m, Number((u.customerCode || "").replace(/^a/i, "")) || 0), 20122) + 1;
+          const missingCodes = [];
+          byUid.forEach(u => {
+            if (!u.customerCode) {
+              u.customerCode = "a" + nextNo++;
+              u.createdAt = u.createdAt || Date.now();
+              missingCodes.push(fbDb.ref("customer_profiles/" + u.id).update({ customerCode: u.customerCode, createdAt: u.createdAt }));
+            }
+          });
+          state.users = byUid.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+          state.txHistory = byUid.flatMap(u => (u.transactions || []).map(t => ({ ...t, userId: u.id, user: u.name }))).sort((a,b) => Number(b.id)-Number(a.id));
+          if (missingCodes.length) Promise.all(missingCodes).catch(err => console.error("Could not assign customer numbers", err));
           renderAdminUserLines();
           renderAdminTxLists();
           setBackendStatus(true);
@@ -1841,7 +1856,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
           if (Object.keys(profileWrites).length) await fbDb.ref().update(profileWrites);
         } else {
           const user = getActiveUser();
-          const profile = { ...user, id: firebaseUser.uid, email: firebaseUser.email };
+          const profile = { ...user, id: firebaseUser.uid, email: firebaseUser.email, transactions: user.transactions || [] };
           delete profile.loginPassword; delete profile.withdrawPassword;
           await fbDb.ref("customer_profiles/" + firebaseUser.uid).update(profile);
         }
@@ -2123,7 +2138,11 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       const container = document.getElementById('admin-users-lines-container');
       if (!container) return;
 
-      container.innerHTML = state.users.map(user => {
+      const search = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
+      const visibleUsers = [...state.users].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).filter(user =>
+        !search || [user.customerCode, user.name, user.email, user.phone].some(v => String(v || '').toLowerCase().includes(search))
+      );
+      container.innerHTML = visibleUsers.length ? visibleUsers.map(user => {
         const panelMode = openUserPanels[user.id] || null;
         const l = user.activeLuckyOrder;
 
@@ -2132,7 +2151,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
             <div class="user-line-top">
               <div>
                 <h4 style="font-size:15px; color:#0f172a;">
-                  <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name}
+                  <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name} <small style="color:#4f46e5;font-weight:800;">${user.customerCode || ''}</small>
                   <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
                     ${user.accountStatus}
                   </span>
@@ -2256,7 +2275,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
             ` : ''}
           </div>
         `;
-      }).join('');
+      }).join('') : `<p style="padding:18px;color:#64748b;">No matching customers found.</p>`;
     }
 
     function toggleUserSubpanel(userId, mode) {
@@ -2401,7 +2420,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       if (registerButton) { registerButton.disabled = true; registerButton.textContent = "Creating account..."; }
       try {
         const profile = makeUserRecord({
-          name, phone, email, balance: 0,
+          name, phone, email, balance: 0, createdAt: Date.now(), transactions: [],
           trc20Address: state.platformConfig.trc20Address
         });
         delete profile.loginPassword;
@@ -2593,7 +2612,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
           <button class="btn-primary" onclick="submitWithdraw()">Submit Withdrawal</button>
         `;
       } else if (type === 'history') {
-        const userTx = state.txHistory.filter(t => t.userId === u.id);
+        const userTx = (u.transactions || state.txHistory.filter(t => t.userId === u.id)).slice().sort((a,b) => Number(b.id)-Number(a.id));
         const rows = userTx.length === 0
           ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No live transactions yet.</p>`
           : userTx.map(t => {
@@ -2650,15 +2669,10 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     function confirmPaid() {
       const u = getActiveUser();
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      state.txHistory.unshift({
-        id: Date.now(),
-        userId: u.id,
-        user: u.name,
-        type: "Deposit",
-        amount: pendingDepositAmt,
-        status: "Pending",
-        time: "Today, " + now
-      });
+      const request = { id: Date.now(), userId: u.id, user: u.name, type: "Deposit", amount: pendingDepositAmt, status: "Pending", time: "Today, " + now, createdAt: Date.now() };
+      u.transactions = u.transactions || [];
+      u.transactions.unshift(request);
+      state.txHistory.unshift(request);
       saveState();
       alert("Deposit submitted live! Waiting for Admin approval.");
       closeModal();
@@ -2682,15 +2696,10 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       }
       u.balance -= amt;
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      state.txHistory.unshift({
-        id: Date.now(),
-        userId: u.id,
-        user: u.name,
-        type: "Withdraw",
-        amount: amt,
-        status: "Pending",
-        time: "Today, " + now
-      });
+      const request = { id: Date.now(), userId: u.id, user: u.name, type: "Withdraw", amount: amt, status: "Pending", time: "Today, " + now, createdAt: Date.now() };
+      u.transactions = u.transactions || [];
+      u.transactions.unshift(request);
+      state.txHistory.unshift(request);
       saveState();
       alert("Withdrawal submitted live! Waiting for Admin approval.");
       closeModal();
@@ -2794,6 +2803,10 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       const targetUser = state.users.find(x => x.id === tx.userId) || getActiveUser();
 
       tx.status = decision;
+      tx.reviewedAt = Date.now();
+      targetUser.transactions = targetUser.transactions || [];
+      const profileTx = targetUser.transactions.find(t => String(t.id) === String(id));
+      if (profileTx) { profileTx.status = decision; profileTx.reviewedAt = tx.reviewedAt; }
       if (tx.type === 'Deposit' && decision === 'Approved') {
         targetUser.balance += tx.amount;
       }
