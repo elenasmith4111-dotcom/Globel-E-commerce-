@@ -2709,41 +2709,122 @@ if (todayProfitEl) {
               </div>
             ` : ''}
 
-            ${panelMode === 'lucky' ? `
-              <div class="user-subpanel">
-                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-star" style="color:#d97706;"></i> ${user.name} — Lucky Order Configuration</h5>
-                <div class="admin-grid-2">
-                  <div class="input-group">
-                    <label>Task Number (1 - 25)</label>
-                    <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="${l ? l.taskNum : 2}" />
-                  </div>
-                  <div class="input-group">
-                    <label>Lucky Product</label>
-                    <select id="u-lucky-prod-${user.id}">
-                      <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
-                      <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
-                      <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6zJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
-                    </select>
-                  </div>
-                  <div class="input-group">
-                    <label>Lucky Order Amount (USDT)</label>
-                    <input type="number" id="u-lucky-amt-${user.id}" value="${l ? l.amount : 500}" />
-                  </div>
-                  <div class="input-group">
-                    <label>Lucky Commission (USDT)</label>
-                    <input type="number" id="u-lucky-comm-${user.id}" value="${l ? l.comm : 85}" />
-                  </div>
-                </div>
-                <button class="btn-sm" style="background:#d97706; padding:8px 14px;" onclick="saveUserLuckyOrder('${user.id}')">
-                  <i class="fa-solid fa-bolt"></i> Apply Lucky Order to User
-                </button>
-                ${l ? `<p style="font-size:11px; color:#9f1239; margin-top:8px; font-weight:700;">Current Lucky Order: Task #${l.taskNum} • ${l.product} (-$${l.amount}, Comm +$${l.comm})</p>` : ''}
-              </div>
-            ` : ''}
+          
+${panelMode === 'lucky' ? `
+  <div class="user-subpanel">
+    <h5 style="font-size:13px;color:#0f172a;margin-bottom:10px;">
+      <i class="fa-solid fa-star" style="color:#d97706;"></i>
+      ${user.name} — Demo Lucky Orders
+    </h5>
+
+    <div class="admin-grid-2">
+      <div class="input-group">
+        <label>Task Number (1–25)</label>
+        <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="2" />
+      </div>
+
+      <div class="input-group">
+        <label>Lucky Product</label>
+        <select id="u-lucky-prod-${user.id}">
+          <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
+          <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
+          <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6xJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Demo Order Amount</label>
+        <input type="number" id="u-lucky-amt-${user.id}" min="0.01" step="0.01" value="500" />
+      </div>
+
+      <div class="input-group">
+        <label>Demo Commission</label>
+        <input type="number" id="u-lucky-comm-${user.id}" min="0.01" step="0.01" value="85" />
+      </div>
+    </div>
+
+    <button class="btn-primary"
+      onclick="saveUserLuckyOrder('${user.id}')">
+      Add Demo Lucky Order
+    </button>
+
+    <div id="u-lucky-list-${user.id}"></div>
+  </div>
+` : ''}
+
           </div>
         `;
+     
       }).join('') : `<p style="padding:18px;color:#64748b;">No matching customers found.</p>`;
+
+      visibleUsers.forEach(user => {
+        if (openUserPanels[user.id] === 'lucky') {
+          renderAdminLuckyOrders(user.id);
+        }
+      });
     }
+
+
+function renderAdminLuckyOrders(userId) {
+  const list = document.getElementById("u-lucky-list-" + userId);
+  if (!list) return;
+
+  list.innerHTML = "<p>Loading demo orders...</p>";
+
+  fbDb.ref("demo_lucky_orders/" + userId)
+    .once("value")
+    .then(snapshot => {
+      const orders = snapshot.val() || {};
+      const entries = Object.entries(orders);
+
+      if (entries.length === 0) {
+        list.innerHTML = "<p>No demo Lucky Orders assigned.</p>";
+        return;
+      }
+
+      list.innerHTML = entries.map(([id, o]) => `
+        <div class="card-box" style="margin-top:10px;padding:12px;">
+          <strong>${o.product || "Demo Product"}</strong>
+
+          <p>Task Number: ${o.taskNum || 0}</p>
+          <p>Demo Amount: ${Number(o.amount || 0).toFixed(2)}</p>
+          <p>Demo Commission: ${Number(o.commission || 0).toFixed(2)}</p>
+          <p>Status: ${o.status || "Pending"}</p>
+
+          <p style="font-size:11px;color:#64748b;">
+            Order ID: ${id}
+          </p>
+
+          <button
+            class="btn-sm"
+            style="background:#dc2626;margin-top:8px;"
+            onclick="deleteDemoLuckyOrder('${userId}','${id}')">
+            Delete Demo Order
+          </button>
+        </div>
+      `).join("");
+    })
+    .catch(err => {
+      console.error("Demo Lucky Order Error:", err);
+      list.textContent = "Could not load orders: " + err.message;
+    });
+}
+
+function deleteDemoLuckyOrder(userId, orderId) {
+  if (!confirm("Are you sure you want to delete this demo order?")) {
+    return;
+  }
+
+  fbDb.ref("demo_lucky_orders/" + userId + "/" + orderId)
+    .remove()
+    .then(() => {
+      alert("Demo Lucky Order deleted successfully!");
+      renderAdminLuckyOrders(userId);
+    })
+    .catch(err => {
+      alert("Delete failed: " + err.message);
+    });
+}
 
     function toggleUserSubpanel(userId, mode) {
       openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
@@ -2808,29 +2889,78 @@ if (todayProfitEl) {
       alert(`Settings saved for ${u.name}!`);
     }
 
-    function saveUserLuckyOrder(userId) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      const tNum = parseInt(document.getElementById('u-lucky-task-' + userId).value);
-      const prodSplit = document.getElementById('u-lucky-prod-' + userId).value.split('|');
-      const amt = parseFloat(document.getElementById('u-lucky-amt-' + userId).value);
-      const comm = parseFloat(document.getElementById('u-lucky-comm-' + userId).value);
-      if (!tNum || tNum < 1 || tNum > 25 || !amt || !comm) {
-        alert("Enter valid task number, amount, and commission.");
-        return;
-      }
-      u.activeLuckyOrder = {
-        taskNum: tNum,
-        product: prodSplit[0],
-        img: prodSplit[1],
-        amount: amt,
-        comm: comm,
-        triggered: u.completedTasks + 1 === tNum,
-        completed: false
-      };
-      saveState();
-      alert(`Lucky Order set for ${u.name} on Task #${tNum}!`);
-    }
+ 
+async function saveUserLuckyOrder(userId) {
+  const user = state.users.find(u => u.id === userId);
+
+  if (!user) {
+    alert("Customer not found.");
+    return;
+  }
+
+  const taskInput = document.getElementById("u-lucky-task-" + userId);
+  const productInput = document.getElementById("u-lucky-prod-" + userId);
+  const amountInput = document.getElementById("u-lucky-amt-" + userId);
+  const commissionInput = document.getElementById("u-lucky-comm-" + userId);
+
+  if (!taskInput || !productInput || !amountInput || !commissionInput) {
+    alert("Lucky Order form not found. Please open the Lucky Order panel again.");
+    return;
+  }
+
+  const taskNum = Number(taskInput.value);
+  const productParts = productInput.value.split("|");
+  const amount = Number(amountInput.value);
+  const commission = Number(commissionInput.value);
+
+  if (!Number.isInteger(taskNum) || taskNum < 1 || taskNum > 25) {
+    alert("Task number must be between 1 and 25.");
+    return;
+  }
+
+  if (!productParts[0] || !productParts[1]) {
+    alert("Please select a valid demo product.");
+    return;
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert("Enter a valid demo order amount.");
+    return;
+  }
+
+  if (!Number.isFinite(commission) || commission < 0) {
+    alert("Enter a valid demo commission.");
+    return;
+  }
+
+  const orderRef = fbDb.ref("demo_lucky_orders/" + userId).push();
+
+  const demoOrder = {
+    id: orderRef.key,
+    taskNum: taskNum,
+    product: productParts[0],
+    img: productParts[1],
+    amount: amount,
+    commission: commission,
+    status: "Pending",
+    createdAt: Date.now()
+  };
+
+  try {
+    await orderRef.set(demoOrder);
+
+    alert(" Lucky Order added successfully!");
+
+    renderAdminLuckyOrders(userId);
+
+    amountInput.value = "";
+    commissionInput.value = "";
+
+  } catch (error) {
+    console.error(" Lucky Order Error:", error);
+    alert("Could not save demo order: " + error.message);
+  }
+}
 
     // ==================== CUSTOMER VERIFYING & AUTH FLOW ====================
     function showVerifyingThenEnter(onComplete) {
@@ -3088,6 +3218,91 @@ function switchCustPage(pageId, navEl) {
       saveState();
       alert(`Lucky Order Completed! +$${lucky.comm.toFixed(2)} commission credited.`);
     }
+
+
+async function editDemoLuckyOrder(userId, orderId) {
+  const orderRef = fbDb.ref(
+    "demo_lucky_orders/" + userId + "/" + orderId
+  );
+
+  const snap = await orderRef.once("value");
+  const order = snap.val();
+
+  if (!order) {
+    alert("Order not found.");
+    return;
+  }
+
+  document.getElementById('u-lucky-task-' + userId).value = order.taskNum;
+  document.getElementById('u-lucky-amt-' + userId).value = order.amount;
+  document.getElementById('u-lucky-comm-' + userId).value = order.commission;
+
+  const select = document.getElementById('u-lucky-prod-' + userId);
+  const option = [...select.options].find(
+    o => o.value.split('|')[0] === order.product
+  );
+
+  if (option) select.value = option.value;
+
+  const btn = document.getElementById('u-lucky-save-' + userId);
+  if (btn) {
+    btn.textContent = "Update Lucky Order";
+    btn.onclick = () => updateDemoLuckyOrder(userId, orderId);
+  }
+}
+
+async function updateDemoLuckyOrder(userId, orderId) {
+  const tNum = parseInt(
+    document.getElementById('u-lucky-task-' + userId).value
+  );
+  const prodSplit = document.getElementById(
+    'u-lucky-prod-' + userId
+  ).value.split('|');
+  const amt = parseFloat(
+    document.getElementById('u-lucky-amt-' + userId).value
+  );
+  const comm = parseFloat(
+    document.getElementById('u-lucky-comm-' + userId).value
+  );
+
+  if (!tNum || tNum < 1 || tNum > 25 ||
+      !amt || amt <= 0 || !comm || comm <= 0) {
+    alert("Enter valid values.");
+    return;
+  }
+
+  try {
+    await fbDb.ref(
+      "demo_lucky_orders/" + userId + "/" + orderId
+    ).update({
+      taskNum: tNum,
+      product: prodSplit[0],
+      img: prodSplit[1],
+      amount: amt,
+      commission: comm,
+      updatedAt: Date.now()
+    });
+
+    alert("Demo Lucky Order updated.");
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function deleteDemoLuckyOrder(userId, orderId) {
+  if (!confirm("Delete this demo Lucky Order?")) return;
+
+  try {
+    await fbDb.ref(
+      "demo_lucky_orders/" + userId + "/" + orderId
+    ).remove();
+
+    alert("Demo Lucky Order deleted.");
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 
     function updateCustLoginPassInline() {
       const u = getActiveUser();
@@ -3484,6 +3699,39 @@ sessionStorage.setItem('adminLastTitle', title);
       saveState();
       alert("Telegram, WhatsApp & TRC20 settings updated!");
     }
+
+function renderAdminLuckyOrders(userId) {
+  const list = document.getElementById("u-lucky-list-" + userId);
+  if (!list) return;
+
+  fbDb.ref("demo_lucky_orders/" + userId).once("value")
+    .then(snapshot => {
+      const orders = snapshot.val() || {};
+      const entries = Object.entries(orders);
+
+      list.innerHTML = entries.length
+        ? entries.map(([id, o]) => `
+          <div class="card-box" style="margin-top:10px;">
+            <strong>${o.product}</strong>
+            <p>Task: ${o.taskNum}</p>
+            <p>Demo Order Amount: ${Number(o.amount).toFixed(2)}</p>
+            <p>Demo Commission: ${Number(o.commission).toFixed(2)}</p>
+            <p>Status: ${o.status}</p>
+            <button class="btn-sm"
+              onclick="editDemoLuckyOrder('${userId}','${id}')">
+              Edit
+            </button>
+            <button class="btn-sm"
+              style="background:#dc2626"
+              onclick="deleteDemoLuckyOrder('${userId}','${id}')">
+              Delete
+            </button>
+          </div>
+        `).join("")
+        : "<p>No demo Lucky Orders assigned.</p>";
+    });
+}
+
   </script>
 
 </body>
