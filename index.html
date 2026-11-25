@@ -4352,30 +4352,6 @@ async function handleAdminLogout() {
 }
  
 
-
-async function handleCustLogout() {
-  try {
-    const { error } = await sb.auth.signOut();
-    if (error) throw error;
-
-    if (luckyOrdersChannel) {
-      await sb.removeChannel(luckyOrdersChannel);
-      luckyOrdersChannel = null;
-    }
-
-    state.customerLoggedIn = false;
-    state.activeUserId = null;
-    state.users = [];
-    state.ordersHistory = [];
-
-    authReady = true;
-    applyRouting();
-
-  } catch (err) {
-    console.error("Customer logout error:", err);
-    alert(err.message || "Customer logout failed.");
-  }
-}
    function switchAdminPage(pageId, title, btnEl) {
       document.querySelectorAll('#admin-app-screen .page').forEach(p => p.classList.remove('active'));
       document.getElementById('admin-page-' + pageId).classList.add('active');
