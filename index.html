@@ -3902,17 +3902,20 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
-async function creditLedgerEntry(userId, amount) {
+async function creditLedgerEntry(userId, amount, entryType = "commission") {
   const amt = Number(amount || 0);
   if (!userId || !Number.isFinite(amt) || amt === 0 || typeof sb === "undefined" || !sb) {
     return null;
   }
 
+  const resolvedEntryType = entryType || (amt < 0 ? "withdraw_hold" : "commission");
+
   const { error: insErr } = await sb
     .from("wallet_ledger")
     .insert({
       user_id: userId,
-      amount: amt
+      amount: amt,
+      entry_type: resolvedEntryType
     });
 
   if (insErr) throw insErr;
@@ -3923,8 +3926,15 @@ async function creditLedgerEntry(userId, amount) {
     .eq("user_id", userId);
 
   if (sumErr) throw sumErr;
-  return (rows || []).reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  const totalBal = (rows || []).reduce((sum, r) => sum + Number(r.amount || 0), 0);
+
+  if (typeof syncBalanceFromLedger === "function") {
+    return syncBalanceFromLedger(userId, totalBal);
+  }
+  return totalBal;
 }
+
+
 async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
