@@ -1068,22 +1068,247 @@
             </div>
           </div>
 
-          <!-- SERVICE PAGE (WELCOME CARD WITH 24/7 ASSIST MESSAGE, NO EXTRA SPACE) -->
-          <div id="cust-page-service" class="page">
-            <div class="service-hero-card">
-              <div style="width:66px; height:66px; border-radius:50%; background:linear-gradient(135deg,#e0e7ff,#dbeafe); color:#0284c7; font-size:32px; display:flex; justify-content:center; align-items:center; margin:0 auto 12px;">
-                <i class="fa-brands fa-telegram"></i>
-              </div>
-              <h3 style="font-size:17px; color:#1e1b4b; font-weight:800;" data-i18n="tgSupportTitle">Welcome to Customer Support Service</h3>
-              <p style="font-size:12.5px; color:#4338ca; font-weight:600; margin:8px 0 16px;" data-i18n="tgSupportDesc">We are here to assist you 24/7 for every time</p>
-              <a id="cust-telegram-direct-link" href="https://t.me/GlobalEcom_Help" target="_blank" rel="noopener noreferrer" class="btn-primary">
-                <i class="fa-brands fa-telegram"></i> <span data-i18n="openTg">Open Telegram Support</span> (<span id="tg-handle-display">@GlobalEcom_Help</span>)
-              </a>
-              <a id="cust-whatsapp-direct-link" href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:9px;background:#16a34a;">
-                <i class="fa-brands fa-whatsapp"></i> Contact on WhatsApp
-              </a>
-            </div>
-          </div>
+        
+<!-- SERVICE PAGE -->
+<div id="cust-page-service" class="page service-page">
+
+  <style>
+    .service-page {
+      background: linear-gradient(145deg, #e0e7ff, #f0f9ff, #ede9fe);
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .service-hero-card {
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      padding: 22px 15px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(30, 64, 175, 0.09);
+      margin-bottom: 20px;
+    }
+
+    .service-faq-heading {
+      color: #1e1b4b;
+      font-size: 19px;
+      font-weight: 800;
+      margin: 20px 0 12px;
+      text-align: center;
+    }
+
+    .service-faq-card {
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 13px;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 10px rgba(30, 64, 175, 0.06);
+      overflow: hidden;
+    }
+
+    .service-faq-card summary {
+      padding: 15px;
+      color: #1e293b;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .service-faq-card summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .service-faq-card summary::after {
+      content: "+";
+      color: #2563eb;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .service-faq-card[open] summary::after {
+      content: "−";
+    }
+
+    .service-faq-answer {
+      padding: 0 15px 15px;
+      color: #475569;
+      font-size: 12.5px;
+      line-height: 1.7;
+      border-top: 1px solid #eef2ff;
+      padding-top: 12px;
+    }
+  </style>
+
+  <!-- SUPPORT CARD -->
+  <div class="service-hero-card">
+
+    <div style="width:66px;height:66px;border-radius:50%;
+      background:linear-gradient(135deg,#e0e7ff,#dbeafe);
+      color:#0284c7;font-size:32px;display:flex;
+      justify-content:center;align-items:center;margin:0 auto 12px;">
+      <i class="fa-brands fa-telegram"></i>
+    </div>
+
+    <h3 style="font-size:17px;color:#1e1b4b;font-weight:800;"
+      data-i18n="tgSupportTitle">
+      Welcome to Customer Support Service
+    </h3>
+
+    <p style="font-size:12.5px;color:#4338ca;font-weight:600;margin:8px 0 16px;"
+      data-i18n="tgSupportDesc">
+      We are here to assist you 24/7
+    </p>
+
+    <a id="cust-telegram-direct-link"
+      href="https://t.me/GlobalEcom_Help"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-primary">
+      <i class="fa-brands fa-telegram"></i>
+      <span data-i18n="openTg">Open Telegram Support</span>
+      (<span id="tg-handle-display">@GlobalEcom_Help</span>)
+    </a>
+
+    <a id="cust-whatsapp-direct-link"
+      href="https://wa.me/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-primary"
+      style="margin-top:9px;background:#16a34a;">
+      <i class="fa-brands fa-whatsapp"></i>
+      Contact on WhatsApp
+    </a>
+
+  </div>
+
+  <!-- FAQ HEADING -->
+  <h3 class="service-faq-heading">
+    Frequently Asked Questions
+  </h3>
+
+  <p style="text-align:center;color:#64748b;font-size:12px;margin-bottom:15px;">
+    Tap any question below to read the full answer.
+  </p>
+
+  <!-- FAQ 1 -->
+  <details class="service-faq-card">
+    <summary>1. How long does the first deposit take?</summary>
+    <div class="service-faq-answer">
+      After submitting your first deposit request, please allow approximately
+      2–5 minutes for approval. Processing time may vary depending on payment
+      verification. If your deposit is still pending after this time, contact
+      Customer Support and provide your transaction reference or payment proof.
+    </div>
+  </details>
+
+  <!-- FAQ 2 -->
+  <details class="service-faq-card">
+    <summary>2. What should I do if my deposit is pending?</summary>
+    <div class="service-faq-answer">
+      First, check your deposit history and make sure your payment was
+      successfully completed. Do not submit the same payment repeatedly.
+      If the request remains pending, contact Customer Support with your
+      transaction ID and payment screenshot.
+    </div>
+  </details>
+
+  <!-- FAQ 3 -->
+  <details class="service-faq-card">
+    <summary>3. What are the withdrawal requirements?</summary>
+    <div class="service-faq-answer">
+      According to the platform's stated rules, users must complete at least
+      25 tasks before becoming eligible to request a withdrawal. Please also
+      check your available balance and any other applicable withdrawal
+      requirements before submitting a request.
+    </div>
+  </details>
+
+  <!-- FAQ 4 -->
+  <details class="service-faq-card">
+    <summary>4. Why do I need to complete 25 tasks?</summary>
+    <div class="service-faq-answer">
+      The platform requires users to complete 25 tasks before requesting
+      a withdrawal. You can check your completed task count in your account.
+      Once the required tasks are completed, check your withdrawal section
+      for eligibility.
+    </div>
+  </details>
+
+  <!-- FAQ 5 -->
+  <details class="service-faq-card">
+    <summary>5. How long does a withdrawal take?</summary>
+    <div class="service-faq-answer">
+      Withdrawal requests are subject to review and processing. You can check
+      the latest status in your transaction history. If your request is
+      taking longer than the stated processing period, contact Customer
+      Support with your withdrawal reference.
+    </div>
+  </details>
+
+  <!-- FAQ 6 -->
+  <details class="service-faq-card">
+    <summary>6. What is a Lucky Order?</summary>
+    <div class="service-faq-answer">
+      A Lucky Order is a special order that may appear while completing tasks.
+      It can have a different required amount from a regular task. Always
+      review the order details, required amount and instructions displayed
+      on your account before proceeding.
+    </div>
+  </details>
+
+  <!-- FAQ 7 -->
+  <details class="service-faq-card">
+    <summary>7. What is the 24-hour Lucky Order deadline?</summary>
+    <div class="service-faq-answer">
+      According to the platform's Lucky Order policy, the required outstanding
+      amount must be completed within 24 hours after the Lucky Order is
+      triggered. Check the order details and deadline displayed in your
+      account. Do not make a payment unless you understand and agree to
+      the displayed amount and conditions.
+    </div>
+  </details>
+
+  <!-- FAQ 8 -->
+  <details class="service-faq-card">
+    <summary>8. What happens if I miss the Lucky Order deadline?</summary>
+    <div class="service-faq-answer">
+      Under the stated platform policy, if the Lucky Order is not completed
+      within 24 hours, the applicable commission may decrease over time.
+      The exact reduction and timing should be clearly shown in the platform's
+      actual Lucky Order rules. Contact Customer Support if you need
+      clarification about your order.
+    </div>
+  </details>
+
+  <!-- FAQ 9 -->
+  <details class="service-faq-card">
+    <summary>9. How is my commission and daily profit calculated?</summary>
+    <div class="service-faq-answer">
+      Your commission is the earning credited for eligible completed tasks.
+      Today's Profit displays the earnings recorded for the current day.
+      You can review your account balance, today's profit and completed
+      task count in your account dashboard.
+    </div>
+  </details>
+
+  <!-- FAQ 10 -->
+  <details class="service-faq-card">
+    <summary>10. How can I contact Customer Support?</summary>
+    <div class="service-faq-answer">
+      You can contact our support team through the Telegram or WhatsApp
+      buttons above. Include your account details, transaction reference
+      and a clear description of your issue. Never share your password
+      or verification codes with anyone.
+    </div>
+  </details>
+
+</div>
+
 
           <!-- GRABBING PAGE -->
           <div id="cust-page-grabbing" class="page">
@@ -1132,10 +1357,18 @@
                 </div>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; opacity:0.85;" data-i18n="accBalanceShort">Account Balance:</span>
-                <h2 id="profile-balance" style="font-size:22px; color:#fde68a;">$0.00</h2>
-              </div>
-            </div>
+    <span style="font-size:12px; opacity:0.85;" data-i18n="accBalanceShort">Account Balance:</span>
+    <h2 id="profile-balance" style="font-size:22px; color:#fde68a;">$0.00</h2>
+</div>
+
+<!-- Today's Profit -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.2);">
+    <span style="font-size:12px; opacity:0.85;">Today's Profit:</span>
+    <h2 id="profile-today-profit" style="font-size:20px; color:#fde68a;">$0.00</h2>
+</div>
+
+</div>
+                
 
             <div class="action-3-grid">
               <div class="action-box" onclick="openCustModal('deposit1')">
@@ -1997,11 +2230,12 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 
     // Demo commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
     function getDemoCommissionForUser(u) {
-      const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
-      const min = isVip ? 5 : 1;
-      const max = isVip ? 40 : 2.5;
-      return Math.round((min + Math.random() * (max - min)) * 100) / 100;
-    }
+    const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
+    const min = isVip ? 5 : 1;
+    const max = isVip ? 40 : 2.5;
+
+    return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+}
 
     function renderAll() {
       const u = getActiveUser();
@@ -2030,7 +2264,14 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       document.getElementById('profile-balance').innerText = currentBalFormatted;
       document.getElementById('grab-balance').innerText = currentBalFormatted;
       document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
-      document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
+     const todayProfit = Number(u.todayEarn || 0);
+
+const todayProfitEl = document.getElementById('profile-today-profit');
+if (todayProfitEl) {
+    todayProfitEl.textContent = '$' + todayProfit.toFixed(2);
+}
+
+ document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
       document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
 
       const statusBadge = document.getElementById('home-account-status-badge');
@@ -2659,7 +2900,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       if (type === 'deposit1') {
         const lucky = u.activeLuckyOrder;
         const suggested = (lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount)
-          ? (lucky.amount - u.balance).toFixed(2)
+          ? (lucky.amount).toFixed(2)
           : "";
         content.innerHTML = `
           <h3 style="font-size:16px; color:#059669; margin-bottom:6px;">Deposit Funds</h3>
