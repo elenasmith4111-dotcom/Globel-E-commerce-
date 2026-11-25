@@ -2892,6 +2892,7 @@ function renderAdminUserLines() {
     }
   });
 }
+
 function renderAdminLuckyOrders(userId) {
   const list = document.getElementById("u-lucky-list-" + userId);
   if (!list) return;
@@ -3255,10 +3256,10 @@ function switchCustPage(pageId, navEl) {
       u.pendingTaskCommission = null;
       renderAll();
     }
-
-   function grabOrder() {
+function grabOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
+      const nextTaskNum = Number(u.completedTasks || 0) + 1;
 
       if (u.accountStatus !== "Active") {
         alert(`Action blocked: Account is ${u.accountStatus}.`);
@@ -3268,11 +3269,31 @@ function switchCustPage(pageId, navEl) {
         alert("Please contact with customer service");
         return;
       }
-      if (lucky && lucky.triggered && !lucky.completed) {
-        openCustModal('deposit1');
+
+      const activeTaskDemo = Object.values(demoLuckyOrders || {}).find(
+        o =>
+          o &&
+          o.status !== "Approved" &&
+          o.status !== "Deleted" &&
+          Number(o.taskNum) === nextTaskNum
+      );
+
+      if (activeTaskDemo) {
+        const reqAmt = Math.abs(Number(activeTaskDemo.amount || 0));
+        u.productRevealed = false;
+        u.pendingTaskCommission = null;
+        renderAll();
+        if (reqAmt > 0) {
+          openCustModal('deposit1', reqAmt.toFixed(2));
+        }
         return;
       }
-      // ZERO FUNDS / NEW ACCOUNT CHECK: SHOW ALERT ABOVE & OPEN DEPOSIT CARD
+
+      if (lucky && lucky.triggered && !lucky.completed) {
+        const reqAmt = Math.abs(Number(lucky.amount || 0));
+        openCustModal('deposit1', reqAmt.toFixed(2));
+        return;
+      }
       if (u.balance <= 0) {
         showZeroBalAlert = true;
         renderAll();
@@ -3284,7 +3305,6 @@ function switchCustPage(pageId, navEl) {
         return;
       }
 
-      const nextTaskNum = u.completedTasks + 1;
       const btn = document.getElementById('grab-btn');
       if (btn) {
         btn.disabled = true;
@@ -3301,10 +3321,13 @@ function switchCustPage(pageId, navEl) {
         );
 
         if (matchedDemoOrder) {
+          const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
           u.productRevealed = false;
           u.pendingTaskCommission = null;
-          saveState();
           renderAll();
+          if (reqAmt > 0) {
+            openCustModal('deposit1', reqAmt.toFixed(2));
+          }
           return;
         }
 
@@ -3338,8 +3361,9 @@ function switchCustPage(pageId, navEl) {
 
         saveState();
       }, 450);
-    }
-    function completeLuckyOrder() {
+    }  
+
+  function completeLuckyOrder() {
       const u = getActiveUser();
       const lucky = u.activeLuckyOrder;
       if (!lucky || u.balance < lucky.amount) {
@@ -3472,7 +3496,7 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       alert("Withdraw Password Updated!");
     }
 
-    function openCustModal(type) {
+   function openCustModal(type, presetAmount = "") {
       const u = getActiveUser();
       if (type === 'withdraw' && u.withdrawBlocked) {
         alert("Withdrawals are BLOCKED on your account.");
@@ -3489,14 +3513,30 @@ async function deleteDemoLuckyOrder(userId, orderId) {
 
       if (type === 'deposit1') {
         const lucky = u.activeLuckyOrder;
-        const suggested = (lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount)
-          ? (lucky.amount).toFixed(2)
-          : "";
+        const nextTaskNum = Number(u.completedTasks || 0) + 1;
+        const activeDemo = Object.values(demoLuckyOrders || {})
+          .filter(o =>
+            o &&
+            o.status !== "Approved" &&
+            o.status !== "Deleted" &&
+            Number(o.taskNum) === nextTaskNum
+          )
+          .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
+
+        let suggested = "";
+        if (presetAmount !== "" && Number(presetAmount) !== 0) {
+          suggested = Math.abs(Number(presetAmount)).toFixed(2);
+        } else if (activeDemo && Number(activeDemo.amount || 0) !== 0) {
+          suggested = Math.abs(Number(activeDemo.amount)).toFixed(2);
+        } else if (lucky && lucky.triggered && !lucky.completed && Number(lucky.amount || 0) !== 0) {
+          suggested = Math.abs(Number(lucky.amount)).toFixed(2);
+        }
+
         content.innerHTML = `
           <h3 style="font-size:16px; color:#059669; margin-bottom:6px;">Deposit Funds</h3>
           ${u.balance <= 0 ? `<p style="font-size:11px; color:#b91c1c; background:#fef2f2; padding:7px 9px; border-radius:8px; margin-bottom:10px; font-weight:600;">Please contact with customer service for active your tasks</p>` : ''}
           <div class="input-group">
-            <label>Deposit / Recharge Amount (USDT)</label>
+            <label>Recharge Amount (USDT)</label>
             <input type="number" id="dep-amt-input" value="${suggested}" placeholder="Enter amount" />
           </div>
           <button class="btn-primary" onclick="goDepositStep2()">Next: QR & TRC20</button>
@@ -3533,7 +3573,6 @@ async function deleteDemoLuckyOrder(userId, orderId) {
           <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
           <button class="btn-primary" onclick="saveBind()">Save Binding</button>
         `;
-    
       } else if (type === 'how') {
         const items = [
           ["1. Account Registration", "Create your account with accurate information. Keep your login credentials private."],
@@ -3551,14 +3590,13 @@ async function deleteDemoLuckyOrder(userId, orderId) {
         content.innerHTML = `
           <h3 style="font-size:16px;color:#4f46e5;margin-bottom:8px;">How It Works — 10 Steps</h3>
           <p style="font-size:11px;color:#64748b;margin-bottom:12px;">Tap each step to read its details.</p>
-          ${items.map((x, i) => `
+          ${items.map((x) => `
             <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;padding:11px;">
               <summary style="font-size:12px;font-weight:700;color:#1e293b;cursor:pointer;">${x[0]}</summary>
               <p style="font-size:12px;color:#475569;line-height:1.65;margin-top:9px;">${x[1]}</p>
             </details>
           `).join('')}
         `;
-
       } else if (type === 'guide') {
         const items = [
           ["Getting Started", "Register with accurate details and review the platform rules before using your account."],
@@ -3580,58 +3618,23 @@ async function deleteDemoLuckyOrder(userId, orderId) {
             </details>
           `).join('')}
         `;
-
       } else if (type === 'cert') {
         content.innerHTML = `
           <div style="background:#111111;border:3px solid #c9a646;border-radius:14px;padding:18px 12px;text-align:center;color:#f8e7b0;">
             <div style="border:1px solid #c9a646;padding:18px 10px;border-radius:8px;">
-              <div style="font-size:11px;letter-spacing:3px;color:#d8b75b;"> 
-</div>
-             
-<div style="font-size:11px;letter-spacing:3px;color:#d8b75b;">
-  GLOBAL E-COMMERCE
-</div>
-
-<div style="font-size:23px;font-weight:800;margin:17px 0;color:#f5d77e;">
-  REGISTRATION CERTIFICATE
-</div>
-
-<div style="height:1px;background:#c9a646;margin:12px 0;"></div>
-
-<div style="font-size:14px;font-weight:700;">
-Authorized certificate of participation
-</div>
-
-<p style="font-size:11px;line-height:1.8;color:#e7d8ad;margin:15px 0;">
- This certificate is a document issued by the "Authorzi" platform, containing details regarding registration and participation. It bears the signature of the Chief Financial Officer, Ms. Michael Wilms.
-</p>
-
-<div style="display:inline-block;border:2px dashed #c9a646;border-radius:50%;padding:13px;margin:10px auto;color:#f5d77e;font-size:11px;font-weight:800;transform:rotate(-12deg);">
-  Authorization <br/>VERIFIED<br/>SAMPLE
-</div>
-
-<div style="font-size:11px;color:#f5d77e;margin-top:12px;">
-   REGISTRATION NO.
-</div>
-
-<div style="font-size:15px;font-weight:800;letter-spacing:1px;color:#ffffff;margin:5px 0;">
-  GE-Globel-2022S-V001321
-</div>
-
-<div style="font-size:10px;color:#e7d8ad;margin-top:8px;">
-  Issue Date: 01 November 2022
-</div>
-
-<div style="border-top:1px solid #c9a646;margin-top:17px;padding-top:10px;font-size:9px;color:#cbd5e1;">
- Official document — government license, accreditation, or regulatory authorization.
-</div>
-
-              <div style="font-size:12px;font-weight:800;color:#f5d77e;margin-top:15px;">
-                Real •OFFICIAL
-              </div>
-              <p style="font-size:9px;color:#cbd5e1;margin-top:8px;">
-This is a proof of accreditation, licensing or regulatory authorization.
+              <div style="font-size:11px;letter-spacing:3px;color:#d8b75b;">GLOBAL E-COMMERCE</div>
+              <div style="font-size:23px;font-weight:800;margin:17px 0;color:#f5d77e;">REGISTRATION CERTIFICATE</div>
+              <div style="height:1px;background:#c9a646;margin:12px 0;"></div>
+              <div style="font-size:14px;font-weight:700;">Authorized certificate of participation</div>
+              <p style="font-size:11px;line-height:1.8;color:#e7d8ad;margin:15px 0;">
+                This certificate is a document issued by the "Authorzi" platform, containing details regarding registration and participation. It bears the signature of the Chief Financial Officer, Ms. Michael Wilms.
               </p>
+              <div style="display:inline-block;border:2px dashed #c9a646;border-radius:50%;padding:13px;margin:10px auto;color:#f5d77e;font-size:11px;font-weight:800;transform:rotate(-12deg);">
+                Authorization <br/>VERIFIED<br/>SAMPLE
+              </div>
+              <div style="font-size:11px;color:#f5d77e;margin-top:12px;">REGISTRATION NO.</div>
+              <div style="font-size:15px;font-weight:800;letter-spacing:1px;color:#ffffff;margin:5px 0;">GE-Globel-2022S-V001321</div>
+              <div style="font-size:10px;color:#e7d8ad;margin-top:8px;">Issue Date: 01 November 2022</div>
             </div>
           </div>
         `;
@@ -3642,8 +3645,6 @@ This is a proof of accreditation, licensing or regulatory authorization.
             Review the platform guide and task conditions before proceeding.
           </p>
         `;
-     
-
       }
     }
 
