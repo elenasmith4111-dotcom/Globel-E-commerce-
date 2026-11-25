@@ -4603,10 +4603,6 @@ renderAdminTxLists();
 syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
 
 
-
-
-
-
 function renderAdminTxLists() {
   const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
   const depEl = document.getElementById('adm-deposits-list');
@@ -4617,9 +4613,9 @@ function renderAdminTxLists() {
           const st = String(d.status || 'Pending');
           const norm = st.charAt(0).toUpperCase() + st.slice(1).toLowerCase();
           const badgeCls = norm === 'Approved' ? 'badge-approved' : (norm === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-          const safeId = encodeURIComponent(String(d.id));
           const safeUser = typeof escapeLuckyText === "function" ? escapeLuckyText(d.user) : String(d.user || '');
           const safeTime = typeof escapeLuckyText === "function" ? escapeLuckyText(d.time || '') : String(d.time || '');
+          const cleanId = encodeURIComponent(String(d.id ?? ''));
           return `
             <div class="card-box" style="margin-bottom:10px;">
               <div style="display:flex; justify-content:space-between; font-size:13px;">
@@ -4629,14 +4625,60 @@ function renderAdminTxLists() {
               <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${safeTime}</p>
               ${norm === 'Pending' ? `
                 <div style="display:flex; gap:8px;">
-                  <button type="button" class="btn-sm" style="background:#059669;" onclick="decideAdminTx(decodeURIComponent('${safeId}'), 'Approved')">Approve Deposit</button>
-                  <button type="button" class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(decodeURIComponent('${safeId}'), 'Rejected')">Reject Deposit</button>
+                  <button type="button" class="btn-sm js-tx-action" data-tx-id="${cleanId}" data-tx-decision="Approved" style="background:#059669;">Approve Deposit</button>
+                  <button type="button" class="btn-sm js-tx-action" data-tx-id="${cleanId}" data-tx-decision="Rejected" style="background:#dc2626;">Reject Deposit</button>
                 </div>
               ` : ''}
             </div>
           `;
         }).join('');
   }
+
+  const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
+  const wdEl = document.getElementById('adm-withdraws-list');
+  if (wdEl) {
+    wdEl.innerHTML = wds.length === 0
+      ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
+      : wds.map(w => {
+          const st = String(w.status || 'Pending');
+          const norm = st.charAt(0).toUpperCase() + st.slice(1).toLowerCase();
+          const badgeCls = norm === 'Approved' ? 'badge-approved' : (norm === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+          const safeUser = typeof escapeLuckyText === "function" ? escapeLuckyText(w.user) : String(w.user || '');
+          const safeTime = typeof escapeLuckyText === "function" ? escapeLuckyText(w.time || '') : String(w.time || '');
+          const cleanId = encodeURIComponent(String(w.id ?? ''));
+          return `
+            <div class="card-box" style="margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <strong>${safeUser} • $${Number(w.amount || 0).toFixed(2)}</strong>
+                <span class="${badgeCls}">${norm}</span>
+              </div>
+              <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${safeTime}</p>
+              ${norm === 'Pending' ? `
+                <div style="display:flex; gap:8px;">
+                  <button type="button" class="btn-sm js-tx-action" data-tx-id="${cleanId}" data-tx-decision="Approved" style="background:#059669;">Approve Withdraw</button>
+                  <button type="button" class="btn-sm js-tx-action" data-tx-id="${cleanId}" data-tx-decision="Rejected" style="background:#dc2626;">Reject Withdraw</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+  }
+}
+
+if (!window.__adminTxClickBound) {
+  window.__adminTxClickBound = true;
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".js-tx-action");
+    if (!btn) return;
+    const rawId = btn.getAttribute("data-tx-id") || "";
+    const decision = btn.getAttribute("data-tx-decision") || "";
+    const txId = decodeURIComponent(rawId);
+    if (txId && decision && typeof decideAdminTx === "function") {
+      decideAdminTx(txId, decision);
+    }
+  });
+}s
+
 
   const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
   const wdEl = document.getElementById('adm-withdraws-list');
