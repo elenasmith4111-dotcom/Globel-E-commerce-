@@ -3343,6 +3343,125 @@ function escapeLuckyText(value) {
   })[char]);
 }
 
+
+
+async function grabOrder() {
+  const u = typeof getActiveUser === "function" ? getActiveUser() : null;
+  if (!u) return;
+
+  const lucky = u.activeLuckyOrder;
+  const nextTaskNum = Number(u.completedTasks || 0) + 1;
+  const currentBal = Number(u.balance || 0);
+
+  if (u.accountStatus !== "Active") {
+    alert(`Action blocked: Account is ${u.accountStatus}.`);
+    return;
+  }
+  if (u.tasksLocked) {
+    alert("Please contact with customer service");
+    return;
+  }
+
+  const matchedDemoOrder = Object.values(typeof demoLuckyOrders === "object" && demoLuckyOrders ? demoLuckyOrders : {}).find(
+    o =>
+      o &&
+      o.status !== "Approved" &&
+      o.status !== "Deleted" &&
+      Number(o.taskNum) === nextTaskNum
+  );
+
+  if (matchedDemoOrder) {
+    const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    if (reqAmt > 0 && currentBal >= reqAmt) {
+      matchedDemoOrder.status = "FundsAdded";
+    }
+    if (typeof renderAll === "function") renderAll();
+    if (typeof saveState === "function") saveState();
+    if (reqAmt > 0 && currentBal < reqAmt && typeof openCustModal === "function") {
+      openCustModal('deposit1', reqAmt.toFixed(2));
+    }
+    return;
+  }
+
+  if (lucky && !lucky.completed && (lucky.triggered || Number(lucky.taskNum) === nextTaskNum)) {
+    lucky.triggered = true;
+    const reqAmt = Math.abs(Number(lucky.amount || 0));
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    if (typeof renderAll === "function") renderAll();
+    if (typeof saveState === "function") saveState();
+    if (reqAmt > 0 && currentBal < reqAmt && typeof openCustModal === "function") {
+      openCustModal('deposit1', reqAmt.toFixed(2));
+    }
+    return;
+  }
+
+  if (currentBal <= 0) {
+    showZeroBalAlert = true;
+    if (typeof renderAll === "function") renderAll();
+    if (typeof openCustModal === "function") openCustModal('deposit1');
+    return;
+  }
+
+  if (Number(u.completedTasks || 0) >= Number(u.totalTasks || 25)) {
+    alert("All 25 unique tasks completed!");
+    return;
+  }
+
+  const btn = document.getElementById('grab-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+  }
+
+  const baseItem = unique25Products[Number(u.completedTasks || 0) % unique25Products.length];
+  const item = {
+    ...baseItem,
+    comm: Number(u.pendingTaskCommission || getDemoCommissionForUser(u))
+  };
+
+  try {
+    let updatedBal = currentBal + item.comm;
+    if (typeof creditLedgerEntry === "function") {
+      const ledgerResult = await creditLedgerEntry(u.id, item.comm);
+      if (Number.isFinite(Number(ledgerResult))) {
+        updatedBal = Number(ledgerResult);
+      }
+    }
+
+    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    u.balance = updatedBal;
+    u.todayEarn = Number(u.todayEarn || 0) + item.comm;
+
+    state.ordersHistory.unshift({
+      userId: u.id,
+      taskNum: nextTaskNum,
+      name: item.name,
+      store: item.store,
+      comm: item.comm,
+      img: item.img
+    });
+
+    if (typeof renderAll === "function") renderAll();
+    if (typeof saveState === "function") saveState();
+  } catch (err) {
+    console.error("Grab order error:", err);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Task';
+    }
+    alert(err.message || "Could not complete task.");
+  }
+}
+
+window.grabOrder = grabOrder;
+
+
+
 async function renderAdminLuckyOrders(userId) {
   const list = document.getElementById("u-lucky-list-" + userId);
   if (!list) return;
