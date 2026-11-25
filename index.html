@@ -2303,12 +2303,15 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
 let LuckyOrders = {};
 let LuckyOrdersRef = null;
 
+let demoLuckyOrders = {};
+let demoLuckyOrdersRef = null;
+
 let demoLuckyFunds = {};
 let demoLuckyFundsRef = null;
+
 function saveState() {
   pushToBackend();
 }
-
 fbAuth.onAuthStateChanged(async user => {
   firebaseUser = user;
 
