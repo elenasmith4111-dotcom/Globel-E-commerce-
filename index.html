@@ -2270,7 +2270,10 @@ async function startRealtimeSync() {
       }
       if (data?.state) {
         const existingUsers = state.users || [];
-        Object.assign(state, data.state);
+        const incomingState = { ...data.state };
+        delete incomingState.users;
+        delete incomingState.txHistory;
+        Object.assign(state, incomingState);
         state.users = existingUsers;
         if (typeof renderAll === "function") renderAll();
       }
@@ -2303,6 +2306,9 @@ async function startRealtimeSync() {
 
       state.users = (profiles || []).map(row => {
         const prevUser = (state.users || []).find(x => x.id === row.id) || {};
+        const lockedBal = typeof syncBalanceFromLedger === "function"
+          ? syncBalanceFromLedger(row.id, Number(balances[row.id] || 0))
+          : Number(balances[row.id] || 0);
         return makeUserRecord({
           ...prevUser,
           ...(row.metadata || {}),
@@ -2310,7 +2316,7 @@ async function startRealtimeSync() {
           name: row.display_name || row.metadata?.name || prevUser.name || "",
           phone: row.phone || row.metadata?.phone || prevUser.phone || "",
           email: row.email || prevUser.email || "",
-          balance: Number(balances[row.id] || 0)
+          balance: lockedBal
         });
       });
 
@@ -2326,9 +2332,6 @@ async function startRealtimeSync() {
     await loadGlobalState();
     await loadCustomerProfiles();
 
-   let adminDepositChannel = null;
-    let adminWithdrawChannel = null;
-
     if (sb.getChannels) {
       const existingDep = sb.getChannels().find(ch => ch.topic === "realtime:admin-deposit-requests");
       const existingWd = sb.getChannels().find(ch => ch.topic === "realtime:admin-withdraw-requests");
@@ -2336,19 +2339,17 @@ async function startRealtimeSync() {
       if (existingWd) await sb.removeChannel(existingWd);
     }
 
-   await syncLiveTransactionsFromSupabase();
+    await syncLiveTransactionsFromSupabase();
     renderAdminTxLists();
 
-    adminDepositChannel = sb
-      .channel("admin-deposit-requests")
+    sb.channel("admin-deposit-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
       })
       .subscribe();
 
-    adminWithdrawChannel = sb
-      .channel("admin-withdraw-requests")
+    sb.channel("admin-withdraw-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
@@ -2400,7 +2401,11 @@ async function startRealtimeSync() {
       return;
     }
 
-    const balance = (ledger || []).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const rawBalance = (ledger || []).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const balance = typeof syncBalanceFromLedger === "function"
+      ? syncBalanceFromLedger(user.id, rawBalance)
+      : Number(rawBalance);
+
     const prevRecord = (state.users || []).find(x => x.id === user.id) || {};
     const record = makeUserRecord({
       ...prevRecord,
@@ -2572,10 +2577,15 @@ async function handleSupabaseAuth(user) {
         .eq("state_key", "main")
         .maybeSingle();
 
-      if (appError) throw appError;
+     if (appError) throw appError;
 
       if (appData?.state) {
-        Object.assign(state, appData.state);
+        const existingUsers = state.users || [];
+        const incomingState = { ...appData.state };
+        delete incomingState.users;
+        delete incomingState.txHistory;
+        Object.assign(state, incomingState);
+        state.users = existingUsers;
       }
 
       document.getElementById("admin-auth-screen").style.display = "none";
