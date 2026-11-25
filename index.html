@@ -4602,7 +4602,6 @@ renderAdminTxLists();
     }
 syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
 
-
 function renderAdminTxLists() {
   const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
   const depEl = document.getElementById('adm-deposits-list');
@@ -4678,8 +4677,6 @@ if (!window.__adminTxClickBound) {
     }
   });
 }
-
-
   const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
   const wdEl = document.getElementById('adm-withdraws-list');
   if (wdEl) {
