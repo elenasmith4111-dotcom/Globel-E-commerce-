@@ -2831,7 +2831,7 @@ function getDemoCommissionForUser(u) {
 
 function renderAll() {
   const u = getActiveUser();
-  const lucky = null;
+  const luckyOrderSlot = null;
   const nextTaskNumber = Number(u.completedTasks || 0) + 1;
 
   const demoOrder = Object.values(demoLuckyOrders || {})
@@ -2927,8 +2927,7 @@ function renderAll() {
     `;
   }
 
-
-const luckyOrderData = u.activeLuckyOrder || null;
+  const luckyOrderData = u.activeLuckyOrder || luckyOrderSlot;
   const luckyLockedByFunds = !!(luckyOrderData && luckyOrderData.triggered && !luckyOrderData.completed && u.balance < Math.abs(Number(luckyOrderData.amount || 0)));
   document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
     ? u.accountStatus
