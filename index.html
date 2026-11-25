@@ -2872,22 +2872,24 @@ if (todayProfitEl) {
     generateLoginCaptcha();
   }
 }
-
 let loginCaptchaAnswer = null;
 
 function generateLoginCaptcha() {
-  const a = Math.floor(Math.random() * 9) + 1;
-  const b = Math.floor(Math.random() * 9) + 1;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
 
-  loginCaptchaAnswer = a + b;
+  for (let i = 0; i < 4; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  loginCaptchaAnswer = code;
 
   const question = document.getElementById('captcha-question');
   const answer = document.getElementById('captcha-answer');
 
-  if (question) question.textContent = `${a} + ${b} = ?`;
+  if (question) question.textContent = code;
   if (answer) answer.value = '';
-}
-   async function handleCustLogin() {
+}   async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
   const answer = document.getElementById('captcha-answer').value.trim();
@@ -2902,7 +2904,11 @@ function generateLoginCaptcha() {
     return;
   }
 
-  if (Number(answer) !== loginCaptchaAnswer) {
+if (answer.toUpperCase() !== loginCaptchaAnswer) {
+  alert("Incorrect security code. Please try again.");
+  generateLoginCaptcha();
+  return;
+} {
     alert("Incorrect security code. Please try again.");
     generateLoginCaptcha();
     return;
