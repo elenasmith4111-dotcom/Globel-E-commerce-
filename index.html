@@ -1340,7 +1340,27 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAV_5WLb1yaI0npOGNGANYowNjNTzTyiP4",
+      authDomain: "globel-e-commerce.firebaseapp.com",
+      databaseURL: "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "globel-e-commerce",
+      storageBucket: "globel-e-commerce.firebasestorage.app",
+      messagingSenderId: "390585629282",
+      appId: "1:390585629282:web:b24cdb93dbac77c251ef3b",
+      measurementId: "G-PPYBT3MMPP"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const fbAuth = firebase.auth();
+    const fbDb = firebase.database();
+    let firebaseUser = null;
+    let profileListener = null;
+    let globalStateListener = null;
+
     const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app";
 const DB_NODE_PATH = "/global_ecommerce_state.json";
 
@@ -1731,6 +1751,7 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     let backendStream = null;
     let backendWriteInProgress = false;
     let backendHasInitialData = false;
+    let pendingWrite = false;
 
     function setBackendStatus(online) {
       const pill = document.getElementById("adm-live-sync-pill");
@@ -1742,6 +1763,10 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         : '<i class="fa-solid fa-circle" style="font-size:8px; margin-right:4px;"></i> Backend Offline';
     }
 
+    function isFirebaseAdmin(user) {
+      return !!user && user.uid === "FmwIss9uTdXwGLUnUWLusGHlYp33";
+    }
+
     function applyRemoteState(remoteData) {
       if (!remoteData || typeof remoteData !== "object") return;
       state = normalizeState(remoteData);
@@ -1749,90 +1774,92 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       renderAll();
     }
 
-    async function pullFromBackend() {
-      const url = getEndpoint();
-      if (!url) return;
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("Backend fetch failed");
-        const remoteData = await res.json();
-        if (remoteData) applyRemoteState(remoteData);
-        else await pushToBackend();
-        backendHasInitialData = true;
-        setBackendStatus(true);
-      } catch (err) {
-        setBackendStatus(false);
-      }
-    }
-
     function startRealtimeSync() {
-      const url = getEndpoint();
-      if (!url || typeof EventSource === "undefined") {
-        pullFromBackend();
-        return;
-      }
-      if (backendStream) backendStream.close();
-      backendStream = new EventSource(url);
-      backendStream.onopen = () => setBackendStatus(true);
-      const handleUpdate = event => {
-        try {
-          const message = JSON.parse(event.data || "{}");
-          if (message.path === "/" && message.data && typeof message.data === "object") {
-            applyRemoteState(message.data);
-          } else if (message.path && message.data !== undefined) {
-            // Firebase sends incremental updates as path/data pairs.
-            const next = JSON.parse(JSON.stringify(state));
-            const parts = message.path.split("/").filter(Boolean);
-            let target = next;
-            for (let i = 0; i < parts.length - 1; i++) {
-              if (target[parts[i]] == null) target[parts[i]] = {};
-              target = target[parts[i]];
-            }
-            if (parts.length) {
-              if (message.data === null) delete target[parts[parts.length - 1]];
-              else target[parts[parts.length - 1]] = message.data;
-              applyRemoteState(next);
-            }
-          } else if (message.path === "/" && message.data === null && !backendHasInitialData) {
-            pushToBackend();
+      if (!firebaseUser) return;
+      if (globalStateListener) fbDb.ref("global_ecommerce_state").off("value", globalStateListener);
+      if (profileListener && firebaseUser) fbDb.ref("customer_profiles/" + firebaseUser.uid).off("value", profileListener);
+      if (isFirebaseAdmin(firebaseUser)) {
+        globalStateListener = snap => {
+          const data = snap.val();
+          if (data) applyRemoteState(data);
+          else fbDb.ref("global_ecommerce_state").set(state);
+          backendHasInitialData = true; setBackendStatus(true);
+          // Admin panel receives customer profiles as a UID-keyed collection.
+          fbDb.ref("customer_profiles").once("value").then(ps => {
+            const profiles = ps.val() || {};
+            const byUid = Object.entries(profiles).map(([uid, profile]) => makeUserRecord({ ...profile, id: uid }));
+            if (byUid.length) { state.users = byUid; renderAll(); }
+          }).catch(() => {});
+        };
+        fbDb.ref("global_ecommerce_state").on("value", globalStateListener, () => setBackendStatus(false));
+      } else {
+        profileListener = snap => {
+          const profile = snap.val();
+          if (profile) {
+            const record = makeUserRecord({ ...profile, id: firebaseUser.uid, email: firebaseUser.email });
+            const idx = state.users.findIndex(x => x.id === firebaseUser.uid);
+            if (idx >= 0) state.users[idx] = record; else state.users = [record];
+            state.activeUserId = firebaseUser.uid;
+            state.customerLoggedIn = true;
+            applyRouting(); renderAll();
           }
-          backendHasInitialData = true;
           setBackendStatus(true);
-        } catch (err) {
-          // Ignore malformed stream events; the next valid event will resync state.
-        }
-      };
-      backendStream.addEventListener("put", handleUpdate);
-      backendStream.addEventListener("patch", handleUpdate);
-      backendStream.addEventListener("cancel", () => setBackendStatus(false));
-      backendStream.addEventListener("auth_revoked", () => setBackendStatus(false));
-      backendStream.onerror = () => setBackendStatus(false);
-      // Initial fetch also supports browsers/proxies that do not deliver the first SSE event.
-      pullFromBackend();
+        };
+        fbDb.ref("customer_profiles/" + firebaseUser.uid).on("value", profileListener, () => setBackendStatus(false));
+      }
     }
 
     async function pushToBackend() {
-      const url = getEndpoint();
-      if (!url || backendWriteInProgress) return;
-      backendWriteInProgress = true;
+      if (!firebaseUser) return;
       try {
-        const res = await fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(state)
-        });
-        if (!res.ok) throw new Error("Backend write failed");
+        if (isFirebaseAdmin(firebaseUser)) {
+          await fbDb.ref("global_ecommerce_state").set(state);
+          const profileWrites = {};
+          (state.users || []).forEach(user => {
+            if (!user.id || String(user.id).startsWith("usr_")) return;
+            const clean = { ...user };
+            delete clean.loginPassword; delete clean.withdrawPassword;
+            profileWrites["customer_profiles/" + user.id] = clean;
+          });
+          if (Object.keys(profileWrites).length) await fbDb.ref().update(profileWrites);
+        } else {
+          const user = getActiveUser();
+          const profile = { ...user, id: firebaseUser.uid, email: firebaseUser.email };
+          delete profile.loginPassword; delete profile.withdrawPassword;
+          await fbDb.ref("customer_profiles/" + firebaseUser.uid).update(profile);
+        }
         setBackendStatus(true);
       } catch (err) {
+        console.error("Firebase save failed:", err);
         setBackendStatus(false);
-      } finally {
-        backendWriteInProgress = false;
+        alert("Firebase save failed. Please check database rules and sign-in.");
       }
     }
 
-    function saveState() {
-      pushToBackend();
-    }
+    function saveState() { pushToBackend(); }
+
+    fbAuth.onAuthStateChanged(user => {
+      firebaseUser = user;
+      if (user) {
+        if (isFirebaseAdmin(user)) {
+          document.getElementById("admin-auth-screen").style.display = "none";
+          document.getElementById("admin-app-screen").style.display = "block";
+        } else {
+          state.activeUserId = user.uid;
+          state.customerLoggedIn = true;
+          const idx = state.users.findIndex(x => x.id === user.uid);
+          if (idx < 0) state.users.unshift(makeUserRecord({ id: user.uid, email: user.email }));
+        }
+        startRealtimeSync(); applyRouting(); renderAll();
+      } else {
+        state.customerLoggedIn = false;
+        if (isAdminPath()) {
+          document.getElementById("admin-app-screen").style.display = "none";
+          document.getElementById("admin-auth-screen").style.display = "flex";
+        }
+        applyRouting();
+      }
+    });
 
     const demoFeed = [
       { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
@@ -2315,72 +2342,39 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
       document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
     }
 
-    function handleCustLogin() {
-      const email = (document.getElementById('login-email').value.trim() || "sara.khan@email.com").toLowerCase();
+    async function handleCustLogin() {
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
       const pass = document.getElementById('login-pass').value;
-      let existing = state.users.find(x => x.email.toLowerCase() === email);
-
-      if (existing) {
-        if (existing.loginPassword && pass !== existing.loginPassword) {
-          alert("Incorrect Login Password!");
-          return;
-        }
-        if (existing.accountStatus === "Deactive") {
-          alert("Your account is Deactivated. Please contact customer service.");
-          return;
-        }
-        state.activeUserId = existing.id;
-      } else {
-        const created = makeUserRecord({
-          name: email.split('@')[0].replace(/[._]/g, ' ').toUpperCase(),
-          phone: "+971 50 000 0000",
-          email: email,
-          loginPassword: pass
-        });
-        state.users.unshift(created);
-        state.activeUserId = created.id;
-      }
-
-      showVerifyingThenEnter(() => {
-        state.customerLoggedIn = true;
-        saveState();
-        applyRouting();
-      });
+      if (!email || !pass) { alert("Please enter email and password."); return; }
+      try {
+        await fbAuth.signInWithEmailAndPassword(email, pass);
+        showVerifyingThenEnter(() => { applyRouting(); });
+      } catch (err) { alert(err.message || "Login failed."); }
     }
 
-    function handleCustRegister() {
+    async function handleCustRegister() {
       const name = document.getElementById('reg-name').value.trim();
       const phone = document.getElementById('reg-phone').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const pass = document.getElementById('reg-pass').value.trim();
-
-      if (!name || !phone || !email) {
-        alert("Please enter Name, Phone Number, and Email.");
-        return;
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const pass = document.getElementById('reg-pass').value;
+      if (!name || !phone || !email || !pass) {
+        alert("Please enter Name, Phone Number, Email, and Password."); return;
       }
-
-      const newUser = makeUserRecord({
-        name,
-        phone,
-        email,
-        loginPassword: pass || "123456",
-        trc20Address: state.platformConfig.trc20Address,
-        balance: 0.00
-      });
-
-      showVerifyingThenEnter(() => {
-        state.users.unshift(newUser);
-        state.activeUserId = newUser.id;
-        state.customerLoggedIn = true;
-        saveState();
-        applyRouting();
-      });
+      if (pass.length < 6) { alert("Password must be at least 6 characters."); return; }
+      try {
+        const credential = await fbAuth.createUserWithEmailAndPassword(email, pass);
+        const profile = makeUserRecord({ id: credential.user.uid, name, phone, email, trc20Address: state.platformConfig.trc20Address, balance: 0 });
+        delete profile.loginPassword; delete profile.withdrawPassword;
+        await fbDb.ref("customer_profiles/" + credential.user.uid).set(profile);
+        state.users.unshift(makeUserRecord({ ...profile, id: credential.user.uid }));
+        state.activeUserId = credential.user.uid; state.customerLoggedIn = true;
+        showVerifyingThenEnter(() => { applyRouting(); renderAll(); });
+      } catch (err) { alert(err.message || "Registration failed."); }
     }
 
-    function handleCustLogout() {
-      state.customerLoggedIn = false;
-      saveState();
-      applyRouting();
+    async function handleCustLogout() {
+      try { await fbAuth.signOut(); state.customerLoggedIn = false; applyRouting(); }
+      catch (err) { alert(err.message || "Could not sign out."); }
     }
 
     function switchCustPage(pageId, navEl) {
@@ -2664,20 +2658,24 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
     }
 
     // ==================== ADMIN AUTH, TX APPROVE/REJECT & SETTINGS ====================
-    function handleAdminLogin() {
-      const u = document.getElementById('admin-login-user').value.trim().toLowerCase();
-      const p = document.getElementById('admin-login-pass').value.trim();
-      const validUser = u === state.adminCredentials.email.toLowerCase() || u === state.adminCredentials.user.toLowerCase();
-      if (validUser && p === state.adminCredentials.pass) {
+    async function handleAdminLogin() {
+      const email = document.getElementById('admin-login-user').value.trim().toLowerCase();
+      const password = document.getElementById('admin-login-pass').value;
+      try {
+        const credential = await fbAuth.signInWithEmailAndPassword(email, password);
+        const uid = credential.user.uid;
+        const adminSnap = await fbDb.ref("admins/" + uid).once("value");
+        if (adminSnap.val() !== true || uid !== "FmwIss9uTdXwGLUnUWLusGHlYp33") {
+          await fbAuth.signOut(); alert("This Firebase account is not authorized as admin."); return;
+        }
         document.getElementById('admin-auth-screen').style.display = 'none';
         document.getElementById('admin-app-screen').style.display = 'block';
         renderAll();
-      } else {
-        alert("Invalid Admin Login!");
-      }
+      } catch (err) { alert(err.message || "Invalid admin login."); }
     }
 
-    function handleAdminLogout() {
+    async function handleAdminLogout() {
+      await fbAuth.signOut();
       document.getElementById('admin-app-screen').style.display = 'none';
       document.getElementById('admin-auth-screen').style.display = 'flex';
     }
