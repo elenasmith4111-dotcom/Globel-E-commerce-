@@ -2220,11 +2220,13 @@ function makeUserRecord(partial = {}) {
       renderAll();
     }
 // ================= SUPABASE REALTIME SYNC =================
+// ================= SUPABASE REALTIME SYNC =================
 
 let globalStateChannel = null;
 let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
+
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
   if (authError || !authData?.user) {
@@ -2246,12 +2248,13 @@ async function startRealtimeSync() {
   }
 
   // Remove channels from any previous session before creating fresh ones.
-  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel]) {
+  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
     if (channel) await sb.removeChannel(channel);
   }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
+  adminLuckyOrdersChannel = null;
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2298,16 +2301,25 @@ async function startRealtimeSync() {
         balances[row.user_id] = (balances[row.user_id] || 0) + Number(row.amount || 0);
       });
 
-      state.users = (profiles || []).map(row => makeUserRecord({
-        ...(row.metadata || {}),
-        id: row.id,
-        name: row.display_name || row.metadata?.name || "",
-        phone: row.phone || row.metadata?.phone || "",
-        email: row.email || "",
-        balance: balances[row.id] || 0
-      }));
-      renderAdminUserLines();
-      renderAdminTxLists();
+      state.users = (profiles || []).map(row => {
+        const prevUser = (state.users || []).find(x => x.id === row.id) || {};
+        return makeUserRecord({
+          ...prevUser,
+          ...(row.metadata || {}),
+          id: row.id,
+          name: row.display_name || row.metadata?.name || prevUser.name || "",
+          phone: row.phone || row.metadata?.phone || prevUser.phone || "",
+          email: row.email || prevUser.email || "",
+          balance: Number(balances[row.id] || 0)
+        });
+      });
+
+      if (typeof renderAll === "function") {
+        renderAll();
+      } else {
+        renderAdminUserLines();
+        renderAdminTxLists();
+      }
       setBackendStatus(true);
     };
 
@@ -2336,7 +2348,7 @@ async function startRealtimeSync() {
     return;
   }
 
-  // Customer session: load own profile and calculate balance from wallet ledger.
+  // Customer session: load own profile and calculate live balance from wallet ledger.
   const loadMyProfile = async () => {
     const { data, error } = await sb
       .from("profiles")
@@ -2360,13 +2372,15 @@ async function startRealtimeSync() {
     }
 
     const balance = (ledger || []).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const prevRecord = (state.users || []).find(x => x.id === user.id) || {};
     const record = makeUserRecord({
+      ...prevRecord,
       ...(data.metadata || {}),
       id: user.id,
-      name: data.display_name || data.metadata?.name || "",
-      phone: data.phone || data.metadata?.phone || "",
-      email: data.email || user.email || "",
-      balance
+      name: data.display_name || data.metadata?.name || prevRecord.name || "",
+      phone: data.phone || data.metadata?.phone || prevRecord.phone || "",
+      email: data.email || user.email || prevRecord.email || "",
+      balance: Number(balance)
     });
     delete record.loginPassword;
     delete record.withdrawPassword;
@@ -2400,6 +2414,7 @@ async function startRealtimeSync() {
     }, loadMyProfile)
     .subscribe();
 }
+
 // ================= SAVE DATA TO SUPABASE =================
 
 async function pushToBackend() {
@@ -2427,10 +2442,7 @@ async function pushToBackend() {
 
   try {
     if (profile.role === "admin") {
-
-      // Never save passwords or private credentials in app_state.
       const cleanState = { ...state };
-
       delete cleanState.users;
       delete cleanState.txHistory;
       delete cleanState.adminCredentials;
@@ -2446,9 +2458,7 @@ async function pushToBackend() {
         });
 
       if (error) throw error;
-
     } else {
-
       const user = getActiveUser();
 
       if (!user || user.id !== authUser.id) {
@@ -2456,7 +2466,8 @@ async function pushToBackend() {
       }
 
       const metadata = { ...user };
-
+      // Balance is managed by wallet_ledger; do not let local metadata overwrite it.
+      delete metadata.balance;
       delete metadata.id;
       delete metadata.email;
       delete metadata.loginPassword;
@@ -2475,7 +2486,6 @@ async function pushToBackend() {
     }
 
     setBackendStatus(true);
-
   } catch (err) {
     console.error("Supabase save failed:", err);
     setBackendStatus(false);
@@ -2485,8 +2495,7 @@ async function pushToBackend() {
 
 function saveState() {
   pushToBackend();
-}
-// ================= SUPABASE AUTH LISTENER =================
+}// ================= SUPABASE AUTH LISTENER =================
 let luckyOrdersChannel = null;
 
 async function handleSupabaseAuth(user) {
