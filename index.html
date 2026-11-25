@@ -543,6 +543,32 @@
       transition: 0.2s;
     }
 
+
+/* Six different partner card colors */
+.partner-mini-card:nth-child(1) {
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+}
+
+.partner-mini-card:nth-child(2) {
+  background: linear-gradient(135deg, #fff1f2, #fecdd3);
+}
+
+.partner-mini-card:nth-child(3) {
+  background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+}
+
+.partner-mini-card:nth-child(4) {
+  background: linear-gradient(135deg, #eff6ff, #bfdbfe);
+}
+
+.partner-mini-card:nth-child(5) {
+  background: linear-gradient(135deg, #ecfeff, #a5f3fc);
+}
+
+.partner-mini-card:nth-child(6) {
+  background: linear-gradient(135deg, #f1f5f9, #cbd5e1);
+}
+
     .partner-mini-card:hover {
       border-color: #6366f1;
       transform: translateY(-2px);
@@ -2943,13 +2969,83 @@ if (todayProfitEl) {
           <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
           <button class="btn-primary" onclick="saveBind()">Save Binding</button>
         `;
+    
+      } else if (type === 'how') {
+        const items = [
+          ["1. Account Registration", "Create your account with accurate information. Keep your login credentials private."],
+          ["2. Minimum Deposit", "The platform displays a suggested starting deposit of $10. Review all fees and terms before making any payment."],
+          ["3. Deposit Methods", "USDT TRC20 is the displayed crypto payment method. Confirm the wallet address and network before sending funds."],
+          ["4. Local Payment", "If you want to use a local payment method, contact Customer Support first and confirm the available method and its terms."],
+          ["5. Deposit Verification", "After submitting payment, save your transaction ID and proof. Deposit requests remain pending until reviewed and approved."],
+          ["6. Complete Tasks", "Review each task's instructions and any costs before accepting it. Do not proceed with an order you cannot afford."],
+          ["7. Commission", "Commission should be displayed clearly for each eligible completed task. Actual earnings may vary and are not guaranteed."],
+          ["8. VIP Membership", "VIP1, VIP2 and VIP3 are membership labels. Check the actual fee, benefits, eligibility and commission terms before upgrading."],
+          ["9. Withdrawal Eligibility", "The platform currently states a 25-task withdrawal condition. Review this condition before depositing or completing tasks."],
+          ["10. Withdrawal & Verification", "Withdrawal requests are subject to review. The stated processing estimate is 5–30 minutes, but delays may occur. Larger withdrawals may require additional identity and transaction verification by Customer Support and the Finance team."]
+        ];
+
+        content.innerHTML = `
+          <h3 style="font-size:16px;color:#4f46e5;margin-bottom:8px;">How It Works — 10 Steps</h3>
+          <p style="font-size:11px;color:#64748b;margin-bottom:12px;">Tap each step to read its details.</p>
+          ${items.map((x, i) => `
+            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;padding:11px;">
+              <summary style="font-size:12px;font-weight:700;color:#1e293b;cursor:pointer;">${x[0]}</summary>
+              <p style="font-size:12px;color:#475569;line-height:1.65;margin-top:9px;">${x[1]}</p>
+            </details>
+          `).join('')}
+        `;
+
+      } else if (type === 'guide') {
+        const items = [
+          ["Getting Started", "Register with accurate details and review the platform rules before using your account."],
+          ["Deposits", "The displayed starting amount is $10. USDT TRC20 is the listed crypto method. Verify the network and wallet address before sending."],
+          ["Local Payment Support", "Contact Customer Support to ask whether a local payment option is available. Confirm all terms before paying."],
+          ["Task Instructions", "Read the product task instructions and required amount carefully before accepting a task."],
+          ["VIP1 to VIP3", "Review each VIP level's actual price, eligibility and commission terms. Higher commission is not guaranteed unless clearly specified in verified terms."],
+          ["Withdrawals", "The platform states a requirement of 25 completed tasks. Check your eligibility and available balance before submitting a request."],
+          ["Security & Support", "Keep transaction receipts and never share your password, OTP or private wallet keys. Contact support for account or payment issues."]
+        ];
+
+        content.innerHTML = `
+          <h3 style="font-size:16px;color:#4f46e5;margin-bottom:8px;">User Guide</h3>
+          <p style="font-size:11px;color:#64748b;margin-bottom:12px;">Select a topic to read the instructions.</p>
+          ${items.map(x => `
+            <details style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;padding:11px;">
+              <summary style="font-size:12px;font-weight:700;color:#1e293b;cursor:pointer;">${x[0]}</summary>
+              <p style="font-size:12px;color:#475569;line-height:1.65;margin-top:9px;">${x[1]}</p>
+            </details>
+          `).join('')}
+        `;
+
+      } else if (type === 'cert') {
+        content.innerHTML = `
+          <div style="background:#111111;border:3px solid #c9a646;border-radius:14px;padding:18px 12px;text-align:center;color:#f8e7b0;">
+            <div style="border:1px solid #c9a646;padding:18px 10px;border-radius:8px;">
+              <div style="font-size:11px;letter-spacing:3px;color:#d8b75b;">GLOBAL E-COMMERCE</div>
+              <div style="font-size:23px;font-weight:800;margin:17px 0;color:#f5d77e;">DEMO CERTIFICATE</div>
+              <div style="height:1px;background:#c9a646;margin:12px 0;"></div>
+              <div style="font-size:14px;font-weight:700;">CERTIFICATE OF PARTICIPATION</div>
+              <p style="font-size:11px;line-height:1.8;color:#e7d8ad;margin:15px 0;">
+                This sample digital certificate demonstrates the platform's certificate design.
+              </p>
+              <div style="font-size:12px;font-weight:800;color:#f5d77e;margin-top:15px;">
+                DEMO • NOT OFFICIAL
+              </div>
+              <p style="font-size:9px;color:#cbd5e1;margin-top:8px;">
+                This is not proof of accreditation, licensing or regulatory authorization.
+              </p>
+            </div>
+          </div>
+        `;
       } else {
         content.innerHTML = `
-          <h3 style="font-size:16px; color:#4f46e5; margin-bottom:8px;">Global E-Commerce</h3>
-          <p style="font-size:12px; color:#334155; line-height:1.6;">
-            Complete your 25 unique product promotion tasks in the Grabbing tab to earn instant commissions.
+          <h3 style="font-size:16px;color:#4f46e5;margin-bottom:8px;">Global E-Commerce</h3>
+          <p style="font-size:12px;color:#334155;line-height:1.6;">
+            Review the platform guide and task conditions before proceeding.
           </p>
         `;
+      }
+
       }
     }
 
