@@ -2927,8 +2927,9 @@ function renderAll() {
     `;
   }
 
- const lucky = u.activeLuckyOrder || null;
-  const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < Math.abs(Number(lucky.amount || 0)));
+
+const luckyOrderData = u.activeLuckyOrder || null;
+  const luckyLockedByFunds = !!(luckyOrderData && luckyOrderData.triggered && !luckyOrderData.completed && u.balance < Math.abs(Number(luckyOrderData.amount || 0)));
   document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
     ? u.accountStatus
     : (u.tasksLocked ? "Contact Service" : ((demoOrder && Number(u.balance || 0) < Math.abs(Number(demoOrder.amount || 0))) || luckyLockedByFunds ? "Recharge Needed" : "Active"));
@@ -3021,8 +3022,8 @@ function renderAll() {
         Please contact with customer service
       </div>
     `;
-  } else if (lucky && lucky.triggered && !lucky.completed) {
-    const absLuckyAmt = Math.abs(Number(lucky.amount || 0));
+  } else if (luckyOrderData && luckyOrderData.triggered && !luckyOrderData.completed) {
+    const absLuckyAmt = Math.abs(Number(luckyOrderData.amount || 0));
     const currentBal = Number(u.balance || 0);
     const hasEnough = currentBal >= absLuckyAmt && absLuckyAmt > 0;
     const rechargeNeeded = absLuckyAmt;
@@ -3030,16 +3031,16 @@ function renderAll() {
     if (!hasEnough) {
       stageArea.innerHTML = `
         <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-          <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
-          <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-          <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
+          <img src="${luckyOrderData.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
+          <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${luckyOrderData.taskNum}</span>
+          <h4 style="font-size:15px; color:#881337; margin-top:8px;">${luckyOrderData.product}</h4>
           <div class="negative-order-amt">-$${absLuckyAmt.toFixed(2)}</div>
           <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;">
             <div style="font-size:10px;font-weight:700;">RECHARGE AMOUNT</div>
             <div style="font-size:20px;font-weight:800;">$${rechargeNeeded.toFixed(2)}</div>
           </div>
           <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:8px;">
-            Commission Reward: +$${Number(lucky.comm || 0).toFixed(2)}
+            Commission Reward: +$${Number(luckyOrderData.comm || 0).toFixed(2)}
           </p>
         </div>
         <button class="btn-primary" style="background:#dc2626; color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
@@ -3049,16 +3050,16 @@ function renderAll() {
     } else {
       stageArea.innerHTML = `
         <div class="lucky-product-card" style="background:#ecfdf5;border-color:#059669;cursor:pointer;" onclick="completeDemoLuckyOrder('')">
-          <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
-          <span style="background:#059669; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-          <h4 style="font-size:15px; color:#065f46; margin-top:8px;">${lucky.product}</h4>
+          <img src="${luckyOrderData.img}" class="prod-img" alt="Lucky Order Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
+          <span style="background:#059669; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${luckyOrderData.taskNum}</span>
+          <h4 style="font-size:15px; color:#065f46; margin-top:8px;">${luckyOrderData.product}</h4>
           <div class="negative-order-amt" style="color:#059669;">$${absLuckyAmt.toFixed(2)}</div>
           <p style="font-size:12px; color:#059669; font-weight:800; margin-top:8px;">
-            Commission Reward: +$${Number(lucky.comm || 0).toFixed(2)}
+            Commission Reward: +$${Number(luckyOrderData.comm || 0).toFixed(2)}
           </p>
         </div>
         <button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeDemoLuckyOrder('')">
-          <i class="fa-solid fa-bolt"></i> Grab Now (+$${Number(lucky.comm || 0).toFixed(2)})
+          <i class="fa-solid fa-bolt"></i> Grab Now (+$${Number(luckyOrderData.comm || 0).toFixed(2)})
         </button>
       `;
     }
