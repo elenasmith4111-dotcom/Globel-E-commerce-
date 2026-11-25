@@ -2282,11 +2282,8 @@ const DB_NODE_PATH = "/global_ecommerce_state.json";
         alert("Firebase save failed. Please check database rules and sign-in.");
       }
     }
-
-   let LuckyOrders = {};
+let LuckyOrders = {};
 let LuckyOrdersRef = null;
-
- 
 
 let demoLuckyOrders = {};
 let demoLuckyOrdersRef = null;
@@ -2294,7 +2291,7 @@ let demoLuckyOrdersRef = null;
 function saveState() {
   pushToBackend();
 }
-  
+
 fbAuth.onAuthStateChanged(async user => {
   firebaseUser = user;
 
@@ -2383,525 +2380,518 @@ fbAuth.onAuthStateChanged(async user => {
   }
 });
 
-    const demoFeed = [
-      { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
-      { user: "User***14", action: "Lucky Order Bonus", amount: "+$95.00", color: "#d97706" },
-      { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
-      { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
-    ];
+const demoFeed = [
+  { user: "User***92", action: "Withdraw Approved", amount: "+$480.00", color: "#059669" },
+  { user: "User***14", action: "Lucky Order Bonus", amount: "+$95.00", color: "#d97706" },
+  { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
+  { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
+];
 
-    function isAdminPath() {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      const search = window.location.search.toLowerCase();
-      return (
-        path.endsWith("/admin/login") ||
-        path.includes("/admin/login") ||
-        hash === "#/admin/login" ||
-        hash === "#admin/login" ||
-        hash === "#admin" ||
-        search.includes("admin/login") ||
-        search.includes("admin=login")
-      );
+function isAdminPath() {
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const search = window.location.search.toLowerCase();
+  return (
+    path.endsWith("/admin/login") ||
+    path.includes("/admin/login") ||
+    hash === "#/admin/login" ||
+    hash === "#admin/login" ||
+    hash === "#admin" ||
+    search.includes("admin/login") ||
+    search.includes("admin=login")
+  );
+}
+
+function buildTelegramHref(raw) {
+  const clean = (raw || "").trim();
+  if (!clean) return "https://t.me/GlobalEcom_Help";
+  if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
+  return "https://t.me/" + clean.replace(/^@+/, "");
+}
+
+function buildWhatsappHref(raw) {
+  const digits = String(raw || "").replace(/[^0-9]/g, "");
+  return digits ? "https://wa.me/" + digits : "https://wa.me/";
+}
+
+function applyRouting() {
+  if (!authReady) {
+    document.getElementById('admin-outer').style.display = 'none';
+    document.getElementById('customer-outer').style.display = 'none';
+    return;
+  }
+  const isAdmin = isAdminPath();
+  document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+
+  if (!isAdmin) {
+    const loggedIn = !!state.customerLoggedIn;
+
+    document.getElementById('cust-auth-screen').style.display =
+      loggedIn ? 'none' : 'flex';
+
+    document.getElementById('cust-app-screen').style.display =
+      loggedIn ? 'flex' : 'none';
+
+    if (loggedIn) {
+      const lastPage = sessionStorage.getItem('custLastPage') || 'home';
+
+      document.querySelectorAll('#cust-app-screen .page')
+        .forEach(p => p.classList.remove('active'));
+
+      const page = document.getElementById('cust-page-' + lastPage);
+      if (page) page.classList.add('active');
+      else document.getElementById('cust-page-home')?.classList.add('active');
     }
-
-    function buildTelegramHref(raw) {
-      const clean = (raw || "").trim();
-      if (!clean) return "https://t.me/GlobalEcom_Help";
-      if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
-      return "https://t.me/" + clean.replace(/^@+/, "");
-    }
-
-    function buildWhatsappHref(raw) {
-      const digits = String(raw || "").replace(/[^0-9]/g, "");
-      return digits ? "https://wa.me/" + digits : "https://wa.me/";
-    }
-
-    function applyRouting() {
-      if (!authReady) {
-        document.getElementById('admin-outer').style.display = 'none';
-        document.getElementById('customer-outer').style.display = 'none';
-        return;
-      }
-      const isAdmin = isAdminPath();
-      document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
-
-    if (!isAdmin) {
-  const loggedIn = !!state.customerLoggedIn;
-
-  document.getElementById('cust-auth-screen').style.display =
-    loggedIn ? 'none' : 'flex';
-
-  document.getElementById('cust-app-screen').style.display =
-    loggedIn ? 'flex' : 'none';
-
-  if (loggedIn) {
-    const lastPage = sessionStorage.getItem('custLastPage') || 'home';
-
-    document.querySelectorAll('#cust-app-screen .page')
-      .forEach(p => p.classList.remove('active'));
-
-    const page = document.getElementById('cust-page-' + lastPage);
-    if (page) page.classList.add('active');
-    else document.getElementById('cust-page-home')?.classList.add('active');
   }
 }
-    }
 
-    window.addEventListener("hashchange", applyRouting);
-    window.addEventListener("popstate", applyRouting);
-  window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("hashchange", applyRouting);
+window.addEventListener("popstate", applyRouting);
+window.addEventListener("DOMContentLoaded", () => {
   generateLoginCaptcha();
   renderLiveFeed();
 });
 
-    function renderLiveFeed() {
-      const el = document.getElementById('live-tx-container');
-      if (!el) return;
-      const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 3);
-      el.innerHTML = shuffled.map(x => `
-        <div class="tx-row">
-          <span><strong>${x.user}</strong> • ${x.action}</span>
-          <strong style="color:${x.color};">${x.amount}</strong>
-        </div>
-      `).join('');
-    }
-    setInterval(renderLiveFeed, 3000);
+function renderLiveFeed() {
+  const el = document.getElementById('live-tx-container');
+  if (!el) return;
+  const shuffled = [...demoFeed].sort(() => 0.5 - Math.random()).slice(0, 3);
+  el.innerHTML = shuffled.map(x => `
+    <div class="tx-row">
+      <span><strong>${x.user}</strong> • ${x.action}</span>
+      <strong style="color:${x.color};">${x.amount}</strong>
+    </div>
+  `).join('');
+}
+setInterval(renderLiveFeed, 3000);
 
-    // Real commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
-    function getDemoCommissionForUser(u) {
-    const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
-    const min = isVip ? 5 : 1;
-    const max = isVip ? 40 : 2.5;
+// Real commission ranges: regular $1-$2.50; VIP $5-$40 when admin activates VIP tier.
+function getDemoCommissionForUser(u) {
+  const isVip = String(u && u.tier || "").toLowerCase().includes("vip");
+  const min = isVip ? 5 : 1;
+  const max = isVip ? 40 : 2.5;
 
-    return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+  return Math.round((min + Math.random() * (max - min)) * 100) / 100;
 }
 
-    function renderAll() {
-      const u = getActiveUser();
-const lucky = null;
+function renderAll() {
+  const u = getActiveUser();
+  const lucky = null;
+  const nextTaskNumber = Number(u.completedTasks || 0) + 1;
 
-const demoOrder = Object.values(demoLuckyOrders || {})
-  .filter(o => o && o.status !== "Approved" && o.status !== "Deleted")
-  .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];      const dict = translations15[currentLang] || translations15.en;
+  const demoOrder = Object.values(demoLuckyOrders || {})
+    .filter(o =>
+      o &&
+      o.status !== "Approved" &&
+      o.status !== "Deleted" &&
+      Number(o.taskNum) === nextTaskNumber
+    )
+    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))[0];
 
-      if (u.balance > 0) showZeroBalAlert = false;
+  const dict = translations15[currentLang] || translations15.en;
 
-      document.getElementById('prof-name').innerText = u.name;
-      document.getElementById('prof-email').innerText = u.email;
-      document.getElementById('prof-phone').innerText = u.phone;
-      document.getElementById('prof-tier-badge').innerText = u.tier;
-      document.getElementById('bound-wallet-label').innerText = u.boundWallet;
+  if (u.balance > 0) showZeroBalAlert = false;
 
-      const tgVal = state.platformConfig.telegramSupport;
-      document.getElementById('tg-handle-display').innerText = tgVal;
-      document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
-      const waLink = document.getElementById('cust-whatsapp-direct-link');
-      if (waLink) {
-        waLink.href = buildWhatsappHref(state.platformConfig.whatsappSupport);
-        waLink.style.opacity = state.platformConfig.whatsappSupport ? '1' : '.65';
-        waLink.title = state.platformConfig.whatsappSupport ? 'Open WhatsApp support' : 'Admin must add a WhatsApp number in Settings';
-      }
+  document.getElementById('prof-name').innerText = u.name;
+  document.getElementById('prof-email').innerText = u.email;
+  document.getElementById('prof-phone').innerText = u.phone;
+  document.getElementById('prof-tier-badge').innerText = u.tier;
+  document.getElementById('bound-wallet-label').innerText = u.boundWallet;
 
-      const currentBalFormatted = `$${u.balance.toFixed(2)}`;
-      document.getElementById('profile-balance').innerText = currentBalFormatted;
-      document.getElementById('grab-balance').innerText = currentBalFormatted;
-      document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
-     const todayProfit = Number(u.todayEarn || 0);
+  const tgVal = state.platformConfig.telegramSupport;
+  document.getElementById('tg-handle-display').innerText = tgVal;
+  document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
+  const waLink = document.getElementById('cust-whatsapp-direct-link');
+  if (waLink) {
+    waLink.href = buildWhatsappHref(state.platformConfig.whatsappSupport);
+    waLink.style.opacity = state.platformConfig.whatsappSupport ? '1' : '.65';
+    waLink.title = state.platformConfig.whatsappSupport ? 'Open WhatsApp support' : 'Admin must add a WhatsApp number in Settings';
+  }
 
-const todayProfitEl = document.getElementById('profile-today-profit');
-if (todayProfitEl) {
+  const currentBalFormatted = `$${u.balance.toFixed(2)}`;
+  document.getElementById('profile-balance').innerText = currentBalFormatted;
+  document.getElementById('grab-balance').innerText = currentBalFormatted;
+  document.getElementById('grab-today-earn').innerText = '+$' + u.todayEarn.toFixed(2);
+  const todayProfit = Number(u.todayEarn || 0);
+
+  const todayProfitEl = document.getElementById('profile-today-profit');
+  if (todayProfitEl) {
     todayProfitEl.textContent = '$' + todayProfit.toFixed(2);
-}
+  }
 
- document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
-      document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
+  document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
+  document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
 
-      const statusBadge = document.getElementById('home-account-status-badge');
-      statusBadge.innerText = u.accountStatus;
-      statusBadge.style.background = u.accountStatus === "Active" ? "#10b981" : "#dc2626";
+  const statusBadge = document.getElementById('home-account-status-badge');
+  statusBadge.innerText = u.accountStatus;
+  statusBadge.style.background = u.accountStatus === "Active" ? "#10b981" : "#dc2626";
 
-      const statusBanner = document.getElementById('cust-account-status-banner');
-      const alerts = [];
-      if (u.accountStatus !== "Active") alerts.push(`Account Status: ${u.accountStatus}`);
-      if (u.tasksLocked) alerts.push("Please contact with customer service");
-      if (u.withdrawBlocked) alerts.push("Withdrawals are currently BLOCKED");
+  const statusBanner = document.getElementById('cust-account-status-banner');
+  const alerts = [];
+  if (u.accountStatus !== "Active") alerts.push(`Account Status: ${u.accountStatus}`);
+  if (u.tasksLocked) alerts.push("Please contact with customer service");
+  if (u.withdrawBlocked) alerts.push("Withdrawals are currently BLOCKED");
 
-      statusBanner.innerHTML = alerts.length > 0
-        ? `<div class="status-banner-alert"><i class="fa-solid fa-triangle-exclamation"></i> ${alerts.join(" • ")}</div>`
-        : '';
+  statusBanner.innerHTML = alerts.length > 0
+    ? `<div class="status-banner-alert"><i class="fa-solid fa-triangle-exclamation"></i> ${alerts.join(" • ")}</div>`
+    : '';
 
-      const zeroAlertEl = document.getElementById('grab-zero-balance-alert');
-      if (zeroAlertEl) {
-        zeroAlertEl.innerHTML = (showZeroBalAlert && u.balance <= 0)
-          ? `<div class="status-banner-alert"><i class="fa-solid fa-circle-info"></i> Please contact with customer service for active your tasks</div>`
-          : '';
-      }
+  const zeroAlertEl = document.getElementById('grab-zero-balance-alert');
+  if (zeroAlertEl) {
+    zeroAlertEl.innerHTML = (showZeroBalAlert && u.balance <= 0)
+      ? `<div class="status-banner-alert"><i class="fa-solid fa-circle-info"></i> Please contact with customer service for active your tasks</div>`
+      : '';
+  }
 
-      const notifArea = document.getElementById('cust-admin-notif-area');
-      if (u.adminNotification && u.adminNotification.trim()) {
-        notifArea.innerHTML = `
-          <div class="admin-push-notif">
-            <div><strong style="display:block; margin-bottom:2px;"><i class="fa-solid fa-bell"></i> Admin Notice</strong>${u.adminNotification}</div>
-            <span onclick="dismissCustomerNotification()" style="cursor:pointer; font-weight:700;">✕</span>
-          </div>
-        `;
-      } else {
-        notifArea.innerHTML = '';
-      }
-if (demoOrder && notifArea) {
-  const demoAmt = Number(demoOrder.amount || 0);
-  const demoNeed = Math.max(0, demoAmt - Number(u.balance || 0));
-  notifArea.innerHTML += `
-    <div class="admin-push-notif" style="border-left:4px solid #dc2626; cursor:pointer;" onclick="openCustModal('deposit1', ${demoNeed.toFixed(2)})">
-      <div>
-        <strong style="display:block;margin-bottom:4px;color:#b91c1c;">
-          <i class="fa-solid fa-bell"></i> Lucky Order • Task #${demoOrder.taskNum}
-        </strong>
-        ${demoOrder.product || "Lucky Product"} —
-        Amount: <strong>-$${demoAmt.toFixed(2)}</strong> •
-        Recharge: <strong>$${demoNeed.toFixed(2)}</strong>
-        <br>
-        <strong>Status: ${Number(u.balance || 0) >= demoAmt ? "Ready to Complete" : "Recharge Required"}</strong>
+  const notifArea = document.getElementById('cust-admin-notif-area');
+  if (u.adminNotification && u.adminNotification.trim()) {
+    notifArea.innerHTML = `
+      <div class="admin-push-notif">
+        <div><strong style="display:block; margin-bottom:2px;"><i class="fa-solid fa-bell"></i> Admin Notice</strong>${u.adminNotification}</div>
+        <span onclick="dismissCustomerNotification()" style="cursor:pointer; font-weight:700;">✕</span>
       </div>
-    </div>
-  `;
-}      const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
-      document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
-        ? u.accountStatus
-        : (u.tasksLocked ? "Contact Service" : (luckyLockedByFunds ? "Recharge Needed" : "Active"));
-      document.getElementById('prof-status-pill').innerText = u.accountStatus;
-
-      const stageArea = document.getElementById('grab-stage-area');
-     
-if (demoOrder) {
-  const demoAmount = Number(demoOrder.amount || 0);
-  const demoCommission = Number(demoOrder.commission || 0);
-  const currentBal = Number(u.balance || 0);
-  const rechargeNeeded = Math.max(0, demoAmount - currentBal);
-  const hasFullFunds = currentBal >= demoAmount && demoAmount > 0;
-
-  stageArea.innerHTML = `
-    <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-      <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" />
-
-      <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
-        LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
-      </span>
-
-      <h4 style="font-size:15px;color:#881337;margin-top:8px;">
-        ${demoOrder.product || "Lucky Product"}
-      </h4>
-
-      <div class="negative-order-amt">
-        -$${demoAmount.toFixed(2)}
-      </div>
-
-      <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;box-shadow:0 6px 16px rgba(220,38,38,0.28);">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
-          Recharge Amount Required
-        </div>
-        <div style="font-size:21px;font-weight:800;margin-top:2px;">
-          $${rechargeNeeded.toFixed(2)}
-        </div>
-        <div style="font-size:11px;margin-top:3px;">
-          Negative Amount: <strong>-$${demoAmount.toFixed(2)}</strong> • Balance: <strong>$${currentBal.toFixed(2)}</strong>
-        </div>
-      </div>
-
-      <p style="font-size:12px;color:#059669;font-weight:700;margin-top:10px;">
-        Commission: +$${demoCommission.toFixed(2)}
-      </p>
-
-      <p style="margin-top:10px;padding:9px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;font-size:11px;font-weight:700;">
-        ${hasFullFunds
-          ? "Full funds available — complete Lucky Order to continue."
-          : "Tap card to open Deposit. Order grabbing is locked until full funds are added."}
-      </p>
-    </div>
-
-    ${hasFullFunds
-      ? `<button class="btn-primary" style="background:#059669;color:#fff;" onclick="completeDemoLuckyOrder('${demoOrder.id || ''}')">
-           <i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${demoCommission.toFixed(2)})
-         </button>`
-      : `<button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-           <i class="fa-solid fa-wallet"></i> Deposit $${rechargeNeeded.toFixed(2)} to Unlock Grabbing
-         </button>`
-    }
-  `;
-} else if (u.tasksLocked) {
-  stageArea.innerHTML = `
-    <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
-      <i class="fa-solid fa-headset" style="font-size:24px; display:block; margin-bottom:8px;"></i>
-      Please contact with customer service
-    </div>
-  `;
-} else if (lucky && lucky.triggered && !lucky.completed) {
-  const hasEnough = u.balance >= lucky.amount;
-  const rechargeNeeded = Math.max(0, Number(lucky.amount || 0) - Number(u.balance || 0));
-  stageArea.innerHTML = `
-    <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
-      <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
-      <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
-      <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
-      <div class="negative-order-amt">-$${lucky.amount.toFixed(2)}</div>
-      <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;">
-        <div style="font-size:10px;font-weight:700;">RECHARGE AMOUNT REQUIRED</div>
-        <div style="font-size:20px;font-weight:800;">$${rechargeNeeded.toFixed(2)}</div>
-      </div>
-      <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:8px;">
-        Commission Reward: +$${lucky.comm.toFixed(2)}
-      </p>
-    </div>
-    ${hasEnough
-      ? `<button class="btn-primary" style="background:#059669; color:#fff;" onclick="completeLuckyOrder()"><i class="fa-solid fa-check-circle"></i> Complete Lucky Order (+$${lucky.comm.toFixed(2)})</button>`
-      : `<button class="btn-primary" style="background:#dc2626; color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})"><i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)} to Continue</button>`
-    }
-  `;
-} else if (u.completedTasks >= u.totalTasks) {
-  stageArea.innerHTML = `
-    <div class="product-preview">
-      <i class="fa-solid fa-circle-check" style="font-size:40px; color:#059669; margin-bottom:8px;"></i>
-      <h4 style="font-size:16px; color:#1e1b4b;">All 25 Tasks Completed!</h4>
-      <p style="font-size:12px; color:#64748b; margin-top:4px;">Your daily task batch is complete. Contact support or wait for admin task reset.</p>
-    </div>
-    <button class="btn-primary" style="opacity:0.65; cursor:not-allowed;" disabled>
-      <i class="fa-solid fa-check"></i> 25 / 25 Tasks Completed
-    </button>
-  `;
-} else {
-  const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
-  const previewItem = unique25Products[nextIdx];
-  if (!u.productRevealed) {
-    stageArea.innerHTML = `
-      <div class="grab-intro-card">
-        <i class="fa-solid fa-box-open" style="font-size:38px;color:#d97706;margin-bottom:10px;"></i>
-        <h4 style="font-size:17px;margin-bottom:7px;">Your next Grab Task is ready</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:14px;">Click on Grab order now, complete orders, earn a commission, and improve your future with Global E-commerce.</p>
-        <button class="btn-primary" onclick="revealNextProduct()"><i class="fa-solid fa-bolt"></i> Grab Order Now</button>
-      </div>`;
+    `;
   } else {
-    stageArea.innerHTML = `
-      <div class="grab-product-detail" id="product-display">
-        <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
-          TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
-        </span>
-        <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
-        <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
-        <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
-          Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${(u.pendingTaskCommission || getDemoCommissionForUser(u)).toFixed(2)}
-        </p>
+    notifArea.innerHTML = '';
+  }
+
+  if (demoOrder && notifArea) {
+    const absAmt = Math.abs(Number(demoOrder.amount || 0));
+    const rechargeAmt = absAmt;
+    notifArea.innerHTML += `
+      <div class="admin-push-notif" style="border-left:4px solid #dc2626; cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmt.toFixed(2)})">
+        <div>
+          <strong style="display:block;margin-bottom:4px;color:#b91c1c;">
+            <i class="fa-solid fa-bell"></i> Lucky Order • Task #${demoOrder.taskNum}
+          </strong>
+          ${demoOrder.product || "Lucky Product"} —
+          Amount: <strong>-$${absAmt.toFixed(2)}</strong> •
+          Recharge: <strong>$${rechargeAmt.toFixed(2)}</strong>
+        </div>
       </div>
-      <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
-        <i class="fa-solid fa-check"></i> Confirm Task
-      </button>
-      <button class="btn-primary" style="margin-top:8px;background:#64748b;" onclick="hideProductDetails()">Back</button>
     `;
   }
-}      const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
-      const ordersEl = document.getElementById('orders-list');
-      if (userOrders.length === 0) {
-        ordersEl.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;">${dict.noOrders}</p>`;
-      } else {
-        ordersEl.innerHTML = userOrders.map(o => `
-          <div class="card-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <img src="${o.img}" class="order-thumb" alt="Order Item" />
-              <div>
-                <h4 style="font-size:12px; color:#0f172a;">Task #${o.taskNum} • ${o.name}</h4>
-                <p style="font-size:10px; color:#64748b;">${o.store} • Completed</p>
-              </div>
-            </div>
-            <strong style="color:#059669; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
+
+  const luckyLockedByFunds = !!(lucky && lucky.triggered && !lucky.completed && u.balance < lucky.amount);
+  document.getElementById('grab-status-text').innerText = u.accountStatus !== "Active"
+    ? u.accountStatus
+    : (u.tasksLocked ? "Contact Service" : (demoOrder || luckyLockedByFunds ? "Recharge Needed" : "Active"));
+  document.getElementById('prof-status-pill').innerText = u.accountStatus;
+
+  const stageArea = document.getElementById('grab-stage-area');
+
+  if (demoOrder) {
+    const absAmount = Math.abs(Number(demoOrder.amount || 0));
+    const rechargeAmount = absAmount;
+    const negativeDisplay = `-$${absAmount.toFixed(2)}`;
+    const demoCommission = Number(demoOrder.commission || 0);
+
+    stageArea.innerHTML = `
+      <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+        <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" />
+
+        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
+          LUCKY ORDER • TASK #${demoOrder.taskNum || 0}
+        </span>
+
+        <h4 style="font-size:15px;color:#881337;margin-top:8px;">
+          ${demoOrder.product || "Lucky Product"}
+        </h4>
+
+        <div class="negative-order-amt">
+          ${negativeDisplay}
+        </div>
+
+        <div style="background:#dc2626;color:#fff;border-radius:12px;padding:12px;margin-top:10px;text-align:center;box-shadow:0 6px 16px rgba(220,38,38,0.28);">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
+            Recharge Amount
           </div>
-        `).join('');
-      }
+          <div style="font-size:22px;font-weight:800;margin-top:2px;">
+            $${rechargeAmount.toFixed(2)}
+          </div>
+          <div style="font-size:11px;margin-top:4px;">
+            Negative Amount: <strong>${negativeDisplay}</strong>
+          </div>
+        </div>
 
-      if (document.activeElement !== document.getElementById('adm-set-email')) {
-        document.getElementById('adm-set-email').value = state.adminCredentials.email;
-      }
-      if (document.activeElement !== document.getElementById('adm-set-adminpass')) {
-        document.getElementById('adm-set-adminpass').value = state.adminCredentials.pass;
-      }
-      if (document.activeElement !== document.getElementById('adm-set-trc20')) {
-        document.getElementById('adm-set-trc20').value = state.platformConfig.trc20Address;
-      }
-      if (document.activeElement !== document.getElementById('adm-set-tg')) {
-        document.getElementById('adm-set-tg').value = state.platformConfig.telegramSupport;
-      const waInput = document.getElementById('adm-set-wa');
-      if (waInput) waInput.value = state.platformConfig.whatsappSupport || '';
-      }
+        <p style="font-size:12px;color:#059669;font-weight:700;margin-top:10px;">
+          Commission: +$${demoCommission.toFixed(2)}
+        </p>
+      </div>
 
-      renderAdminUserLines();
-      renderAdminTxLists();
+      <button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+        <i class="fa-solid fa-wallet"></i> Recharge $${rechargeAmount.toFixed(2)}
+      </button>
+    `;
+  } else if (u.tasksLocked) {
+    stageArea.innerHTML = `
+      <div class="status-banner-alert" style="margin-bottom:0; padding:20px;">
+        <i class="fa-solid fa-headset" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+        Please contact with customer service
+      </div>
+    `;
+  } else if (lucky && lucky.triggered && !lucky.completed) {
+    const absLuckyAmt = Math.abs(Number(lucky.amount || 0));
+    const rechargeNeeded = absLuckyAmt;
+    stageArea.innerHTML = `
+      <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
+        <img src="${lucky.img}" class="prod-img" alt="Lucky Order Product" />
+        <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px;">LUCKY ORDER • TASK #${lucky.taskNum}</span>
+        <h4 style="font-size:15px; color:#881337; margin-top:8px;">${lucky.product}</h4>
+        <div class="negative-order-amt">-$${absLuckyAmt.toFixed(2)}</div>
+        <div style="background:#dc2626;color:#fff;border-radius:12px;padding:11px 12px;margin-top:10px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;">RECHARGE AMOUNT</div>
+          <div style="font-size:20px;font-weight:800;">$${rechargeNeeded.toFixed(2)}</div>
+        </div>
+        <p style="font-size:12px; color:#be123c; font-weight:700; margin-top:8px;">
+          Commission Reward: +$${lucky.comm.toFixed(2)}
+        </p>
+      </div>
+      <button class="btn-primary" style="background:#dc2626; color:#fff;" onclick="openCustModal('deposit1', ${rechargeNeeded.toFixed(2)})">
+        <i class="fa-solid fa-wallet"></i> Recharge $${rechargeNeeded.toFixed(2)}
+      </button>
+    `;
+  } else if (u.completedTasks >= u.totalTasks) {
+    stageArea.innerHTML = `
+      <div class="product-preview">
+        <i class="fa-solid fa-circle-check" style="font-size:40px; color:#059669; margin-bottom:8px;"></i>
+        <h4 style="font-size:16px; color:#1e1b4b;">All 25 Tasks Completed!</h4>
+        <p style="font-size:12px; color:#64748b; margin-top:4px;">Your daily task batch is complete. Contact support or wait for admin task reset.</p>
+      </div>
+      <button class="btn-primary" style="opacity:0.65; cursor:not-allowed;" disabled>
+        <i class="fa-solid fa-check"></i> 25 / 25 Tasks Completed
+      </button>
+    `;
+  } else {
+    const nextIdx = Math.min(u.completedTasks, unique25Products.length - 1);
+    const previewItem = unique25Products[nextIdx];
+    if (!u.productRevealed) {
+      stageArea.innerHTML = `
+        <div class="grab-intro-card">
+          <i class="fa-solid fa-box-open" style="font-size:38px;color:#d97706;margin-bottom:10px;"></i>
+          <h4 style="font-size:17px;margin-bottom:7px;">Your next Grab Task is ready</h4>
+          <p style="font-size:12px;color:#64748b;margin-bottom:14px;">Click on Grab order now, complete orders, earn a commission, and improve your future with Global E-commerce.</p>
+          <button class="btn-primary" onclick="revealNextProduct()"><i class="fa-solid fa-bolt"></i> Grab Order Now</button>
+        </div>`;
+    } else {
+      stageArea.innerHTML = `
+        <div class="grab-product-detail" id="product-display">
+          <span style="display:inline-block; background:#e0e7ff; color:#3730a3; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
+            TASK #${u.completedTasks + 1} OF ${u.totalTasks} • ${previewItem.store}
+          </span>
+          <img src="${previewItem.img}" alt="${previewItem.name}" class="prod-img" />
+          <h4 style="font-size:15px; color:#0f172a;">${previewItem.name}</h4>
+          <p style="font-size:12px; color:#4f46e5; font-weight:700; margin-top:5px;">
+            Order Value: $${previewItem.price.toFixed(2)} • Commission: +$${(u.pendingTaskCommission || getDemoCommissionForUser(u)).toFixed(2)}
+          </p>
+        </div>
+        <button class="btn-primary" id="grab-btn" onclick="grabOrder()">
+          <i class="fa-solid fa-check"></i> Confirm Task
+        </button>
+        <button class="btn-primary" style="margin-top:8px;background:#64748b;" onclick="hideProductDetails()">Back</button>
+      `;
     }
+  }
 
-    // ==================== RENDER EACH USER IN ADMIN ====================
-    function renderAdminUserLines() {
-      const container = document.getElementById('admin-users-lines-container');
-      if (!container) return;
+  const userOrders = state.ordersHistory.filter(o => o.userId === u.id);
+  const ordersEl = document.getElementById('orders-list');
+  if (userOrders.length === 0) {
+    ordersEl.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:30px;">${dict.noOrders}</p>`;
+  } else {
+    ordersEl.innerHTML = userOrders.map(o => `
+      <div class="card-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="${o.img}" class="order-thumb" alt="Order Item" />
+          <div>
+            <h4 style="font-size:12px; color:#0f172a;">Task #${o.taskNum} • ${o.name}</h4>
+            <p style="font-size:10px; color:#64748b;">${o.store} • Completed</p>
+          </div>
+        </div>
+        <strong style="color:#059669; font-size:13px; white-space:nowrap;">+$${o.comm.toFixed(2)}</strong>
+      </div>
+    `).join('');
+  }
 
-      const search = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
-      const visibleUsers = [...state.users].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).filter(user =>
-        !search || [user.customerCode, user.name, user.email, user.phone].some(v => String(v || '').toLowerCase().includes(search))
-      );
-      container.innerHTML = visibleUsers.length ? visibleUsers.map(user => {
-        const panelMode = openUserPanels[user.id] || null;
-        const l = user.activeLuckyOrder;
+  if (document.activeElement !== document.getElementById('adm-set-email')) {
+    document.getElementById('adm-set-email').value = state.adminCredentials.email;
+  }
+  if (document.activeElement !== document.getElementById('adm-set-adminpass')) {
+    document.getElementById('adm-set-adminpass').value = state.adminCredentials.pass;
+  }
+  if (document.activeElement !== document.getElementById('adm-set-trc20')) {
+    document.getElementById('adm-set-trc20').value = state.platformConfig.trc20Address;
+  }
+  if (document.activeElement !== document.getElementById('adm-set-tg')) {
+    document.getElementById('adm-set-tg').value = state.platformConfig.telegramSupport;
+    const waInput = document.getElementById('adm-set-wa');
+    if (waInput) waInput.value = state.platformConfig.whatsappSupport || '';
+  }
 
-        return `
-          <div class="user-line-card" id="user-line-${user.id}">
-            <div class="user-line-top">
-              <div>
-                <h4 style="font-size:15px; color:#0f172a;">
-                  <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name} <small style="color:#4f46e5;font-weight:800;">${user.customerCode || ''}</small>
-                  <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
-                    ${user.accountStatus}
-                  </span>
-                </h4>
+  renderAdminUserLines();
+  renderAdminTxLists();
+}
+
+// ==================== RENDER EACH USER IN ADMIN ====================
+function renderAdminUserLines() {
+  const container = document.getElementById('admin-users-lines-container');
+  if (!container) return;
+
+  const search = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
+  const visibleUsers = [...state.users].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)).filter(user =>
+    !search || [user.customerCode, user.name, user.email, user.phone].some(v => String(v || '').toLowerCase().includes(search))
+  );
+  container.innerHTML = visibleUsers.length ? visibleUsers.map(user => {
+    const panelMode = openUserPanels[user.id] || null;
+
+    return `
+      <div class="user-line-card" id="user-line-${user.id}">
+        <div class="user-line-top">
+          <div>
+            <h4 style="font-size:15px; color:#0f172a;">
+              <i class="fa-solid fa-user-circle" style="color:#4f46e5;"></i> ${user.name} <small style="color:#4f46e5;font-weight:800;">${user.customerCode || ''}</small>
+              <span style="margin-left:8px; font-size:11px; padding:2px 8px; border-radius:10px; background:${user.accountStatus === 'Active' ? '#dcfce7' : '#fee2e2'}; color:${user.accountStatus === 'Active' ? '#15803d' : '#b91c1c'};">
+                ${user.accountStatus}
+              </span>
+            </h4>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:15px; font-weight:800; color:#059669; margin-right:6px;">$${user.balance.toFixed(2)}</span>
+            <input type="number" id="fund-input-${user.id}" placeholder="Amount ($)" style="width:105px; padding:7px 9px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px;" />
+            <button class="btn-sm" style="background:#059669;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
+            <button class="btn-sm" style="background:#dc2626;" onclick="userAdjustFunds('${user.id}', 'deduct')">- Deduct Funds</button>
+          </div>
+        </div>
+
+        <div class="user-meta-grid">
+          <div><span style="color:#64748b;">Name:</span> <strong>${user.name}</strong></div>
+          <div><span style="color:#64748b;">Phone:</span> <strong>${user.phone}</strong></div>
+          <div><span style="color:#64748b;">Email:</span> <strong>${user.email}</strong></div>
+          <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong> • <span style="color:#059669; font-weight:700;">Today: $${user.todayEarn.toFixed(2)}</span></div>
+        </div>
+
+        <div class="user-inline-controls">
+          <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+            <span style="font-size:11px; font-weight:700; color:#334155;">Status:</span>
+            <select id="status-select-${user.id}" onchange="userSetStatus('${user.id}', this.value)" style="padding:4px 7px; border-radius:6px; border:1px solid #cbd5e1; font-size:11px; font-weight:600;">
+              <option value="Active" ${user.accountStatus === 'Active' ? 'selected' : ''}>Active</option>
+              <option value="Freeze" ${user.accountStatus === 'Freeze' ? 'selected' : ''}>Freeze</option>
+              <option value="Deactive" ${user.accountStatus === 'Deactive' ? 'selected' : ''}>Deactive</option>
+            </select>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+            <span style="font-size:11px; font-weight:700; color:#334155;">Slide Lock:</span>
+            <label class="switch">
+              <input type="checkbox" ${user.tasksLocked ? 'checked' : ''} onchange="userToggleSlideLock('${user.id}', this.checked)" />
+              <span class="slider"></span>
+            </label>
+            <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#059669'}; font-weight:700;">
+              ${user.tasksLocked ? 'ON (Service Msg)' : 'OFF'}
+            </span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
+            <span style="font-size:11px; font-weight:700; color:#334155;">WD Block:</span>
+            <label class="switch">
+              <input type="checkbox" ${user.withdrawBlocked ? 'checked' : ''} onchange="userToggleWdBlock('${user.id}', this.checked)" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <button class="btn-sm" style="background:#7c3aed;" onclick="userResetTasks('${user.id}')">
+            <i class="fa-solid fa-rotate-left"></i> Reset Tasks (0/25)
+          </button>
+
+          <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#4f46e5'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
+            <i class="fa-solid fa-gear"></i> User Setting
+          </button>
+
+          <button class="btn-sm" style="background:${panelMode === 'lucky' ? '#0f172a' : '#d97706'};" onclick="toggleUserSubpanel('${user.id}', 'lucky')">
+            <i class="fa-solid fa-star"></i> Lucky Order
+          </button>
+        </div>
+
+        ${panelMode === 'setting' ? `
+          <div class="user-subpanel">
+            <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-gear"></i> ${user.name} — Account & Security Setting</h5>
+            <div class="admin-grid-2">
+              <div class="input-group">
+                <label>Customer Login Password</label>
+                <input type="text" id="u-loginpass-${user.id}" value="${user.loginPassword || ''}" placeholder="Set login password" />
               </div>
-
-              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span style="font-size:15px; font-weight:800; color:#059669; margin-right:6px;">$${user.balance.toFixed(2)}</span>
-                <input type="number" id="fund-input-${user.id}" placeholder="Amount ($)" style="width:105px; padding:7px 9px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px;" />
-                <button class="btn-sm" style="background:#059669;" onclick="userAdjustFunds('${user.id}', 'add')">+ Add Funds</button>
-                <button class="btn-sm" style="background:#dc2626;" onclick="userAdjustFunds('${user.id}', 'deduct')">- Deduct Funds</button>
+              <div class="input-group">
+                <label>Customer Withdraw Password</label>
+                <input type="text" id="u-wdpass-${user.id}" value="${user.withdrawPassword || ''}" placeholder="Set withdraw password" />
+              </div>
+              <div class="input-group">
+                <label>Customer TRC20 Address</label>
+                <input type="text" id="u-trc20-${user.id}" value="${user.trc20Address || ''}" placeholder="TRC20 wallet address" />
+              </div>
+              <div class="input-group">
+                <label>Customer Notice / Notification</label>
+                <input type="text" id="u-notif-${user.id}" value="${user.adminNotification || ''}" placeholder="Live message for this user" />
               </div>
             </div>
+            <button class="btn-sm" style="background:#059669; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
+              <i class="fa-solid fa-check"></i> Save User Setting
+            </button>
+          </div>
+        ` : ''}
 
-            <div class="user-meta-grid">
-              <div><span style="color:#64748b;">Name:</span> <strong>${user.name}</strong></div>
-              <div><span style="color:#64748b;">Phone:</span> <strong>${user.phone}</strong></div>
-              <div><span style="color:#64748b;">Email:</span> <strong>${user.email}</strong></div>
-              <div><span style="color:#64748b;">Tasks:</span> <strong>${user.completedTasks} / ${user.totalTasks}</strong> • <span style="color:#059669; font-weight:700;">Today: $${user.todayEarn.toFixed(2)}</span></div>
-            </div>
+        ${panelMode === 'lucky' ? `
+          <div class="user-subpanel">
+            <h5 style="font-size:13px;color:#0f172a;margin-bottom:10px;">
+              <i class="fa-solid fa-star" style="color:#d97706;"></i>
+              ${user.name} — Demo Lucky Orders
+            </h5>
 
-            <div class="user-inline-controls">
-              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
-                <span style="font-size:11px; font-weight:700; color:#334155;">Status:</span>
-                <select id="status-select-${user.id}" onchange="userSetStatus('${user.id}', this.value)" style="padding:4px 7px; border-radius:6px; border:1px solid #cbd5e1; font-size:11px; font-weight:600;">
-                  <option value="Active" ${user.accountStatus === 'Active' ? 'selected' : ''}>Active</option>
-                  <option value="Freeze" ${user.accountStatus === 'Freeze' ? 'selected' : ''}>Freeze</option>
-                  <option value="Deactive" ${user.accountStatus === 'Deactive' ? 'selected' : ''}>Deactive</option>
+            <div class="admin-grid-2">
+              <div class="input-group">
+                <label>Task Number (1–25)</label>
+                <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="2" />
+              </div>
+
+              <div class="input-group">
+                <label>Lucky Product</label>
+                <select id="u-lucky-prod-${user.id}">
+                  <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
+                  <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
+                  <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6xJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
                 </select>
               </div>
 
-              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
-                <span style="font-size:11px; font-weight:700; color:#334155;">Slide Lock:</span>
-                <label class="switch">
-                  <input type="checkbox" ${user.tasksLocked ? 'checked' : ''} onchange="userToggleSlideLock('${user.id}', this.checked)" />
-                  <span class="slider"></span>
-                </label>
-                <span style="font-size:10px; color:${user.tasksLocked ? '#dc2626' : '#059669'}; font-weight:700;">
-                  ${user.tasksLocked ? 'ON (Service Msg)' : 'OFF'}
-                </span>
+              <div class="input-group">
+                <label>Demo Order Amount</label>
+                <input type="number" id="u-lucky-amt-${user.id}" step="0.01" value="500" />
               </div>
 
-              <div style="display:flex; align-items:center; gap:6px; background:#eef2ff; padding:6px 10px; border-radius:9px; border:1px solid #c7d2fe;">
-                <span style="font-size:11px; font-weight:700; color:#334155;">WD Block:</span>
-                <label class="switch">
-                  <input type="checkbox" ${user.withdrawBlocked ? 'checked' : ''} onchange="userToggleWdBlock('${user.id}', this.checked)" />
-                  <span class="slider"></span>
-                </label>
+              <div class="input-group">
+                <label>Demo Commission</label>
+                <input type="number" id="u-lucky-comm-${user.id}" min="0" step="0.01" value="85" />
               </div>
-
-              <button class="btn-sm" style="background:#7c3aed;" onclick="userResetTasks('${user.id}')">
-                <i class="fa-solid fa-rotate-left"></i> Reset Tasks (0/25)
-              </button>
-
-              <button class="btn-sm" style="background:${panelMode === 'setting' ? '#0f172a' : '#4f46e5'};" onclick="toggleUserSubpanel('${user.id}', 'setting')">
-                <i class="fa-solid fa-gear"></i> User Setting
-              </button>
-
-              <button class="btn-sm" style="background:${panelMode === 'lucky' ? '#0f172a' : '#d97706'};" onclick="toggleUserSubpanel('${user.id}', 'lucky')">
-                <i class="fa-solid fa-star"></i> Lucky Order
-              </button>
             </div>
 
-            ${panelMode === 'setting' ? `
-              <div class="user-subpanel">
-                <h5 style="font-size:13px; color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-gear"></i> ${user.name} — Account & Security Setting</h5>
-                <div class="admin-grid-2">
-                  <div class="input-group">
-                    <label>Customer Login Password</label>
-                    <input type="text" id="u-loginpass-${user.id}" value="${user.loginPassword || ''}" placeholder="Set login password" />
-                  </div>
-                  <div class="input-group">
-                    <label>Customer Withdraw Password</label>
-                    <input type="text" id="u-wdpass-${user.id}" value="${user.withdrawPassword || ''}" placeholder="Set withdraw password" />
-                  </div>
-                  <div class="input-group">
-                    <label>Customer TRC20 Address</label>
-                    <input type="text" id="u-trc20-${user.id}" value="${user.trc20Address || ''}" placeholder="TRC20 wallet address" />
-                  </div>
-                  <div class="input-group">
-                    <label>Customer Notice / Notification</label>
-                    <input type="text" id="u-notif-${user.id}" value="${user.adminNotification || ''}" placeholder="Live message for this user" />
-                  </div>
-                </div>
-                <button class="btn-sm" style="background:#059669; padding:8px 14px;" onclick="saveUserSettings('${user.id}')">
-                  <i class="fa-solid fa-check"></i> Save User Setting
-                </button>
-              </div>
-            ` : ''}
+            <button class="btn-primary" id="u-lucky-save-${user.id}"
+              onclick="saveUserLuckyOrder('${user.id}')">
+              Add Demo Lucky Order
+            </button>
 
-          
-${panelMode === 'lucky' ? `
-  <div class="user-subpanel">
-    <h5 style="font-size:13px;color:#0f172a;margin-bottom:10px;">
-      <i class="fa-solid fa-star" style="color:#d97706;"></i>
-      ${user.name} — Demo Lucky Orders
-    </h5>
-
-    <div class="admin-grid-2">
-      <div class="input-group">
-        <label>Task Number (1–25)</label>
-        <input type="number" id="u-lucky-task-${user.id}" min="1" max="25" value="2" />
-      </div>
-
-      <div class="input-group">
-        <label>Lucky Product</label>
-        <select id="u-lucky-prod-${user.id}">
-          <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
-          <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
-          <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6xJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label>Demo Order Amount</label>
-        <input type="number" id="u-lucky-amt-${user.id}" min="0.01" step="0.01" value="500" />
-      </div>
-
-      <div class="input-group">
-        <label>Demo Commission</label>
-        <input type="number" id="u-lucky-comm-${user.id}" min="0.01" step="0.01" value="85" />
-      </div>
-    </div>
-
-    <button class="btn-primary"
-      onclick="saveUserLuckyOrder('${user.id}')">
-      Add Demo Lucky Order
-    </button>
-
-    <div id="u-lucky-list-${user.id}"></div>
-  </div>
-` : ''}
-
+            <div id="u-lucky-list-${user.id}"></div>
           </div>
-        `;
-     
-      }).join('') : `<p style="padding:18px;color:#64748b;">No matching customers found.</p>`;
+        ` : ''}
 
-      visibleUsers.forEach(user => {
-        if (openUserPanels[user.id] === 'lucky') {
-          renderAdminLuckyOrders(user.id);
-        }
-      });
+      </div>
+    `;
+  }).join('') : `<p style="padding:18px;color:#64748b;">No matching customers found.</p>`;
+
+  visibleUsers.forEach(user => {
+    if (openUserPanels[user.id] === 'lucky') {
+      renderAdminLuckyOrders(user.id);
     }
-
-
+  });
+}
 function renderAdminLuckyOrders(userId) {
   const list = document.getElementById("u-lucky-list-" + userId);
   if (!list) return;
