@@ -1919,7 +1919,11 @@
             <button class="admin-nav-btn active" onclick="switchAdminPage('users', 'Registered Users', this)">
               <i class="fa-solid fa-users"></i> Users
             </button>
-            <button class="admin-nav-btn" onclick="switchAdminPage('deposits', 'Deposit Requests', this)">
+            <button class="admin-nav-btn" onclick="switchAdminPage('order-management', 'Order Management', this)">
+  <i class="fa-solid fa-list-check"></i> Order Management
+</button>
+
+<button class="admin-nav-btn" onclick="switchAdminPage('deposits', 'Deposit Requests', this)">
               <i class="fa-solid fa-circle-arrow-down"></i> Deposits
             </button>
             <button class="admin-nav-btn" onclick="switchAdminPage('withdraws', 'Withdrawal Requests', this)">
@@ -1948,7 +1952,23 @@
               <div style="margin-bottom:12px;"><input id="admin-user-search" type="search" placeholder="Search customers by ID, name, email or phone..." oninput="renderAdminUserLines()" style="width:100%;max-width:460px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:13px;" /></div>
               <div id="admin-users-lines-container"></div>
             </div>
+<div id="admin-page-order-management" class="page">
+  <div class="card-box">
+    <h4 style="font-size:16px; margin-bottom:12px;">
+      <i class="fa-solid fa-list-check"></i> Lucky Order Management
+    </h4>
 
+    <div id="admin-lucky-order-slots"></div>
+  </div>
+
+  <div class="card-box" style="margin-top:15px;">
+    <h4 style="font-size:16px; margin-bottom:12px;">
+      Completed / Deleted Order History
+    </h4>
+
+    <div id="admin-lucky-order-history"></div>
+  </div>
+</div>
             <div id="admin-page-deposits" class="page">
               <div class="card-box">
                 <h4 style="font-size:15px; margin-bottom:12px;">Live Deposit Requests</h4>
