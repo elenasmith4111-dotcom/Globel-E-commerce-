@@ -2628,7 +2628,10 @@ async function startRealtimeSync() {
       } else {
         renderAdminUserLines();
         renderAdminTxLists();
-      }
+     if (pageId === "order-management") {
+  renderAdminOrderManagement();
+}
+ }
       setBackendStatus(true);
     };
 
@@ -3920,11 +3923,11 @@ async function deleteDemoLuckyOrder(userId, orderId) {
   }
 
   try {
-    const { error } = await sb
-      .from("lucky_orders")
-      .delete()
-      .eq("id", orderId)
-      .eq("user_id", userId);
+   const { error } = await sb
+  .from("lucky_orders")
+  .update({ status: "Deleted" })
+  .eq("id", orderId)
+  .eq("user_id", userId);
 
     if (error) throw error;
 
@@ -4120,7 +4123,7 @@ async function saveUserLuckyOrder(userId) {
     commissionInput.value = "";
 
     await renderAdminLuckyOrders(userId);
-
+    await renderAdminOrderManagement();
   } catch (error) {
     console.error("Supabase Lucky Order Error:", error);
     alert("Could not save demo order: " + error.message);
@@ -5279,7 +5282,64 @@ if (!window.__adminTxClickBound) {
       decideAdminTx(txId, decision);
     }
   });
-}async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
+}
+async function renderAdminOrderManagement() {
+  const slots = document.getElementById("admin-lucky-order-slots");
+  const history = document.getElementById("admin-lucky-order-history");
+
+  if (!slots || !history) return;
+
+  const { data: orders, error } = await sb
+    .from("lucky_orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    slots.innerHTML = "Orders load nahi ho sake: " + error.message;
+    return;
+  }
+
+  const activeOrders = (orders || []).filter(
+    o => !["Approved", "Deleted"].includes(o.status)
+  );
+
+  const historyOrders = (orders || []).filter(
+    o => ["Approved", "Deleted"].includes(o.status)
+  );
+
+  const getUserName = userId => {
+    const user = state.users.find(u => String(u.id) === String(userId));
+    return user ? (user.name || user.email || user.id) : userId;
+  };
+
+  slots.innerHTML = `
+    <p>Active Orders: ${activeOrders.length} / 4</p>
+    ${activeOrders.map(o => `
+      <div class="user-subpanel" style="margin-bottom:10px;">
+        <b>${escapeLuckyText(getUserName(o.user_id))}</b>
+        <p>Task: ${o.task_number} | Product: ${escapeLuckyText(o.product)}</p>
+        <p>Amount: ${o.amount} | Commission: ${o.commission}</p>
+        <p>Status: ${escapeLuckyText(o.status)}</p>
+        <button class="btn-primary"
+          onclick="deleteDemoLuckyOrder('${o.user_id}', '${o.id}')">
+          Delete / Free Slot
+        </button>
+      </div>
+    `).join("")}
+  `;
+
+  history.innerHTML = historyOrders.length
+    ? historyOrders.map(o => `
+        <div class="user-subpanel" style="margin-bottom:10px;">
+          <b>${escapeLuckyText(getUserName(o.user_id))}</b>
+          <p>Task: ${o.task_number} | ${escapeLuckyText(o.product)}</p>
+          <p>Status: ${o.status === "Approved" ? "Completed" : "Deleted"}</p>
+        </div>
+      `).join("")
+    : "<p>No completed or deleted orders yet.</p>";
+}
+
+async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
   const usr = (state.users || []).find(u => u.id === userId);
   if (!usr || typeof sb === "undefined" || !sb) return;
 
