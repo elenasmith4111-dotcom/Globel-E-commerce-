@@ -4675,40 +4675,7 @@ if (!window.__adminTxClickBound) {
       decideAdminTx(txId, decision);
     }
   });
-}
-
-  const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
-  const wdEl = document.getElementById('adm-withdraws-list');
-  if (wdEl) {
-    wdEl.innerHTML = wds.length === 0
-      ? `<p style="font-size:12px; color:#94a3b8; text-align:center; padding:20px 0;">No withdrawal requests.</p>`
-      : wds.map(w => {
-          const st = String(w.status || 'Pending');
-          const norm = st.charAt(0).toUpperCase() + st.slice(1).toLowerCase();
-          const badgeCls = norm === 'Approved' ? 'badge-approved' : (norm === 'Rejected' ? 'badge-rejected' : 'badge-pending');
-          const safeId = encodeURIComponent(String(w.id));
-          const safeUser = typeof escapeLuckyText === "function" ? escapeLuckyText(w.user) : String(w.user || '');
-          const safeTime = typeof escapeLuckyText === "function" ? escapeLuckyText(w.time || '') : String(w.time || '');
-          return `
-            <div class="card-box" style="margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; font-size:13px;">
-                <strong>${safeUser} • $${Number(w.amount || 0).toFixed(2)}</strong>
-                <span class="${badgeCls}">${norm}</span>
-              </div>
-              <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${safeTime}</p>
-              ${norm === 'Pending' ? `
-                <div style="display:flex; gap:8px;">
-                  <button type="button" class="btn-sm" style="background:#059669;" onclick="decideAdminTx(decodeURIComponent('${safeId}'), 'Approved')">Approve Withdraw</button>
-                  <button type="button" class="btn-sm" style="background:#dc2626;" onclick="decideAdminTx(decodeURIComponent('${safeId}'), 'Rejected')">Reject Withdraw</button>
-                </div>
-              ` : ''}
-            </div>
-          `;
-        }).join('');
-  }
-}
-
-async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
+}async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
   const usr = (state.users || []).find(u => u.id === userId);
   if (!usr || typeof sb === "undefined" || !sb) return;
 
