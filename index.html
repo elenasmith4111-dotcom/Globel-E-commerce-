@@ -2712,24 +2712,7 @@ async function startRealtimeSync() {
     state.users = [record];
     state.activeUserId = user.id;
     state.customerLoggedIn = true;
-// Load confirmed wallet balance before showing dashboard
-const { data: ledgerRows, error: walletFetchError } = await sb
-  .from("wallet_ledger")
-  .select("amount")
-  .eq("user_id", user.id);
 
-if (ledgerError) throw ledgerError;
-
-if (!Array.isArray(ledgerRows)) {
-  throw new Error("Wallet balance could not be verified.");
-}
-
-const confirmedBalance = ledgerRows.reduce((sum, row) => {
-  const amount = Number(row.amount);
-  return sum + (Number.isFinite(amount) ? amount : 0);
-}, 0);
-
-profile.balance = syncBalanceFromLedger(user.id, confirmedBalance);
     if (typeof demoLuckyOrders === "object" && demoLuckyOrders) {
       Object.keys(demoLuckyOrders).forEach(key => {
         const ord = demoLuckyOrders[key];
