@@ -1246,19 +1246,29 @@
             <input type="password" id="login-pass" value="123456" />
           </div>
 
-          <!-- SIMPLE 4-CHARACTER CAPTCHA -->
           <div class="simple-captcha">
-            <span id="captcha-question">3354</span>
-            <input
-              type="text"
-              id="captcha-answer"
-              placeholder="Enter 4-digit code"
-              maxlength="4"
-              inputmode="numeric"
-              pattern="[0-9]{4}"
-              autocomplete="off"
-            />
-          </div>
+  <span id="captcha-question">3354</span>
+
+  <button
+    type="button"
+    id="captcha-refresh"
+    onclick="generateLoginCaptcha()"
+    aria-label="Refresh captcha"
+    title="Refresh code"
+  >
+    ↻
+  </button>
+
+  <input
+    type="text"
+    id="captcha-answer"
+    placeholder="Enter 4-digit code"
+    maxlength="4"
+    inputmode="numeric"
+    pattern="[0-9]{4}"
+    autocomplete="off"
+  />
+</div>
 
           <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">
             Sign In
