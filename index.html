@@ -1585,16 +1585,15 @@
       data-i18n="tgSupportDesc">
       We are here to assist you 24/7
     </p>
-
-    <a id="cust-telegram-direct-link"
-      href="https://t.me/GlobalEcom_Help"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="btn-primary">
-      <i class="fa-brands fa-telegram"></i>
-      <span data-i18n="openTg">Open Telegram Support</span>
-      (<span id="tg-handle-display">@GlobalEcom_Help</span>)
-    </a>
+<a id="cust-telegram-direct-link"
+   href="#"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn-primary">
+    <i class="fa-brands fa-telegram"></i>
+    <span data-i18n="openTg">Open Telegram Support</span>
+    (<span id="tg-handle-display">@Telegram</span>)
+</a>
 
     <a id="cust-whatsapp-direct-link"
       href="https://wa.me/"
@@ -2422,11 +2421,11 @@ function makeUserRecord(partial = {}) {
         user: "admin",
         pass: "admin123"
       },
-      platformConfig: {
-        trc20Address: "TX9k8mP4vL2qR7nW9xJ3cE5bA1zH6yU8pQ",
-        telegramSupport: "@GlobalEcom_Help",
-        whatsappSupport: ""
-      },
+    platformConfig: {
+    trc20Address: "",
+    telegramSupport: "",
+    whatsappSupport: ""
+},
       activeUserId: "usr_default_1",
       customerLoggedIn: false,
       users: [
@@ -4265,23 +4264,6 @@ async function loadPlatformSettings() {
     applyPlatformSettings(data);
 }
 
-function applyPlatformSettings(settings) {
-    if (!settings) return;
-
-    state.platformConfig.trc20Address =
-        settings.trc20_address || "";
-
-    state.platformConfig.telegramSupport =
-        settings.telegram_support || "";
-
-    state.platformConfig.whatsappSupport =
-        settings.whatsapp_support || "";
-
-    if (typeof renderAll === "function") {
-        renderAll();
-    }
-}
-
 function startPlatformSettingsLive() {
     if (platformSettingsChannel) return;
 
@@ -4306,6 +4288,32 @@ function startPlatformSettingsLive() {
     loadPlatformSettings();
 }
 
+function updateCustomerTelegramLink() {
+    const rawTelegram = state.platformConfig.telegramSupport || '';
+
+    const username = rawTelegram
+        .trim()
+        .replace(/^@/, '')
+        .replace(/^https?:\/\/(www\.)?t\.me\//i, '')
+        .replace(/\/$/, '');
+
+    const link = document.getElementById('cust-telegram-direct-link');
+    const display = document.getElementById('tg-handle-display');
+
+    if (!link || !display) return;
+
+    if (username) {
+        link.href = `https://t.me/${encodeURIComponent(username)}`;
+        display.textContent = '@' + username;
+        link.style.display = '';
+    } else {
+        link.href = '#';
+        display.textContent = 'Unavailable';
+        link.style.display = 'none';
+    }
+}
+
+startPlatformSettingsLive();
 async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
@@ -5707,32 +5715,34 @@ async function adminSavePlatformSettings() {
     const newTrc = document.getElementById('adm-set-trc20').value.trim();
     const newTg = document.getElementById('adm-set-tg').value.trim();
     const newWa = (document.getElementById('adm-set-wa')?.value || '')
-        .trim()
-        .replace(/[^0-9]/g, '');
+        .trim().replace(/[^0-9]/g, '');
 
     try {
-        const { error } = await sb
+        const { data, error } = await sb
             .from('platform_settings')
-            .upsert({
-                id: 1,
+            .update({
                 trc20_address: newTrc,
                 telegram_support: newTg,
                 whatsapp_support: newWa
-            }, { onConflict: 'id' });
+            })
+            .eq('id', 1)
+            .select();
 
         if (error) throw error;
 
-        // Admin page ki local state bhi update karein
+        if (!data || data.length === 0) {
+            throw new Error("Settings update nahi hui. Admin permission check karein.");
+        }
+
         state.platformConfig.trc20Address = newTrc;
         state.platformConfig.telegramSupport = newTg;
         state.platformConfig.whatsappSupport = newWa;
 
         saveState();
-
         alert("Platform settings updated successfully!");
 
     } catch (error) {
-        console.error("Platform settings error:", error);
+        console.error("Settings error:", error);
         alert("Settings update failed: " + error.message);
     }
 }
