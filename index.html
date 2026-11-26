@@ -5302,7 +5302,10 @@ async function renderAdminOrderManagement() {
   const searchBox = document.getElementById("admin-order-search");
 
   if (!slots || !history) return;
-
+if (searchBox) searchBox.style.display = "";
+if (history.parentElement) {
+  history.parentElement.style.display = "";
+}
   // Search listener sirf ek baar attach hoga
   if (searchBox && !searchBox.dataset.bound) {
     searchBox.dataset.bound = "true";
@@ -5329,49 +5332,60 @@ async function renderAdminOrderManagement() {
     return;
   }
 
-  slots.innerHTML = `
-    <div style="overflow-x:auto;">
-      <table style="width:100%; border-collapse:collapse; min-width:750px;">
-        <thead>
-          <tr>
-            <th>User ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Balance</th>
-            <th>Tasks</th>
-            <th>Slide</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${users.map(user => `
-            <tr>
-              <td>${escapeLuckyText(user.customerCode || user.id)}</td>
-              <td>${escapeLuckyText(user.name || "-")}</td>
-              <td>${escapeLuckyText(user.email || "-")}</td>
-              <td>${Number(user.balance || 0).toFixed(2)}</td>
-              <td>
-                ${Number(user.completedTasks || 0)}
-                /
-                ${Number(user.totalTasks || 0)}
-              </td>
-              <td>
-                ${user.tasksLocked ? "OFF" : "ON"}
-              </td>
-              <td>
-                <button
-                  class="btn-primary"
-                  data-admin-tasks="${encodeURIComponent(String(user.id))}">
-                  <i class="fa-solid fa-list-check"></i> Tasks
-                </button>
-              </td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
+ slots.innerHTML = `
+  <div style="overflow-x:auto;">
+    <table style="width:100%; min-width:750px; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Lucky Balance</th>
+          <th>Tasks Control</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
 
+      <tbody>
+        ${users.map(user => `
+          <tr>
+            <td>${escapeLuckyText(user.name || "-")}</td>
+
+            <td>${escapeLuckyText(user.email || "-")}</td>
+
+            <td>
+              ${Number(user.balance || 0).toFixed(2)}
+            </td>
+
+            <td>
+              <span style="
+                display:inline-block;
+                padding:5px 12px;
+                border-radius:20px;
+                background:${user.tasksLocked ? '#fee2e2' : '#dcfce7'};
+                color:${user.tasksLocked ? '#b91c1c' : '#15803d'};
+                font-weight:600;">
+                ${user.tasksLocked ? "OFF" : "ON"}
+              </span>
+            </td>
+
+            <td>
+              <button
+                class="btn-primary"
+                data-admin-tasks="${encodeURIComponent(String(user.id))}">
+                <i class="fa-solid fa-list-check"></i>
+                Tasks
+              </button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  </div>
+`;
+history.scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
   // Tasks button listener
   if (!window.__adminOrderTasksClickBound) {
     window.__adminOrderTasksClickBound = true;
@@ -5393,19 +5407,42 @@ async function renderAdminOrderManagement() {
 
 // Customer ke existing task records ke 4 read-only slots
 async function showAdminCustomerTasks(userId) {
+  const slots = document.getElementById("admin-lucky-order-slots");
   const history = document.getElementById("admin-lucky-order-history");
-  if (!history) return;
+  const searchBox = document.getElementById("admin-order-search");
+
+  if (!slots) return;
 
   const user = (state.users || []).find(
     u => String(u.id) === String(userId)
   );
 
   if (!user) {
-    history.innerHTML = "<p>Customer not found.</p>";
+    slots.innerHTML = "<p>Customer not found.</p>";
     return;
   }
 
-  history.innerHTML = "<p>Loading customer tasks...</p>";
+  // Table aur search hide
+  if (searchBox) searchBox.style.display = "none";
+  if (history?.parentElement) {
+    history.parentElement.style.display = "none";
+  }
+
+  slots.innerHTML = `
+    <button class="btn-primary"
+      onclick="renderAdminOrderManagement()"
+      style="margin-bottom:15px;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Customers
+    </button>
+
+    <h3>${escapeLuckyText(user.name || user.email || user.id)}</h3>
+    <p>${escapeLuckyText(user.email || "")}</p>
+
+    <p>Lucky Balance: ${Number(user.balance || 0).toFixed(2)}</p>
+
+    <h4 style="margin-top:20px;">Customer Task Slots</h4>
+    <p>Loading slots...</p>
+  `;
 
   const { data: orders, error } = await sb
     .from("lucky_orders")
@@ -5414,50 +5451,64 @@ async function showAdminCustomerTasks(userId) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    history.innerHTML =
-      "<p>Tasks load nahi ho sake: " +
-      escapeLuckyText(error.message) +
-      "</p>";
+    slots.innerHTML += `
+      <p>Tasks load nahi ho sake:
+        ${escapeLuckyText(error.message)}
+      </p>
+    `;
     return;
   }
 
   const taskSlots = (orders || []).slice(0, 4);
 
-  history.innerHTML = `
-    <h4>
-      ${escapeLuckyText(user.name || user.email || user.id)}
-      — Four Task Slots
-    </h4>
+  slots.innerHTML = `
+    <button class="btn-primary"
+      onclick="renderAdminOrderManagement()"
+      style="margin-bottom:15px;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Customers
+    </button>
 
-    <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;">
+    <h3>${escapeLuckyText(user.name || user.email || user.id)}</h3>
+    <p>${escapeLuckyText(user.email || "")}</p>
+
+    <p>Lucky Balance: ${Number(user.balance || 0).toFixed(2)}</p>
+
+    <h4 style="margin:20px 0 12px;">Four Task Slots</h4>
+
+    <div style="
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;">
+
       ${Array.from({ length: 4 }, (_, index) => {
         const task = taskSlots[index];
 
         return `
-          <div class="user-subpanel" style="padding:14px;">
-            <h5>Slot ${index + 1}</h5>
+          <div class="user-subpanel" style="padding:15px;">
+            <h4>Slot ${index + 1}</h4>
 
             ${
               task
                 ? `
-                  <p>Task Number: ${escapeLuckyText(task.task_number)}</p>
+                  <p>Task: ${escapeLuckyText(task.task_number)}</p>
                   <p>Status: ${escapeLuckyText(task.status || "Unknown")}</p>
                   <p>Date: ${
                     task.created_at
-                      ? escapeLuckyText(new Date(task.created_at).toLocaleString())
+                      ? escapeLuckyText(
+                          new Date(task.created_at).toLocaleString()
+                        )
                       : "-"
                   }</p>
                 `
-                : "<p>No recorded task</p>"
+                : "<p>Empty Slot</p>"
             }
           </div>
         `;
       }).join("")}
+
     </div>
   `;
 }
-
-
   history.innerHTML = historyOrders.length
     ? historyOrders.map(o => `
         <div class="user-subpanel" style="margin-bottom:10px;">
