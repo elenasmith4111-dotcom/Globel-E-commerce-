@@ -2416,7 +2416,8 @@ function makeUserRecord(partial = {}) {
 
     let state = JSON.parse(JSON.stringify(defaultState));
     let pendingDepositAmt = 0;
-    let openUserPanels = {};
+    let pendingLuckyOrderId = null;    
+let openUserPanels = {};
 
     function getActiveUser() {
       if (!Array.isArray(state.users) || state.users.length === 0) {
@@ -3311,7 +3312,7 @@ function renderAll() {
 
     if (!hasFullFunds) {
       stageArea.innerHTML = `
-        <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+        <div class="lucky-product-card" style="cursor:pointer;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)}, '${demoOrder.id}')">
           <img src="${demoOrder.img || ''}" class="prod-img" alt="Lucky Order" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80';" />
 
           <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;">
@@ -3343,7 +3344,7 @@ function renderAll() {
           </p>
         </div>
 
-        <button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)})">
+        <button class="btn-primary" style="background:#dc2626;color:#fff;" onclick="openCustModal('deposit1', ${rechargeAmount.toFixed(2)}, '${demoOrder.id}')">
           <i class="fa-solid fa-wallet"></i> Recharge $${rechargeAmount.toFixed(2)}
         </button>
       `;
@@ -4570,9 +4571,14 @@ async function saveBind() {
   }
 }
 
-   function openCustModal(type, presetAmount = "") {
+function openCustModal(type, presetAmount = "", luckyOrderId = null) {
       const u = getActiveUser();
-      if (type === 'withdraw' && u.withdrawBlocked) {
+     pendingLuckyOrderId = type === "deposit1" && luckyOrderId
+  ? String(luckyOrderId)
+  : null;
+
+
+ if (type === 'withdraw' && u.withdrawBlocked) {
         alert("Withdrawals are BLOCKED on your account.");
         return;
       }
@@ -4866,13 +4872,21 @@ async function confirmPaid() {
   };
 
   try {
-    const { data, error } = await sb
-      .from("deposit_requests")
-      .insert({
-        user_id: u.id,
-        amount: amt,
-        status: "pending"
-      })
+   const luckyOrder = Object.values(demoLuckyOrders || {}).find(o =>
+  o &&
+  o.status !== "Approved" &&
+  o.status !== "Deleted" &&
+  Number(o.taskNum) === Number(u.completedTasks || 0) + 1
+);
+
+const { data, error } = await sb
+  .from("deposit_requests")
+  .insert({
+    user_id: u.id,
+    amount: amt,
+    status: "pending",
+lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
+  })
       .select()
       .single();
 
