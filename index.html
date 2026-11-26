@@ -5509,16 +5509,7 @@ async function showAdminCustomerTasks(userId) {
     </div>
   `;
 }
-  history.innerHTML = historyOrders.length
-    ? historyOrders.map(o => `
-        <div class="user-subpanel" style="margin-bottom:10px;">
-          <b>${escapeLuckyText(getUserName(o.user_id))}</b>
-          <p>Task: ${o.task_number} | ${escapeLuckyText(o.product)}</p>
-          <p>Status: ${o.status === "Approved" ? "Completed" : "Deleted"}</p>
-        </div>
-      `).join("")
-    : "<p>No completed or deleted orders yet.</p>";
-}
+
 
 async function addAdminLuckyOrder(slot) {
   const userId = document.getElementById(`om-user-${slot}`).value;
