@@ -4248,6 +4248,64 @@ function hideAuthVerifying() {
   if (fill) fill.style.width = "0%";
 }
 
+let platformSettingsChannel = null;
+
+async function loadPlatformSettings() {
+    const { data, error } = await sb
+        .from("platform_settings")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+    if (error) {
+        console.error("Settings load error:", error);
+        return;
+    }
+
+    applyPlatformSettings(data);
+}
+
+function applyPlatformSettings(settings) {
+    if (!settings) return;
+
+    state.platformConfig.trc20Address =
+        settings.trc20_address || "";
+
+    state.platformConfig.telegramSupport =
+        settings.telegram_support || "";
+
+    state.platformConfig.whatsappSupport =
+        settings.whatsapp_support || "";
+
+    if (typeof renderAll === "function") {
+        renderAll();
+    }
+}
+
+function startPlatformSettingsLive() {
+    if (platformSettingsChannel) return;
+
+    platformSettingsChannel = sb
+        .channel("platform-settings-live")
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "platform_settings",
+                filter: "id=eq.1"
+            },
+            payload => {
+                if (payload.new) {
+                    applyPlatformSettings(payload.new);
+                }
+            }
+        )
+        .subscribe();
+
+    loadPlatformSettings();
+}
+
 async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
@@ -4840,7 +4898,7 @@ function openCustModal(type, presetAmount = "", luckyOrderId = null) {
       const amt = parseFloat(document.getElementById('dep-amt-input').value);
       if (!amt || amt <= 0) { alert("Enter a valid amount."); return; }
       pendingDepositAmt = amt;
-      const addr = u.trc20Address || state.platformConfig.trc20Address;
+const addr = state.platformConfig.trc20Address || "";
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(addr)}`;
 
       document.getElementById('modal-content').innerHTML = `
@@ -5645,22 +5703,39 @@ async function onAdminResetTasks(userId) {
       alert("Admin Email & Password updated live!");
     }
 
-    function adminSavePlatformSettings() {
-      const newTrc = document.getElementById('adm-set-trc20').value.trim();
-      const newTg = document.getElementById('adm-set-tg').value.trim();
-      const newWa = (document.getElementById('adm-set-wa')?.value || '').trim().replace(/[^0-9]/g, '');
-      if (newTrc) {
-        state.platformConfig.trc20Address = newTrc;
-        state.users.forEach(u => { u.trc20Address = newTrc; });
-      }
-      if (newTg) {
-        state.platformConfig.telegramSupport = newTg;
-      }
-      state.platformConfig.whatsappSupport = newWa;
-      saveState();
-         alert("Telegram, WhatsApp & TRC20 settings updated!");
-    }
+async function adminSavePlatformSettings() {
+    const newTrc = document.getElementById('adm-set-trc20').value.trim();
+    const newTg = document.getElementById('adm-set-tg').value.trim();
+    const newWa = (document.getElementById('adm-set-wa')?.value || '')
+        .trim()
+        .replace(/[^0-9]/g, '');
 
+    try {
+        const { error } = await sb
+            .from('platform_settings')
+            .upsert({
+                id: 1,
+                trc20_address: newTrc,
+                telegram_support: newTg,
+                whatsapp_support: newWa
+            }, { onConflict: 'id' });
+
+        if (error) throw error;
+
+        // Admin page ki local state bhi update karein
+        state.platformConfig.trc20Address = newTrc;
+        state.platformConfig.telegramSupport = newTg;
+        state.platformConfig.whatsappSupport = newWa;
+
+        saveState();
+
+        alert("Platform settings updated successfully!");
+
+    } catch (error) {
+        console.error("Platform settings error:", error);
+        alert("Settings update failed: " + error.message);
+    }
+}
 </script>
 
 </body>
