@@ -2628,9 +2628,7 @@ async function startRealtimeSync() {
       } else {
         renderAdminUserLines();
         renderAdminTxLists();
-     if (pageId === "order-management") {
-  renderAdminOrderManagement();
-}
+
  }
       setBackendStatus(true);
     };
@@ -5206,7 +5204,10 @@ sessionStorage.setItem('adminLastTitle', title);
 
 renderAdminUserLines();
 renderAdminTxLists();
-    }
+
+if (pageId === "order-management") {
+  renderAdminOrderManagement();
+}
 syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
 function renderAdminTxLists() {
   const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
