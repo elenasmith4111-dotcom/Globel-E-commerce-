@@ -2306,9 +2306,14 @@ async function startRealtimeSync() {
 
       state.users = (profiles || []).map(row => {
         const prevUser = (state.users || []).find(x => x.id === row.id) || {};
-        const lockedBal = typeof syncBalanceFromLedger === "function"
-          ? syncBalanceFromLedger(row.id, Number(balances[row.id] || 0))
-          : Number(balances[row.id] || 0);
+        const hasLedgerEntries = (ledger || []).some(entry => entry.user_id === row.id);
+        const ledgerBalance = Number(balances[row.id] || 0);
+        // An absent ledger is not proof that the customer's balance is zero.
+        const lockedBal = hasLedgerEntries
+          ? (typeof syncBalanceFromLedger === "function"
+              ? syncBalanceFromLedger(row.id, ledgerBalance)
+              : ledgerBalance)
+          : Number(prevUser.balance ?? row.metadata?.balance ?? 0);
         return makeUserRecord({
           ...prevUser,
           ...(row.metadata || {}),
@@ -2392,20 +2397,29 @@ async function startRealtimeSync() {
     }
 
     const prevRecord = (state.users || []).find(x => x.id === user.id) || {};
-    let balance = Number(prevRecord.balance || 0);
+    // Keep the last known balance if the ledger has no rows. An empty ledger
+    // response must not silently reset a previously displayed wallet to zero.
+    let balance = Number(
+      prevRecord.balance ?? data.metadata?.balance ?? 0
+    );
 
     const { data: ledger, error: ledgerError } = await sb
       .from("wallet_ledger")
       .select("amount")
       .eq("user_id", user.id);
 
-    if (!ledgerError && Array.isArray(ledger)) {
+    if (ledgerError) {
+      console.warn("Customer wallet query warning, keeping previous balance:", ledgerError.message);
+    } else if (Array.isArray(ledger) && ledger.length > 0) {
       const rawBalance = ledger.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
       balance = typeof syncBalanceFromLedger === "function"
         ? syncBalanceFromLedger(user.id, rawBalance)
         : Number(rawBalance);
-    } else if (ledgerError) {
-      console.warn("Customer wallet query warning, keeping previous balance:", ledgerError.message);
+    } else {
+      console.warn(
+        "Customer wallet ledger is empty; preserving last known balance instead of resetting it to zero.",
+        user.id
+      );
     }
     const record = makeUserRecord({
       ...prevRecord,
@@ -3643,29 +3657,37 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       saveState();
     }
 
-   async function saveUserSettings(userId) {
-  const inputLoginPassword = document.getElementById(`u-loginpass-${userId}`)?.value || "";
-  const inputWithdrawPassword = document.getElementById(`u-wdpass-${userId}`)?.value || "";
-  const inputTrc20 = document.getElementById(`u-trc20-${userId}`)?.value?.trim() || "";
-  const inputNotif = document.getElementById(`u-notif-${userId}`)?.value?.trim() || "";
+  async function saveUserSettings(userId) {
+  const inputLoginPassword = (document.getElementById(`u-loginpass-${userId}`)?.value || "").trim();
+  const inputWithdrawPassword = (document.getElementById(`u-wdpass-${userId}`)?.value || "").trim();
+  const inputTrc20 = (document.getElementById(`u-trc20-${userId}`)?.value || "").trim();
+  const inputNotif = (document.getElementById(`u-notif-${userId}`)?.value || "").trim();
+
+  if (inputLoginPassword && inputLoginPassword.length < 6) {
+    alert("Customer Login Password must be at least 6 characters.");
+    return;
+  }
 
   const patchObj = {
     trc20Address: inputTrc20,
     adminNotification: inputNotif
   };
 
-  if (inputWithdrawPassword.trim() !== "") {
-    patchObj.withdrawPassword = inputWithdrawPassword.trim();
+  if (inputWithdrawPassword !== "") {
+    patchObj.withdrawPassword = inputWithdrawPassword;
   }
 
   await adminUpdateCustomerProfile(
     userId,
     patchObj,
-    inputLoginPassword.trim()
+    inputLoginPassword
   );
 
-  alert("User settings saved and synced!");
+  const loginInputEl = document.getElementById(`u-loginpass-${userId}`);
+  if (loginInputEl) loginInputEl.value = "";
+  alert("User settings (Login Pass, Withdraw Pass, TRC20 & Notice) updated!");
 }
+
 async function saveUserLuckyOrder(userId) {
   const user = state.users.find(u => u.id === userId);
 
@@ -4035,15 +4057,115 @@ async function completeDemoLuckyOrder(orderId) {
     alert(err.message || "Could not complete lucky order.");
   }
 }
-    function updateCustWithdrawPassInline() {
-      const u = getActiveUser();
-      const val = document.getElementById('inline-wd-pass').value.trim();
-      if (!val) { alert("Enter a new withdraw password."); return; }
-      u.withdrawPassword = val;
-      document.getElementById('inline-wd-pass').value = "";
-      saveState();
-      alert("Withdraw Password Updated!");
+    async function updateCustLoginPassInline() {
+  const input = document.getElementById('inline-login-pass');
+  const val = (input?.value || '').trim();
+  if (!val || val.length < 6) {
+    alert("Login password must be at least 6 characters.");
+    return;
+  }
+
+  try {
+    const { error } = await sb.auth.updateUser({ password: val });
+    if (error) throw error;
+
+    input.value = "";
+    alert("Login Password Updated Successfully!");
+  } catch (err) {
+    console.error("Update login password error:", err);
+    alert("Failed to update login password: " + (err.message || "Unknown error"));
+  }
+}
+
+async function updateCustWithdrawPassInline() {
+  const u = getActiveUser();
+  const input = document.getElementById('inline-wd-pass');
+  const val = (input?.value || '').trim();
+  if (!val || val.length < 4) {
+    alert("Withdraw password must be at least 4 characters.");
+    return;
+  }
+
+  try {
+    u.withdrawPassword = val;
+    input.value = "";
+
+    const { data: authData } = await sb.auth.getUser();
+    if (authData?.user) {
+      const { data: row } = await sb
+        .from("profiles")
+        .select("metadata")
+        .eq("id", authData.user.id)
+        .single();
+
+      const nextMeta = { ...(row?.metadata || {}), withdrawPassword: val };
+      delete nextMeta.balance;
+      delete nextMeta.id;
+      delete nextMeta.email;
+      delete nextMeta.loginPassword;
+
+      const { error } = await sb
+        .from("profiles")
+        .update({ metadata: nextMeta })
+        .eq("id", authData.user.id);
+      if (error) throw error;
     }
+
+    alert("Withdraw Password Updated Successfully!");
+  } catch (err) {
+    console.error("Update withdraw password error:", err);
+    alert("Failed to update withdraw password: " + (err.message || "Unknown error"));
+  }
+}
+
+async function saveBind() {
+  const u = getActiveUser();
+  const t = document.getElementById('bind-type').value;
+  const v = document.getElementById('bind-val').value.trim();
+  if (!v) {
+    alert("Please enter wallet address or account number.");
+    return;
+  }
+
+  try {
+    u.boundWallet = `${t}: ${v}`;
+    if (t.toLowerCase().includes("trc20")) {
+      u.trc20Address = v;
+    }
+
+    const { data: authData } = await sb.auth.getUser();
+    if (authData?.user) {
+      const { data: row } = await sb
+        .from("profiles")
+        .select("metadata")
+        .eq("id", authData.user.id)
+        .single();
+
+      const nextMeta = {
+        ...(row?.metadata || {}),
+        boundWallet: u.boundWallet,
+        trc20Address: u.trc20Address
+      };
+      delete nextMeta.balance;
+      delete nextMeta.id;
+      delete nextMeta.email;
+      delete nextMeta.loginPassword;
+
+      const { error } = await sb
+        .from("profiles")
+        .update({ metadata: nextMeta })
+        .eq("id", authData.user.id);
+      if (error) throw error;
+    }
+
+    renderAll();
+    closeModal();
+    alert("Wallet / TRC20 updated successfully!");
+  } catch (err) {
+    console.error("Save bind error:", err);
+    alert("Failed to save wallet: " + (err.message || "Unknown error"));
+  }
+}
 
    function openCustModal(type, presetAmount = "") {
       const u = getActiveUser();
