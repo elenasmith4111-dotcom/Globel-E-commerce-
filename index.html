@@ -2998,6 +2998,10 @@ luckyOrdersChannel = sb
   .subscribe((status, err) => {
     console.log("Customer Lucky Orders Realtime:", status, err || "");
   });
+if (customerDepositChannel) {
+  await sb.removeChannel(customerDepositChannel);
+  customerDepositChannel = null;
+}
 customerDepositChannel = sb
   .channel("customer-deposits-" + user.id)
   .on(
