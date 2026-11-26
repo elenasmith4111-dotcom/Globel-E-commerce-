@@ -2480,7 +2480,22 @@ function makeUserRecord(partial = {}) {
       applyRouting();
       renderAll();
     }
-// ================= SUPABASE REALTIME SYNC =================
+
+function syncBalanceFromLedger(userId, ledgerBalance) {
+  const balance = Number(ledgerBalance);
+
+  if (!userId || !Number.isFinite(balance)) {
+    throw new Error("Invalid ledger balance.");
+  }
+
+  const user = (state.users || []).find(u => u.id === userId);
+
+  if (user) {
+    user.balance = balance;
+  }
+
+  return balance;
+}
 // ================= SUPABASE REALTIME SYNC =================
 
 let globalStateChannel = null;
@@ -2867,13 +2882,18 @@ async function handleSupabaseAuth(user) {
       document.getElementById("admin-app-screen").style.display = "block";
     } else {
       // Customer account
-      const profile = makeUserRecord({
-        ...(profileRow.metadata || {}),
-        id: user.id,
-        name: profileRow.display_name || profileRow.metadata?.name || "",
-        phone: profileRow.phone || profileRow.metadata?.phone || "",
-        email: user.email || profileRow.email || ""
-      });
+     const profile = makeUserRecord({
+  ...(profileRow.metadata || {}),
+  id: user.id,
+  name: profileRow.display_name || profileRow.metadata?.name || "",
+  phone: profileRow.phone || profileRow.metadata?.phone || "",
+  email: user.email || profileRow.email || "",
+  balance: Number(
+    profileRow.metadata?.balance ??
+    state.users?.find(x => x.id === user.id)?.balance ??
+    0
+  )
+});
 
       delete profile.loginPassword;
       delete profile.withdrawPassword;
@@ -3875,8 +3895,11 @@ async function deleteDemoLuckyOrder(userId, orderId) {
 
     if (error) throw error;
 
-    const newBalance = Number(data);
-    u.balance = newBalance;
+   const newBalance = Number(data);
+
+if (Number.isFinite(newBalance)) {
+  u.balance = newBalance; // RPC se confirmed balance
+}
 
     if (mode === "add" && typeof demoLuckyOrders === "object" && demoLuckyOrders) {
       Object.keys(demoLuckyOrders).forEach(key => {
@@ -4064,23 +4087,48 @@ async function saveUserLuckyOrder(userId) {
   }
 }
 let loginCaptchaAnswer = null;
+let loginCaptchaAnswer = null;
 
 function generateLoginCaptcha() {
   const chars = '0123456789';
   let code = '';
 
   for (let i = 0; i < 4; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(
+      Math.floor(Math.random() * chars.length)
+    );
   }
 
   loginCaptchaAnswer = code;
 
   const question = document.getElementById('captcha-question');
   const answer = document.getElementById('captcha-answer');
+  const refresh = document.getElementById('captcha-refresh');
 
-  if (question) question.textContent = code;
-  if (answer) answer.value = '';
-} 
+  if (question) {
+    question.textContent = code;
+  }
+
+  if (answer) {
+    answer.value = '';
+  }
+
+  // Refresh button animation
+  if (refresh) {
+    refresh.style.transform = 'rotate(360deg)';
+
+    setTimeout(() => {
+      refresh.style.transform = '';
+    }, 250);
+  }
+}
+
+// Automatically refresh CAPTCHA every 30 seconds
+setInterval(() => {
+  if (document.getElementById('captcha-question')) {
+    generateLoginCaptcha();
+  }
+}, 30000);
 
 function showAuthVerifying(mode) {
   const overlay = document.getElementById("verifying-overlay");
@@ -4281,13 +4329,22 @@ function switchCustPage(pageId, navEl) {
       renderAll();
     }
 async function creditLedgerEntry(userId, amount, entryType = "commission") {
-  const amt = Number(amount || 0);
-  if (!userId || !Number.isFinite(amt) || amt === 0 || typeof sb === "undefined" || !sb) {
+  const amt = Number(amount);
+
+  if (
+    !userId ||
+    !Number.isFinite(amt) ||
+    amt === 0 ||
+    typeof sb === "undefined" ||
+    !sb
+  ) {
     return null;
   }
 
-  const resolvedEntryType = entryType || (amt < 0 ? "withdraw_hold" : "commission");
+  const resolvedEntryType =
+    entryType || (amt < 0 ? "withdraw_hold" : "commission");
 
+  // 1. Ledger entry save
   const { error: insErr } = await sb
     .from("wallet_ledger")
     .insert({
@@ -4298,21 +4355,32 @@ async function creditLedgerEntry(userId, amount, entryType = "commission") {
 
   if (insErr) throw insErr;
 
+  // 2. Confirm latest ledger balance
   const { data: rows, error: sumErr } = await sb
     .from("wallet_ledger")
     .select("amount")
     .eq("user_id", userId);
 
+  // Fetch fail ho to incorrect/zero balance set nahi karna
   if (sumErr) throw sumErr;
-  const totalBal = (rows || []).reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
-  if (typeof syncBalanceFromLedger === "function") {
-    return syncBalanceFromLedger(userId, totalBal);
+  if (!Array.isArray(rows)) {
+    throw new Error("Ledger balance could not be verified.");
   }
+
+  const totalBal = rows.reduce((sum, row) => {
+    const value = Number(row.amount);
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+
+  // 3. Only confirmed total sync
+  if (typeof syncBalanceFromLedger === "function") {
+    const synced = await syncBalanceFromLedger(userId, totalBal);
+    return Number.isFinite(Number(synced)) ? Number(synced) : totalBal;
+  }
+
   return totalBal;
 }
-
-
 async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
@@ -4803,7 +4871,7 @@ async function confirmPaid() {
     u.transactions.unshift(savedTx);
     state.txHistory.unshift(savedTx);
     renderAdminTxLists();
-    alert("Deposit request submitted. Admin will review it after verifying your payment.");
+    alert("Deposit request submitted.");
     closeModal();
   } catch (err) {
     console.error("Deposit request error:", err);
