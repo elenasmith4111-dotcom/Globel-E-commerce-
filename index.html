@@ -5312,21 +5312,58 @@ async function renderAdminOrderManagement() {
     return user ? (user.name || user.email || user.id) : userId;
   };
 
-  slots.innerHTML = `
-    <p>Active Orders: ${activeOrders.length} / 4</p>
-    ${activeOrders.map(o => `
-      <div class="user-subpanel" style="margin-bottom:10px;">
-        <b>${escapeLuckyText(getUserName(o.user_id))}</b>
-        <p>Task: ${o.task_number} | Product: ${escapeLuckyText(o.product)}</p>
-        <p>Amount: ${o.amount} | Commission: ${o.commission}</p>
-        <p>Status: ${escapeLuckyText(o.status)}</p>
-        <button class="btn-primary"
-          onclick="deleteDemoLuckyOrder('${o.user_id}', '${o.id}')">
-          Delete / Free Slot
-        </button>
-      </div>
-    `).join("")}
-  `;
+slots.innerHTML = `
+  <p><b>Active Orders: ${activeOrders.length} / 4</b></p>
+
+  ${activeOrders.map(o => `
+    <div class="user-subpanel" style="margin-bottom:10px;">
+      <b>${escapeLuckyText(getUserName(o.user_id))}</b>
+      <p>Task: ${o.task_number} | Product: ${escapeLuckyText(o.product)}</p>
+      <p>Amount: ${o.amount} | Commission: ${o.commission}</p>
+      <p>Status: ${escapeLuckyText(o.status)}</p>
+      <button class="btn-primary"
+        onclick="deleteDemoLuckyOrder('${o.user_id}', '${o.id}')">
+        Delete / Free Slot
+      </button>
+    </div>
+  `).join("")}
+
+  ${Array.from({ length: Math.max(0, 4 - activeOrders.length) }, (_, i) => `
+    <div class="user-subpanel" style="margin-bottom:12px;">
+      <h5>Available Order Slot ${i + 1}</h5>
+
+      <label>Select Customer</label>
+      <select id="om-user-${i}" class="form-control">
+        <option value="">Select Customer</option>
+        ${(state.users || []).map(u => `
+          <option value="${u.id}">
+            ${escapeLuckyText(u.name || u.email || u.id)}
+          </option>
+        `).join("")}
+      </select>
+
+      <label>Task Number</label>
+      <input id="om-task-${i}" type="number" min="1" max="25" value="2">
+
+      <label>Product</label>
+      <select id="om-product-${i}">
+        <option value="Rolex Cosmograph Watch|https://visualeducation.com/wp-content/uploads/2018/05/Watch-live-product-shoot.jpg">Rolex Cosmograph Watch</option>
+        <option value="Hermes Birkin Leather Bag|https://www.squareshot.com/assets/img/blog/Le-o-et-Violette.jpg">Hermes Birkin Leather Bag</option>
+        <option value="Sony WH-1000XM5 Wireless Headset|https://media.istockphoto.com/id/2162431408/photo/sleek-blue-headphones-on-white-background.jpg?s=612x612&w=0&k=20&c=WyQ-bUslLSnirpxZ6xJNQnht7jnEtCz0bSkfasG1cSc=">Sony WH-1000XM5 Wireless Headset</option>
+      </select>
+
+      <label>Amount</label>
+      <input id="om-amount-${i}" type="number" step="0.01" value="500">
+
+      <label>Commission</label>
+      <input id="om-commission-${i}" type="number" min="0" step="0.01" value="85">
+
+      <button class="btn-primary" onclick="addAdminLuckyOrder(${i})">
+        Add Order / ON
+      </button>
+    </div>
+  `).join("")}
+`;
 
   history.innerHTML = historyOrders.length
     ? historyOrders.map(o => `
@@ -5339,6 +5376,57 @@ async function renderAdminOrderManagement() {
     : "<p>No completed or deleted orders yet.</p>";
 }
 
+async function addAdminLuckyOrder(slot) {
+  const userId = document.getElementById(`om-user-${slot}`).value;
+  const taskNum = Number(document.getElementById(`om-task-${slot}`).value);
+  const productParts = document.getElementById(`om-product-${slot}`).value.split("|");
+  const amount = Number(document.getElementById(`om-amount-${slot}`).value);
+  const commission = Number(document.getElementById(`om-commission-${slot}`).value);
+
+  if (!userId || !taskNum || taskNum < 1 || taskNum > 25 ||
+      !amount || amount <= 0 || commission < 0) {
+    alert("Please fill all order details correctly.");
+    return;
+  }
+
+  const { data: orders, error: fetchError } = await sb
+    .from("lucky_orders")
+    .select("id, status");
+
+  if (fetchError) {
+    alert(fetchError.message);
+    return;
+  }
+
+  const activeCount = (orders || []).filter(
+    o => !["Approved", "Deleted"].includes(o.status)
+  ).length;
+
+  if (activeCount >= 4) {
+    alert("All 4 order slots are occupied.");
+    return;
+  }
+
+  const { error } = await sb
+    .from("lucky_orders")
+    .insert({
+      user_id: userId,
+      task_number: taskNum,
+      product: productParts[0],
+      image_url: productParts[1],
+      amount: amount,
+      commission: commission,
+      status: "Pending"
+    });
+
+  if (error) {
+    alert("Order failed: " + error.message);
+    return;
+  }
+
+  alert("Lucky Order added successfully!");
+  await renderAdminOrderManagement();
+}
 async function adminUpdateCustomerProfile(userId, patchObj, newLoginPassword = "") {
   const usr = (state.users || []).find(u => u.id === userId);
   if (!usr || typeof sb === "undefined" || !sb) return;
