@@ -5209,6 +5209,8 @@ if (pageId === "order-management") {
   renderAdminOrderManagement();
 }
 syncLiveTransactionsFromSupabase().then(() => renderAdminTxLists());
+}
+
 function renderAdminTxLists() {
   const deps = (state.txHistory || []).filter(t => t.type === 'Deposit');
   const depEl = document.getElementById('adm-deposits-list');
