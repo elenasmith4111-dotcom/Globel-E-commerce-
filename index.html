@@ -1152,6 +1152,40 @@
   #cust-auth-screen #captcha-answer { width: 132px; }
 }
 
+
+/* AUTH VERIFICATION OVERLAY — BLUE / WHITE / GREEN */
+#verifying-overlay {
+  background: rgba(239, 246, 255, 0.97) !important;
+  backdrop-filter: blur(8px);
+  color: #0f172a !important;
+  z-index: 10050 !important;
+}
+#verifying-overlay::before {
+  content: "";
+  position: absolute;
+  width: min(86vw, 360px);
+  height: 230px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 22px;
+  box-shadow: 0 18px 48px rgba(30, 64, 175, 0.16);
+  z-index: -1;
+}
+#verifying-overlay .verify-ring {
+  border-color: #dbeafe !important;
+  border-top-color: #2563eb !important;
+  border-right-color: #16a34a !important;
+}
+#verifying-overlay #verify-title {
+  color: #1d4ed8 !important;
+  font-weight: 800 !important;
+}
+#verifying-overlay #verify-sub { color: #475569 !important; line-height: 1.6; }
+#verifying-overlay .verify-progress-bar { background: #dbeafe !important; }
+#verifying-overlay .verify-progress-fill {
+  background: linear-gradient(90deg, #2563eb, #16a34a) !important;
+}
+
 </style>
 </head>
 <body>
@@ -2861,6 +2895,14 @@ await startRealtimeSync();
 
   if (state.customerLoggedIn) {
     renderAll();
+    updateAuthVerifyingProgress(
+      100,
+      "Verification Complete",
+      "Your dashboard is ready. Welcome back!"
+    );
+    setTimeout(hideAuthVerifying, 450);
+  } else {
+    hideAuthVerifying();
   }
 }
 
@@ -3953,6 +3995,35 @@ function generateLoginCaptcha() {
   if (question) question.textContent = code;
   if (answer) answer.value = '';
 } 
+
+function showAuthVerifying(mode) {
+  const overlay = document.getElementById("verifying-overlay");
+  const fill = document.getElementById("verify-progress-fill");
+  const title = document.getElementById("verify-title");
+  const sub = document.getElementById("verify-sub");
+  if (!overlay) return;
+  title.textContent = mode === "register" ? "Creating Your Account..." : "Verifying Your Account...";
+  sub.textContent = mode === "register"
+    ? "Securely creating your account and checking your details..."
+    : "Securely checking your email address and password with Supabase...";
+  if (fill) fill.style.width = "35%";
+  overlay.style.display = "flex";
+}
+function updateAuthVerifyingProgress(percent, heading, message) {
+  const fill = document.getElementById("verify-progress-fill");
+  const title = document.getElementById("verify-title");
+  const sub = document.getElementById("verify-sub");
+  if (fill) fill.style.width = percent + "%";
+  if (title && heading) title.textContent = heading;
+  if (sub && message) sub.textContent = message;
+}
+function hideAuthVerifying() {
+  const overlay = document.getElementById("verifying-overlay");
+  const fill = document.getElementById("verify-progress-fill");
+  if (overlay) overlay.style.display = "none";
+  if (fill) fill.style.width = "0%";
+}
+
 async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
@@ -3975,6 +4046,7 @@ async function handleCustLogin() {
   }
 
   loginCaptchaAnswer = null;
+  showAuthVerifying("login");
 
   try {
     const { data, error } = await sb.auth.signInWithPassword({
@@ -3984,9 +4056,21 @@ async function handleCustLogin() {
 
     if (error) throw error;
 
+    updateAuthVerifyingProgress(
+      72,
+      "Credentials Verified",
+      "Loading your secure profile and dashboard..."
+    );
     console.log("Supabase customer login successful:", data.user.id);
 
+    // Keep the verification card visible until the Supabase auth listener
+    // finishes loading the profile and dashboard.
+    setTimeout(() => {
+      if (!state.customerLoggedIn) hideAuthVerifying();
+    }, 15000);
+
   } catch (err) {
+    hideAuthVerifying();
     alert(err.message || "Login failed.");
     generateLoginCaptcha();
   }
@@ -4013,6 +4097,8 @@ async function handleCustRegister() {
     registerButton.disabled = true;
     registerButton.textContent = "Creating account...";
   }
+
+  showAuthVerifying("register");
 
   try {
    
@@ -4050,13 +4136,19 @@ if (error) throw error;
 
   
 
-    alert(
-      data.session
-        ? "Account created successfully!"
-        : "Account created! Please verify your email, then login."
-    );
+    if (data.session) {
+      updateAuthVerifyingProgress(
+        100,
+        "Account Created Successfully",
+        "Preparing your secure dashboard..."
+      );
+    } else {
+      hideAuthVerifying();
+      alert("Account created! Please verify your email, then sign in.");
+    }
 
   } catch (err) {
+    hideAuthVerifying();
     console.error("Registration error:", err);
     alert(err.message || "Registration failed.");
   } finally {
