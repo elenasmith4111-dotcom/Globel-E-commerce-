@@ -2713,7 +2713,7 @@ async function startRealtimeSync() {
     state.activeUserId = user.id;
     state.customerLoggedIn = true;
 // Load confirmed wallet balance before showing dashboard
-const { data: ledgerRows, error: ledgerError } = await sb
+const { data: ledgerRows, error: walletFetchError } = await sb
   .from("wallet_ledger")
   .select("amount")
   .eq("user_id", user.id);
@@ -2836,7 +2836,8 @@ async function pushToBackend() {
 
 function saveState() {
   pushToBackend();
-}// ================= SUPABASE AUTH LISTENER =================
+}
+// ================= SUPABASE AUTH LISTENER =================
 let luckyOrdersChannel = null;
 
 async function handleSupabaseAuth(user) {
@@ -3768,13 +3769,17 @@ async function grabOrder() {
   };
 
   try {
-    let updatedBal = currentBal + item.comm;
-    if (typeof creditLedgerEntry === "function") {
-      const ledgerResult = await creditLedgerEntry(u.id, item.comm);
-      if (Number.isFinite(Number(ledgerResult))) {
-        updatedBal = Number(ledgerResult);
-      }
-    }
+  if (typeof creditLedgerEntry !== "function") {
+  throw new Error("Wallet ledger function is unavailable.");
+}
+
+const ledgerResult = await creditLedgerEntry(u.id, item.comm);
+
+if (ledgerResult === null || !Number.isFinite(Number(ledgerResult))) {
+  throw new Error("Commission credit could not be verified.");
+}
+
+const updatedBal = Number(ledgerResult);
 
     u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
     u.productRevealed = false;
