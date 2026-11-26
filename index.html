@@ -2697,15 +2697,18 @@ async function startRealtimeSync() {
         user.id
       );
     }
-    const record = makeUserRecord({
-      ...prevRecord,
-      ...(data.metadata || {}),
-      id: user.id,
-      name: data.display_name || data.metadata?.name || prevRecord.name || "",
-      phone: data.phone || data.metadata?.phone || prevRecord.phone || "",
-      email: data.email || user.email || prevRecord.email || "",
-      balance: Number(balance)
-    });
+// Get the latest in-memory user data after async ledger loading
+const latestRecord =
+  (state.users || []).find(x => x.id === user.id) || prevRecord;
+   const record = makeUserRecord({
+  ...(data.metadata || {}),
+  ...latestRecord,
+  id: user.id,
+  name: data.display_name || data.metadata?.name || latestRecord.name || "",
+  phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
+  email: data.email || user.email || latestRecord.email || "",
+  balance: Number(balance)
+});
     delete record.loginPassword;
     delete record.withdrawPassword;
 
