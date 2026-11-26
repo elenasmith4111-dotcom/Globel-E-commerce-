@@ -3764,11 +3764,20 @@ if (ledgerResult === null || !Number.isFinite(Number(ledgerResult))) {
 
 const updatedBal = Number(ledgerResult);
 
-    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-    u.productRevealed = false;
-    u.pendingTaskCommission = null;
-    u.balance = updatedBal;
-    u.todayEarn = Number(u.todayEarn || 0) + item.comm;
+// Re-fetch the latest user record after the async ledger update
+const currentUser =
+  (state.users || []).find(x => x.id === u.id) || u;
+
+currentUser.completedTasks = Math.min(
+  Number(currentUser.totalTasks || 25),
+  Number(currentUser.completedTasks || 0) + 1
+);
+
+currentUser.productRevealed = false;
+currentUser.pendingTaskCommission = null;
+currentUser.balance = updatedBal;
+currentUser.todayEarn =
+  Number(currentUser.todayEarn || 0) + Number(item.comm || 0);
 
     state.ordersHistory.unshift({
       userId: u.id,
