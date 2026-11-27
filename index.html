@@ -2732,9 +2732,9 @@ async function startRealtimeSync() {
 // Get the latest in-memory user data after async ledger loading
 const latestRecord =
   (state.users || []).find(x => x.id === user.id) || prevRecord;
-   const record = makeUserRecord({
-  ...(data.metadata || {}),
+const record = makeUserRecord({
   ...latestRecord,
+  ...(data.metadata || {}),
   id: user.id,
   name: data.display_name || data.metadata?.name || latestRecord.name || "",
   phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
@@ -4018,26 +4018,75 @@ if (Number.isFinite(newBalance)) {
     alert(err.message || "Wallet adjustment failed.");
   }
 }
-    function userSetStatus(userId, newStatus) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      u.accountStatus = newStatus;
-      saveState();
+   
+async function saveLiveCustomerControls(userId, patch) {
+  const u = (state.users || []).find(x => String(x.id) === String(userId));
+  if (!u) return false;
+
+  try {
+    const { data: row, error: fetchError } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const nextMeta = {
+      ...(row?.metadata || {}),
+      ...patch
+    };
+
+    const { error: updateError } = await sb
+      .from("profiles")
+      .update({ metadata: nextMeta })
+      .eq("id", userId);
+
+    if (updateError) throw updateError;
+
+    Object.assign(u, patch);
+
+    if (typeof renderAdminUserLines === "function") {
+      renderAdminUserLines();
     }
 
-    function userToggleSlideLock(userId, locked) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      u.tasksLocked = locked;
-      saveState();
+    if (typeof renderAll === "function") {
+      renderAll();
     }
 
-    function userToggleWdBlock(userId, blocked) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      u.withdrawBlocked = blocked;
-      saveState();
-    }
+    return true;
+
+  } catch (err) {
+    console.error("Live customer setting error:", err);
+    alert("Setting update failed: " + err.message);
+    renderAdminUserLines();
+    return false;
+  }
+}
+
+async function userSetStatus(userId, newStatus) {
+  const success = await saveLiveCustomerControls(userId, {
+    accountStatus: newStatus
+  });
+
+  if (success) {
+    alert("Account status updated live!");
+  }
+}
+
+async function userToggleSlideLock(userId, locked) {
+  const success = await saveLiveCustomerControls(userId, {
+    tasksLocked: Boolean(locked)
+  });
+
+  if (success) {
+    alert(locked
+      ? "Slide Lock enabled live."
+      : "Slide Lock disabled live."
+    );
+  }
+}
+
 
   async function saveUserSettings(userId) {
   const inputLoginPassword = (document.getElementById(`u-loginpass-${userId}`)?.value || "").trim();
@@ -4313,7 +4362,9 @@ function updateCustomerTelegramLink() {
     }
 }
 
+
 startPlatformSettingsLive();
+
 async function handleCustLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
@@ -4346,15 +4397,76 @@ async function handleCustLogin() {
 
     if (error) throw error;
 
+   
+    // ACCOUNT STATUS CHECK FROM LIVE PROFILE METADATA
+    const { data: accountData, error: statusError } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", data.user.id)
+      .single();
+
+    if (statusError) {
+      await sb.auth.signOut();
+      hideAuthVerifying();
+      alert("Unable to verify your account status. Please try again.");
+      generateLoginCaptcha();
+      return;
+    }
+
+    const accountStatus = String(
+      accountData?.metadata?.accountStatus || "Active"
+    ).toLowerCase().trim();
+
+    // DEACTIVATED
+    if (["deactive", "deactivated", "inactive"].includes(accountStatus)) {
+      await sb.auth.signOut();
+      hideAuthVerifying();
+
+      alert(
+        "Your account is suspended. Please kindly contact customer service."
+      );
+
+      generateLoginCaptcha();
+      return;
+    }
+
+    // FROZEN
+    if (["freeze", "frozen"].includes(accountStatus)) {
+      await sb.auth.signOut();
+      hideAuthVerifying();
+
+      alert(
+        "Your account is frozen. Please contact customer service."
+      );
+
+      generateLoginCaptcha();
+      return;
+    }
+
+    // ACTIVE - CONTINUE EXISTING LOGIN
     updateAuthVerifyingProgress(
       72,
       "Credentials Verified",
       "Loading your secure profile and dashboard..."
     );
+
     console.log("Supabase customer login successful:", data.user.id);
 
-    // Keep the verification card visible until the Supabase auth listener
-    // finishes loading the profile and dashboard.
+    setTimeout(() => {
+      if (!state.customerLoggedIn) hideAuthVerifying();
+    }, 15000);
+
+
+    // ACTIVE ACCOUNT - CONTINUE NORMAL LOGIN
+    updateAuthVerifyingProgress(
+      72,
+      "Credentials Verified",
+      "Loading your secure profile and dashboard..."
+    );
+
+    console.log("Supabase customer login successful:", data.user.id);
+
+    // Keep existing verification card behavior
     setTimeout(() => {
       if (!state.customerLoggedIn) hideAuthVerifying();
     }, 15000);
@@ -5710,7 +5822,54 @@ async function onAdminResetTasks(userId) {
       saveState();
       alert("Admin Email & Password updated live!");
     }
+let noticeChannel = null;
 
+async function loadLiveNotice() {
+    const { data, error } = await sb
+        .from("platform_notice")
+        .select("message")
+        .eq("id", 1)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Notice load error:", error);
+        return;
+    }
+
+    displayLiveNotice(data?.message || "");
+}
+
+function startLiveNotice() {
+    if (noticeChannel) return;
+
+    noticeChannel = sb
+        .channel("platform-notice-live")
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "platform_notice",
+                filter: "id=eq.1"
+            },
+            payload => {
+                if (payload.new) {
+                    displayLiveNotice(payload.new.message || "");
+                }
+            }
+        )
+        .subscribe();
+
+    loadLiveNotice();
+}
+
+function displayLiveNotice(message) {
+    const el = document.getElementById("customer-live-notice");
+    if (!el) return;
+
+    el.textContent = message;
+    el.style.display = message.trim() ? "block" : "none";
+}
 async function adminSavePlatformSettings() {
     const newTrc = document.getElementById('adm-set-trc20').value.trim();
     const newTg = document.getElementById('adm-set-tg').value.trim();
