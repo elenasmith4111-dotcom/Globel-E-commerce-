@@ -6052,6 +6052,59 @@ function displayLiveNotice(message) {
     el.textContent = message;
     el.style.display = message.trim() ? "block" : "none";
 }
+
+async function adminSaveUserSetting(userId, patch) {
+  const { data: authData, error: authErr } = await sb.auth.getUser();
+  if (authErr || !authData?.user) {
+    alert("Admin session not found.");
+    return false;
+  }
+
+  const { data: adminRow, error: adminErr } = await sb
+    .from("profiles")
+    .select("role")
+    .eq("id", authData.user.id)
+    .single();
+
+  if (adminErr || adminRow?.role !== "admin") {
+    alert("Access denied: Only admin can change user settings.");
+    return false;
+  }
+
+  const u = (state.users || []).find(x => String(x.id) === String(userId));
+  if (!u) return false;
+
+  try {
+    const { data: targetRow, error: readErr } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", userId)
+      .single();
+
+    if (readErr) throw readErr;
+
+    const nextMeta = {
+      ...(targetRow?.metadata || {}),
+      ...patch
+    };
+
+    const { error: updErr } = await sb
+      .from("profiles")
+      .update({ metadata: nextMeta })
+      .eq("id", userId);
+
+    if (updErr) throw updErr;
+
+    Object.assign(u, patch);
+    if (typeof renderAdminUserLines === "function") renderAdminUserLines();
+    if (typeof renderAll === "function") renderAll();
+    return true;
+  } catch (err) {
+    console.error("User setting update error:", err);
+    alert("Setting update failed: " + (err.message || err));
+    return false;
+  }
+}
 async function adminSavePlatformSettings() {
     const newTrc = document.getElementById('adm-set-trc20').value.trim();
     const newTg = document.getElementById('adm-set-tg').value.trim();
