@@ -3888,19 +3888,55 @@ currentUser.todayEarn =
 }
 
 window.grabOrder = grabOrder;
-
 async function userToggleWdBlock(userId, blocked) {
   const isBlocked = Boolean(blocked);
-  const success = await saveLiveCustomerControls(userId, {
-    withdrawBlocked: isBlocked,
-    wdBlock: isBlocked
-  });
+  const u = (state.users || []).find(x => String(x.id) === String(userId));
+  if (!u) return;
 
-  if (success) {
-    alert(isBlocked ? "Withdraw slide ON (Customer withdraw blocked live)." : "Withdraw slide OFF.");
+  try {
+    const { data: existingRow, error: readErr } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", userId)
+      .single();
+
+    if (readErr) throw new Error("Read failed: " + readErr.message);
+
+    const nextMeta = {
+      ...(existingRow?.metadata || {}),
+      withdrawBlocked: isBlocked,
+      wdBlock: isBlocked
+    };
+    delete nextMeta.balance;
+    delete nextMeta.id;
+    delete nextMeta.email;
+    delete nextMeta.loginPassword;
+
+    const { error: updErr } = await sb
+      .from("profiles")
+      .update({ metadata: nextMeta })
+      .eq("id", userId);
+
+    if (updErr) throw new Error("Update failed: " + updErr.message);
+
+    u.withdrawBlocked = isBlocked;
+    u.wdBlock = isBlocked;
+
+    renderAdminUserLines();
+    if (typeof renderAll === "function") renderAll();
+
+    alert(
+      isBlocked
+        ? "WD Block ON: Customer withdrawal is now restricted live."
+        : "WD Block OFF: Customer withdrawal restriction removed live."
+    );
+  } catch (err) {
+    console.error("WD Block toggle error:", err);
+    alert("Setting update failed: " + (err.message || err));
+    renderAdminUserLines();
   }
 }
-aasync function userResetTasks(userId) {
+async function userResetTasks(userId) {
   const u = (state.users || []).find(x => String(x.id) === String(userId));
   if (!u) {
     alert("User not found in list.");
