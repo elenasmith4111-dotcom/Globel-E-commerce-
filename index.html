@@ -2728,12 +2728,13 @@ async function startRealtimeSync() {
       return;
     }
 
-    const prevRecord = (state.users || []).find(x => x.id === user.id) || {};
+  const prevRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || {};
+    const latestRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || prevRecord;
+
     // Keep the last known balance if the ledger has no rows. An empty ledger
     // response must not silently reset a previously displayed wallet to zero.
-    let balance = Number(
-      prevRecord.balance ?? data.metadata?.balance ?? 0
-    );
+    const fallbackBal = Number(latestRecord.balance ?? prevRecord.balance ?? data.metadata?.balance ?? 0);
+    let balance = Number.isFinite(fallbackBal) ? fallbackBal : 0;
 
     const { data: ledger, error: ledgerError } = await sb
       .from("wallet_ledger")
@@ -2743,9 +2744,12 @@ async function startRealtimeSync() {
     if (ledgerError) {
       console.warn("Customer wallet query warning, keeping previous balance:", ledgerError.message);
     } else if (Array.isArray(ledger) && ledger.length > 0) {
-      const rawBalance = ledger.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+      const rawBalance = ledger.reduce((sum, entry) => {
+        const val = Number(entry.amount);
+        return sum + (Number.isFinite(val) ? val : 0);
+      }, 0);
       balance = typeof syncBalanceFromLedger === "function"
-        ? syncBalanceFromLedger(user.id, rawBalance)
+        ? Number(syncBalanceFromLedger(user.id, rawBalance))
         : Number(rawBalance);
     } else {
       console.warn(
