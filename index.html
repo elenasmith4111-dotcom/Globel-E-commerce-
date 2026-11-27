@@ -2849,9 +2849,7 @@ function setAdminScreenState(isLoggedIn) {
   if (appScreen) {
     appScreen.style.display = isLoggedIn ? "flex" : "none";
   }
-}
-
-function showAdminPortalView() {
+}function showAdminPortalView() {
   setAdminScreenState(true);
 
   if (typeof applyRouting === "function") {
@@ -2871,15 +2869,14 @@ function showAdminPortalView() {
   if (adminOuter) {
     adminOuter.style.display = "flex";
   }
-}
+
   const adminLoginBox =
     document.getElementById("admin-login-screen") ||
     document.getElementById("admin-auth-box");
   if (adminLoginBox) {
     adminLoginBox.style.display = "none";
   }
-
-
+}
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
   if (authError || !authData?.user) {
@@ -3283,7 +3280,7 @@ async function handleSupabaseAuth(user) {
       throw new Error("Your profile was not found. Please contact support.");
     }
 
-    // Admin account
+   // Admin account
     if (profileRow.role === "admin") {
       const { data: appData, error: appError } = await sb
         .from("app_state")
@@ -3291,7 +3288,7 @@ async function handleSupabaseAuth(user) {
         .eq("state_key", "main")
         .maybeSingle();
 
-     if (appError) throw appError;
+      if (appError) throw appError;
 
       if (appData?.state) {
         const existingUsers = state.users || [];
@@ -3302,23 +3299,40 @@ async function handleSupabaseAuth(user) {
         state.users = existingUsers;
       }
 
-      document.getElementById("admin-auth-screen").style.display = "none";
-      document.getElementById("admin-app-screen").style.display = "block";
+      state.adminLoggedIn = true;
+      if (typeof setAdminScreenState === "function") {
+        setAdminScreenState(true);
+      }
+
+      const adminAuthEl = document.getElementById("admin-auth-screen");
+      const adminAppEl = document.getElementById("admin-app-screen");
+      if (adminAuthEl) adminAuthEl.style.display = "none";
+      if (adminAppEl) adminAppEl.style.display = "flex";
+
+      if (typeof showAdminPortalView === "function") {
+        showAdminPortalView();
+      } else if (typeof applyRouting === "function") {
+        authReady = true;
+        applyRouting();
+      }
+
+      if (typeof renderAll === "function") {
+        renderAll();
+      }
     } else {
       // Customer account
-     const profile = makeUserRecord({
-  ...(profileRow.metadata || {}),
-  id: user.id,
-  name: profileRow.display_name || profileRow.metadata?.name || "",
-  phone: profileRow.phone || profileRow.metadata?.phone || "",
-  email: user.email || profileRow.email || "",
-  balance: Number(
-    profileRow.metadata?.balance ??
-    state.users?.find(x => x.id === user.id)?.balance ??
-    0
-  )
-});
-
+      const profile = makeUserRecord({
+        ...(profileRow.metadata || {}),
+        id: user.id,
+        name: profileRow.display_name || profileRow.metadata?.name || "",
+        phone: profileRow.phone || profileRow.metadata?.phone || "",
+        email: user.email || profileRow.email || "",
+        balance: Number(
+          profileRow.metadata?.balance ??
+          state.users?.find(x => x.id === user.id)?.balance ??
+          0
+        )
+      });
       delete profile.loginPassword;
       delete profile.withdrawPassword;
 
@@ -3593,52 +3607,61 @@ function buildWhatsappHref(raw) {
   return digits ? "https://wa.me/" + digits : "https://wa.me/";
 }
 function applyRouting() {
+  const adminOuter = document.getElementById('admin-outer');
+  const customerOuter = document.getElementById('customer-outer');
+
   if (!authReady) {
-    document.getElementById('admin-outer').style.display = 'none';
-    document.getElementById('customer-outer').style.display = 'none';
+    if (adminOuter) adminOuter.style.display = 'none';
+    if (customerOuter) customerOuter.style.display = 'none';
     return;
   }
-  const isAdmin = isAdminPath();
-  document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
-  document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+
+  const isAdmin = typeof isAdminPath === 'function' ? isAdminPath() : false;
+  if (adminOuter) adminOuter.style.display = isAdmin ? 'flex' : 'none';
+  if (customerOuter) customerOuter.style.display = isAdmin ? 'none' : 'flex';
 
   if (isAdmin) {
     const adminLoggedIn = !!state.adminLoggedIn;
     const adminAuth = document.getElementById('admin-auth-screen');
     const adminApp = document.getElementById('admin-app-screen');
+
     if (adminAuth) adminAuth.style.display = adminLoggedIn ? 'none' : 'flex';
     if (adminApp) adminApp.style.display = adminLoggedIn ? 'flex' : 'none';
+
+    if (adminLoggedIn && typeof renderAll === 'function') {
+      renderAll();
+    }
     return;
   }
 
-  if (!isAdmin) {
-    const loggedIn = !!state.customerLoggedIn;
+  const loggedIn = !!state.customerLoggedIn;
+  const custAuth = document.getElementById('cust-auth-screen');
+  const custApp = document.getElementById('cust-app-screen');
 
-    document.getElementById('cust-auth-screen').style.display =
-      loggedIn ? 'none' : 'flex';
+  if (custAuth) custAuth.style.display = loggedIn ? 'none' : 'flex';
+  if (custApp) custApp.style.display = loggedIn ? 'flex' : 'none';
 
-    document.getElementById('cust-app-screen').style.display =
-      loggedIn ? 'flex' : 'none';
+  if (loggedIn) {
+    const lastPage = sessionStorage.getItem('custLastPage') || 'home';
 
-    if (loggedIn) {
-      const lastPage = sessionStorage.getItem('custLastPage') || 'home';
+    document.querySelectorAll('#cust-app-screen .page')
+      .forEach(p => p.classList.remove('active'));
 
-      document.querySelectorAll('#cust-app-screen .page')
-        .forEach(p => p.classList.remove('active'));
-
-      const page = document.getElementById('cust-page-' + lastPage);
-      if (page) page.classList.add('active');
-      else document.getElementById('cust-page-home')?.classList.add('active');
-    }
+    const page = document.getElementById('cust-page-' + lastPage);
+    if (page) page.classList.add('active');
+    else document.getElementById('cust-page-home')?.classList.add('active');
   }
 }
 
 window.addEventListener("hashchange", applyRouting);
 window.addEventListener("popstate", applyRouting);
+window.addEventListener("storage", applyRouting);
 window.addEventListener("DOMContentLoaded", () => {
-  generateLoginCaptcha();
-  renderLiveFeed();
+  applyRouting();
+  if (typeof generateLoginCaptcha === "function") generateLoginCaptcha();
+  if (typeof renderLiveFeed === "function") renderLiveFeed();
 });
+
 function renderLiveFeed() {
   const el = document.getElementById('live-tx-container');
   if (!el) return;
