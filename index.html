@@ -2732,6 +2732,23 @@ async function startRealtimeSync() {
 // Get the latest in-memory user data after async ledger loading
 const latestRecord =
   (state.users || []).find(x => x.id === user.id) || prevRecord;
+const keepRecentTaskState =
+  latestRecord._taskSyncUntil && Date.now() < Number(latestRecord._taskSyncUntil);
+
+const incomingCompleted = Number(
+  data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
+);
+const currentCompleted = Number(
+  latestRecord.completedTasks ?? latestRecord.tasksCompleted ?? 0
+);
+
+const incomingTodayEarn = Number(
+  data.metadata?.todayEarn ?? data.metadata?.todayCommission ?? 0
+);
+const currentTodayEarn = Number(
+  latestRecord.todayEarn ?? latestRecord.todayCommission ?? 0
+);
+
 const record = makeUserRecord({
   ...latestRecord,
   ...(data.metadata || {}),
@@ -3874,6 +3891,35 @@ currentUser.todayEarn =
       comm: item.comm,
       img: item.img
     });
+
+currentUser._taskSyncUntil = Date.now() + 6000;
+
+if (typeof sb !== "undefined" && sb) {
+  const { data: profMetaRow } = await sb
+    .from("profiles")
+    .select("metadata")
+    .eq("id", u.id)
+    .maybeSingle();
+
+  const nextMeta = {
+    ...(profMetaRow?.metadata || {}),
+    completedTasks: currentUser.completedTasks,
+    tasksCompleted: currentUser.completedTasks,
+    todayEarn: currentUser.todayEarn,
+    todayCommission: currentUser.todayEarn,
+    productRevealed: false,
+    pendingTaskCommission: null
+  };
+  delete nextMeta.balance;
+  delete nextMeta.id;
+  delete nextMeta.email;
+  delete nextMeta.loginPassword;
+
+  await sb
+    .from("profiles")
+    .update({ metadata: nextMeta })
+    .eq("id", u.id);
+}
 
     if (typeof renderAll === "function") renderAll();
     if (typeof saveState === "function") saveState();
