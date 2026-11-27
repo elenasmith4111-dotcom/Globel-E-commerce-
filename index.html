@@ -3012,7 +3012,9 @@ async function loadCustomerLuckyOrders() {
 }
 
 await loadCustomerLuckyOrders();
-
+if (typeof startPlatformSettingsLive === "function") {
+  await startPlatformSettingsLive();
+}
 luckyOrdersChannel = sb
   .channel("customer-lucky-orders-" + user.id)
   .on(
@@ -4401,6 +4403,17 @@ function hideAuthVerifying() {
   if (overlay) overlay.style.display = "none";
   if (fill) fill.style.width = "0%";
 }
+
+var platformSettingsChannel = window.platformSettingsChannel || null;
+
+function getResolvedTrc20Address() {
+  return String(
+    state?.platformConfig?.trc20Address ||
+    state?.platformConfig?.trc20_address ||
+    ""
+  ).trim();
+}
+
 function applyPlatformSettings(data) {
   if (!data || typeof data !== "object") return;
 
@@ -4414,146 +4427,113 @@ function applyPlatformSettings(data) {
 
   const wa = String(
     data.whatsappSupport ?? data.whatsapp_support ?? state.platformConfig?.whatsappSupport ?? ""
-  ).trim();
+  ).trim().replace(/[^0-9]/g, "");
 
   state.platformConfig = {
     ...(state.platformConfig || {}),
     ...data,
     trc20Address: trc,
+    trc20_address: trc,
     telegramSupport: tg,
-    whatsappSupport: wa
+    telegram_support: tg,
+    whatsappSupport: wa,
+    whatsapp_support: wa
   };
 
-  if (typeof updateCustomerTelegramLink === "function") {
-    updateCustomerTelegramLink();
+  updateCustomerTelegramLink();
+
+  const waLink = document.getElementById("cust-whatsapp-direct-link");
+  if (waLink) {
+    waLink.href = wa ? `https://wa.me/${wa}` : "https://wa.me/";
+    waLink.style.opacity = wa ? "1" : "0.65";
   }
-  if (typeof renderAll === "function") {
+
+  if (typeof renderAll === "function" && !window.__renderingAll) {
     renderAll();
   }
 }
 
 async function loadPlatformSettings() {
-  const { data, error } = await sb
-    .from("platform_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
+  if (typeof sb === "undefined" || !sb) return;
+  try {
+    const { data, error } = await sb
+      .from("platform_settings")
+      .select("id, trc20_address, telegram_support, whatsapp_support")
+      .eq("id", 1)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Settings load error:", error);
-    return;
+    if (error) {
+      console.error("Platform settings load error:", error);
+      return;
+    }
+
+    if (data) {
+      applyPlatformSettings(data);
+    }
+  } catch (err) {
+    console.error("Platform settings load exception:", err);
   }
-
-  if (data) {
-    applyPlatformSettings(data);
-  }
-}
-
-function goDepositStep2() {
-  const amt = parseFloat(document.getElementById('dep-amt-input')?.value);
-  if (!amt || amt <= 0) {
-    alert("Enter a valid amount.");
-    return;
-  }
-
-  pendingDepositAmt = amt;
-  const addr = String(
-    state.platformConfig?.trc20Address ||
-    state.platformConfig?.trc20_address ||
-    ""
-  ).trim();
-
-  if (!addr) {
-    alert("TRC20 wallet address is not configured yet. Please contact support.");
-    return;
-  }
-
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(addr)}`;
-
-  document.getElementById('modal-content').innerHTML = `
-    <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
-    <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
-      <img
-        src="${qrUrl}"
-        alt="TRC20 QR Code"
-        style="width:160px; height:160px; border-radius:10px; background:#fff; padding:6px; display:block; margin:0 auto;"
-        onerror="this.style.display='none'; document.getElementById('qr-fallback-box').style.display='block';"
-      />
-      <div id="qr-fallback-box" style="display:none; background:#fff; border:1px dashed #6366f1; border-radius:10px; padding:12px; font-size:11px; color:#1e1b4b; word-break:break-all;">
-        <strong>USDT (TRC20) Address:</strong><br/>${escapeLuckyText(addr)}
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#e2e8f0; padding:8px 10px; border-radius:8px; margin-top:10px; font-size:11px;">
-        <span id="trc20-copy-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-align:left; font-weight:700; color:#0f172a;">${escapeLuckyText(addr)}</span>
-        <button type="button" class="btn-sm" style="background:#4f46e5; flex-shrink:0;" onclick="copyTrc20Addr()">Copy</button>
-      </div>
-    </div>
-    <button type="button" class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
-  `;
-}
-
-function copyTrc20Addr() {
-  const addr = String(
-    state.platformConfig?.trc20Address ||
-    state.platformConfig?.trc20_address ||
-    ""
-  ).trim();
-  if (!addr) return;
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(addr).catch(() => {});
-  }
-  alert("TRC20 Address Copied!");
-}
-
-function startPlatformSettingsLive() {
-    if (platformSettingsChannel) return;
-
-    platformSettingsChannel = sb
-        .channel("platform-settings-live")
-        .on(
-            "postgres_changes",
-            {
-                event: "*",
-                schema: "public",
-                table: "platform_settings",
-                filter: "id=eq.1"
-            },
-            payload => {
-                if (payload.new) {
-                    applyPlatformSettings(payload.new);
-                }
-            }
-        )
-        .subscribe();
-
-    loadPlatformSettings();
 }
 
 function updateCustomerTelegramLink() {
-    const rawTelegram = state.platformConfig.telegramSupport || '';
+  const rawTelegram = String(
+    state?.platformConfig?.telegramSupport ||
+    state?.platformConfig?.telegram_support ||
+    ""
+  ).trim();
 
-    const username = rawTelegram
-        .trim()
-        .replace(/^@/, '')
-        .replace(/^https?:\/\/(www\.)?t\.me\//i, '')
-        .replace(/\/$/, '');
+  const username = rawTelegram
+    .replace(/^@+/, "")
+    .replace(/^https?:\/\/(www\.)?t\.me\//i, "")
+    .replace(/\/+$/, "");
 
-    const link = document.getElementById('cust-telegram-direct-link');
-    const display = document.getElementById('tg-handle-display');
+  const link = document.getElementById("cust-telegram-direct-link");
+  const display = document.getElementById("tg-handle-display");
 
-    if (!link || !display) return;
+  if (!link || !display) return;
 
-    if (username) {
-        link.href = `https://t.me/${encodeURIComponent(username)}`;
-        display.textContent = '@' + username;
-        link.style.display = '';
-    } else {
-        link.href = '#';
-        display.textContent = 'Unavailable';
-        link.style.display = 'none';
-    }
+  if (username) {
+    link.href = `https://t.me/${encodeURIComponent(username)}`;
+    display.textContent = "@" + username;
+    link.style.display = "";
+  } else {
+    link.href = "#";
+    display.textContent = "Unavailable";
+    link.style.display = "none";
+  }
 }
 
+async function startPlatformSettingsLive() {
+  if (typeof sb === "undefined" || !sb) return;
+
+  await loadPlatformSettings();
+
+  if (!platformSettingsChannel) {
+    platformSettingsChannel = sb
+      .channel("platform-settings-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "platform_settings",
+          filter: "id=eq.1"
+        },
+        payload => {
+          if (payload?.new) {
+            applyPlatformSettings(payload.new);
+          } else {
+            loadPlatformSettings();
+          }
+        }
+      )
+      .subscribe((status, err) => {
+        if (err) console.error("Platform settings realtime error:", err);
+      });
+
+    window.platformSettingsChannel = platformSettingsChannel;
+  }
+}
 
 startPlatformSettingsLive();
 
@@ -5233,27 +5213,54 @@ if (u.withdrawBlocked) {
       }
     }
 
-    function goDepositStep2() {
-      const u = getActiveUser();
-      const amt = parseFloat(document.getElementById('dep-amt-input').value);
-      if (!amt || amt <= 0) { alert("Enter a valid amount."); return; }
-      pendingDepositAmt = amt;
-const addr = state.platformConfig.trc20Address || "";
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(addr)}`;
+   async function goDepositStep2() {
+  const amtInput = document.getElementById("dep-amt-input");
+  const amt = parseFloat(amtInput ? amtInput.value : pendingDepositAmt);
+  if (!amt || amt <= 0) {
+    alert("Enter a valid amount.");
+    return;
+  }
 
-      document.getElementById('modal-content').innerHTML = `
-        <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
-        <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
-          <img src="${qrUrl}" style="width:145px; height:145px;" />
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; padding:7px 9px; border-radius:8px; margin-top:8px; font-size:11px;">
-            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;">${addr}</span>
-            <button class="btn-sm" style="background:#4f46e5;" onclick="navigator.clipboard.writeText('${addr}'); alert('TRC20 Copied!');">Copy</button>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
-      `;
-    }
+  pendingDepositAmt = amt;
+  await loadPlatformSettings();
+  const addr = getResolvedTrc20Address();
 
+  if (!addr) {
+    alert("TRC20 wallet address abhi set nahi hua. Admin Settings mein TRC20 save karein.");
+    return;
+  }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(addr)}`;
+
+  document.getElementById("modal-content").innerHTML = `
+    <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
+    <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
+      <img
+        src="${qrUrl}"
+        alt="TRC20 QR Code"
+        style="width:155px; height:155px; border-radius:10px; background:#fff; padding:6px; display:block; margin:0 auto;"
+        onerror="this.style.display='none'; document.getElementById('qr-fallback-box').style.display='block';"
+      />
+      <div id="qr-fallback-box" style="display:none; background:#fff; border:1px dashed #6366f1; border-radius:10px; padding:12px; font-size:11px; color:#1e1b4b; word-break:break-all;">
+        <strong>USDT (TRC20) Address:</strong><br/>${escapeLuckyText(addr)}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#e2e8f0; padding:8px 10px; border-radius:8px; margin-top:10px; font-size:11px;">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-align:left; font-weight:700; color:#0f172a;">${escapeLuckyText(addr)}</span>
+        <button type="button" class="btn-sm" style="background:#4f46e5; flex-shrink:0;" onclick="copyTrc20Addr()">Copy</button>
+      </div>
+    </div>
+    <button type="button" class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
+  `;
+}
+
+function copyTrc20Addr() {
+  const addr = getResolvedTrc20Address();
+  if (!addr) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).catch(() => {});
+  }
+  alert("TRC20 Address Copied!");
+}
 async function syncLiveTransactionsFromSupabase() {
   if (typeof sb === "undefined" || !sb) return;
   try {
