@@ -2681,6 +2681,25 @@ async function startRealtimeSync() {
       }, loadCustomerProfiles)
       .subscribe();
 
+     const refreshCustomerTx = async () => {
+    await syncLiveTransactionsFromSupabase();
+    if (typeof renderAll === "function") renderAll();
+  };
+
+  await refreshCustomerTx();
+
+  sb.channel("customer-tx-live-" + user.id)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "withdraw_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .subscribe();
     profileChannel = sb.channel("admin-wallet-ledger")
       .on("postgres_changes", {
         event: "*", schema: "public", table: "wallet_ledger"
@@ -5141,7 +5160,7 @@ if (u.withdrawBlocked) {
      } else if (type === 'history') {
         const userTx = (Array.isArray(u.transactions) && u.transactions.length > 0
           ? u.transactions
-          : state.txHistory.filter(t => t.userId === u.id))
+          : (state.txHistory || []).filter(t => t.userId === u.id))
           .slice()
           .sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
 
@@ -5169,13 +5188,22 @@ if (u.withdrawBlocked) {
               const st = String(t.status || "Pending");
               const lower = st.toLowerCase();
               const badgeCls = lower === 'approved' ? 'badge-approved' : (lower === 'rejected' ? 'badge-rejected' : 'badge-pending');
+              const trcText = String(t.trc20Address || u.trc20Address || state?.platformConfig?.trc20Address || "Not provided").trim();
+              const dateTimeText = t.createdAt
+                ? new Date(Number(t.createdAt)).toLocaleString()
+                : String(t.time || "");
               return `
-                <div style="padding:9px 0; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-                  <div>
-                    <strong style="font-size:12px;">${t.type || "Transaction"} • $${Number(t.amount || 0).toFixed(2)}</strong>
-                    <p style="font-size:10px; color:#64748b;">${t.time || ""}</p>
+                <div style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <strong style="font-size:12px; color:#0f172a;">${escapeLuckyText(t.type || "Transaction")} • $${Number(t.amount || 0).toFixed(2)}</strong>
+                    <span class="${badgeCls}">${escapeLuckyText(st.charAt(0).toUpperCase() + st.slice(1))}</span>
                   </div>
-                  <span class="${badgeCls}">${st.charAt(0).toUpperCase() + st.slice(1)}</span>
+                  <p style="font-size:10px; color:#334155; margin-top:4px; word-break:break-all;">
+                    <strong>TRC20:</strong> ${escapeLuckyText(trcText)}
+                  </p>
+                  <p style="font-size:10px; color:#64748b; margin-top:2px;">
+                    <strong>Date & Time:</strong> ${escapeLuckyText(dateTimeText)}
+                  </p>
                 </div>
               `;
             }).join('');
@@ -5185,7 +5213,6 @@ if (u.withdrawBlocked) {
           ${summaryCards}
           ${rows}
         `;
-
 
   } else if (type === 'bindWallet') {
         content.innerHTML = `
@@ -5337,13 +5364,23 @@ async function syncLiveTransactionsFromSupabase() {
         const usr = (state.users || []).find(x => x.id === d.user_id);
         const stRaw = String(d.status || "Pending");
         const stNorm = stRaw.charAt(0).toUpperCase() + stRaw.slice(1).toLowerCase();
+        const trcAddr = String(
+          d.trc20_address ||
+          d.wallet_address ||
+          d.trc20Address ||
+          usr?.trc20Address ||
+          state?.platformConfig?.trc20Address ||
+          ""
+        ).trim();
+
         merged.push({
           id: d.id,
           userId: d.user_id,
           user: usr?.name || d.user_id,
           type: "Deposit",
-           luckyOrderId: d.lucky_order_id || null,
-  amount: Number(d.amount || 0),
+          luckyOrderId: d.lucky_order_id || null,
+          amount: Number(d.amount || 0),
+          trc20Address: trcAddr,
           status: stNorm,
           time: d.created_at ? new Date(d.created_at).toLocaleString() : "Live",
           createdAt: d.created_at ? new Date(d.created_at).getTime() : Date.now()
@@ -5351,7 +5388,7 @@ async function syncLiveTransactionsFromSupabase() {
       });
     }
 
-if (wdErr) {
+    if (wdErr) {
       const missingTable =
         wdErr.code === "PGRST205" ||
         String(wdErr.message || "").toLowerCase().includes("does not exist") ||
@@ -5366,12 +5403,23 @@ if (wdErr) {
         const usr = (state.users || []).find(x => x.id === w.user_id);
         const stRaw = String(w.status || "Pending");
         const stNorm = stRaw.charAt(0).toUpperCase() + stRaw.slice(1).toLowerCase();
+        const trcAddr = String(
+          w.trc20_address ||
+          w.wallet_address ||
+          w.trc20Address ||
+          usr?.trc20Address ||
+          usr?.boundWallet ||
+          state?.platformConfig?.trc20Address ||
+          ""
+        ).trim();
+
         merged.push({
           id: w.id,
           userId: w.user_id,
           user: usr?.name || w.user_id,
           type: "Withdraw",
           amount: Number(w.amount || 0),
+          trc20Address: trcAddr,
           status: stNorm,
           time: w.created_at ? new Date(w.created_at).toLocaleString() : "Live",
           createdAt: w.created_at ? new Date(w.created_at).getTime() : Date.now()
@@ -5396,34 +5444,36 @@ async function confirmPaid() {
   }
 
   const amt = Number(pendingDepositAmt);
-  const nowLabel = "Today, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const nowStamp = Date.now();
+  const nowLabel = new Date(nowStamp).toLocaleString();
+  const trcAddr = String(
+    (typeof getResolvedTrc20Address === "function" ? getResolvedTrc20Address() : "") ||
+    u.trc20Address ||
+    state?.platformConfig?.trc20Address ||
+    ""
+  ).trim();
+
   const localTx = {
-    id: Date.now(),
+    id: nowStamp,
     userId: u.id,
     user: u.name,
     type: "Deposit",
     amount: amt,
+    trc20Address: trcAddr,
     status: "Pending",
     time: nowLabel,
-    createdAt: Date.now()
+    createdAt: nowStamp
   };
 
   try {
-   const luckyOrder = Object.values(demoLuckyOrders || {}).find(o =>
-  o &&
-  o.status !== "Approved" &&
-  o.status !== "Deleted" &&
-  Number(o.taskNum) === Number(u.completedTasks || 0) + 1
-);
-
-const { data, error } = await sb
-  .from("deposit_requests")
-  .insert({
-    user_id: u.id,
-    amount: amt,
-    status: "pending",
-lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
-  })
+    const { data, error } = await sb
+      .from("deposit_requests")
+      .insert({
+        user_id: u.id,
+        amount: amt,
+        status: "pending",
+        lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
+      })
       .select()
       .single();
 
@@ -5432,7 +5482,9 @@ lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
     const savedTx = {
       ...localTx,
       id: data?.id ?? localTx.id,
-      createdAt: data?.created_at ? new Date(data.created_at).getTime() : Date.now()
+      trc20Address: String(data?.trc20_address || data?.wallet_address || trcAddr).trim(),
+      time: data?.created_at ? new Date(data.created_at).toLocaleString() : nowLabel,
+      createdAt: data?.created_at ? new Date(data.created_at).getTime() : nowStamp
     };
     u.transactions = u.transactions || [];
     u.transactions.unshift(savedTx);
@@ -5451,6 +5503,7 @@ lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
     closeModal();
   }
 }
+
 async function submitWithdraw() {
   const u = getActiveUser();
   const completed = Number(u.completedTasks ?? u.tasksCompleted ?? 0);
@@ -5461,13 +5514,11 @@ async function submitWithdraw() {
     return;
   }
 
-  // 1. Slide ON hone par exact restricted message
   if (Boolean(u.withdrawBlocked || u.wdBlock)) {
     alert("Your withdraw is restricted. Please contact with customer service.");
     return;
   }
 
-  // 2. 25 tasks complete na hon to withdraw block
   if (completed < requiredTasks) {
     alert(`Please complete ${requiredTasks} tasks before withdraw (${completed}/${requiredTasks} completed).`);
     return;
@@ -5486,16 +5537,25 @@ async function submitWithdraw() {
     return;
   }
 
-  const nowLabel = "Today, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const nowStamp = Date.now();
+  const nowLabel = new Date(nowStamp).toLocaleString();
+  const wdTrcAddr = String(
+    u.trc20Address ||
+    u.boundWallet ||
+    state?.platformConfig?.trc20Address ||
+    ""
+  ).trim();
+
   const txObj = {
-    id: Date.now(),
+    id: nowStamp,
     userId: u.id,
     user: u.name,
     type: "Withdraw",
     amount: amt,
+    trc20Address: wdTrcAddr,
     status: "Pending",
     time: nowLabel,
-    createdAt: Date.now()
+    createdAt: nowStamp
   };
 
   try {
@@ -5516,6 +5576,11 @@ async function submitWithdraw() {
 
     if (!wdErr && wdRow?.id) {
       txObj.id = wdRow.id;
+      txObj.trc20Address = String(wdRow.trc20_address || wdRow.wallet_address || wdTrcAddr).trim();
+      if (wdRow.created_at) {
+        txObj.time = new Date(wdRow.created_at).toLocaleString();
+        txObj.createdAt = new Date(wdRow.created_at).getTime();
+      }
     }
 
     u.transactions = u.transactions || [];
@@ -5530,7 +5595,6 @@ async function submitWithdraw() {
     alert(err.message || "Could not submit withdrawal.");
   }
 }
-
 async function decideAdminTx(id, decision) {
   const tx = (state.txHistory || []).find(t => String(t.id) === String(id));
   const currentStatus = String(tx?.status || "Pending").toLowerCase();
@@ -5725,7 +5789,7 @@ function renderAdminTxLists() {
         }).join('');
   }
 
-  const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
+ const wds = (state.txHistory || []).filter(t => t.type === 'Withdraw');
   const wdEl = document.getElementById('adm-withdraws-list');
   if (wdEl) {
     wdEl.innerHTML = wds.length === 0
@@ -5734,8 +5798,20 @@ function renderAdminTxLists() {
           const st = String(w.status || 'Pending');
           const norm = st.charAt(0).toUpperCase() + st.slice(1).toLowerCase();
           const badgeCls = norm === 'Approved' ? 'badge-approved' : (norm === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+          const usr = (state.users || []).find(x => String(x.id) === String(w.userId));
+          const trcVal = String(
+            w.trc20Address ||
+            usr?.trc20Address ||
+            usr?.boundWallet ||
+            state?.platformConfig?.trc20Address ||
+            "Not set"
+          ).trim();
+          const dtVal = w.createdAt
+            ? new Date(Number(w.createdAt)).toLocaleString()
+            : String(w.time || '');
           const safeUser = typeof escapeLuckyText === "function" ? escapeLuckyText(w.user) : String(w.user || '');
-          const safeTime = typeof escapeLuckyText === "function" ? escapeLuckyText(w.time || '') : String(w.time || '');
+          const safeTime = typeof escapeLuckyText === "function" ? escapeLuckyText(dtVal) : String(dtVal);
+          const safeTrc = typeof escapeLuckyText === "function" ? escapeLuckyText(trcVal) : String(trcVal);
           const cleanId = encodeURIComponent(String(w.id ?? ''));
           return `
             <div class="card-box" style="margin-bottom:10px;">
@@ -5743,7 +5819,10 @@ function renderAdminTxLists() {
                 <strong>${safeUser} • $${Number(w.amount || 0).toFixed(2)}</strong>
                 <span class="${badgeCls}">${norm}</span>
               </div>
-              <p style="font-size:11px; color:#64748b; margin:4px 0 8px;">${safeTime}</p>
+              <p style="font-size:11px; color:#334155; margin:4px 0 2px; word-break:break-all;">
+                <strong>TRC20 Address:</strong> ${safeTrc}
+              </p>
+              <p style="font-size:11px; color:#64748b; margin:0 0 8px;">${safeTime}</p>
               ${norm === 'Pending' ? `
                 <div style="display:flex; gap:8px;">
                   <button type="button" class="btn-sm js-tx-action" data-tx-id="${cleanId}" data-tx-decision="Approved" style="background:#059669;">Approve Withdraw</button>
@@ -5755,7 +5834,6 @@ function renderAdminTxLists() {
         }).join('');
   }
 }
-
 if (!window.__adminTxClickBound) {
   window.__adminTxClickBound = true;
   document.addEventListener("click", function (e) {
