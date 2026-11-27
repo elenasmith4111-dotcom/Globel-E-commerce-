@@ -1414,7 +1414,103 @@
 }
 
 #cust-app-screen .nav-item.active {
+  color: #fde68a !important;/* FORCE LOGIN SCREEN & CARD THEME */
+html body #customer-outer #cust-auth-screen.auth-box {
+  background: linear-gradient(155deg, #0b1021 0%, #171942 50%, #0d2638 100%) !important;
+  padding: 22px 16px !important;
+}
+
+html body #customer-outer #cust-auth-screen .auth-card-inner {
+  background: linear-gradient(180deg, #1a2142 0%, #232b57 58%, #15293d 100%) !important;
+  border: 1.5px solid rgba(129, 140, 248, 0.5) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 22px 48px rgba(3, 7, 18, 0.65) !important;
+  padding: 24px 18px !important;
+  color: #f8fafc !important;
+}
+
+html body #customer-outer #cust-auth-screen .brand-logo {
+  background: linear-gradient(135deg, #312e81 0%, #4f46e5 52%, #0d9488 100%) !important;
+  border: 1px solid rgba(253, 230, 138, 0.35) !important;
+  border-radius: 18px !important;
+  padding: 16px 14px !important;
+  margin-bottom: 18px !important;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.45) !important;
+}
+
+html body #customer-outer #cust-auth-screen .brand-logo h2 {
   color: #fde68a !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
+}
+
+html body #customer-outer #cust-auth-screen .brand-tagline {
+  display: block !important;
+  margin-top: 5px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #f1f5f9 !important;
+}
+
+html body #customer-outer #cust-auth-screen .auth-tabs {
+  background: rgba(15, 23, 42, 0.45) !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  border-bottom: none !important;
+  margin-bottom: 16px !important;
+}
+
+html body #customer-outer #cust-auth-screen .auth-tab {
+  color: #cbd5e1 !important;
+  border-radius: 9px !important;
+  border-bottom: none !important;
+}
+
+html body #customer-outer #cust-auth-screen .auth-tab.active {
+  background: linear-gradient(135deg, #4f46e5, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+html body #customer-outer #cust-auth-screen .input-group label {
+  color: #e2e8f0 !important;
+}
+
+html body #customer-outer #cust-auth-screen .input-group input {
+  background: rgba(15, 23, 42, 0.65) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+}
+
+html body #customer-outer #cust-auth-screen .simple-captcha {
+  background: rgba(15, 23, 42, 0.55) !important;
+  border: 1px solid rgba(129, 140, 248, 0.35) !important;
+  border-radius: 14px !important;
+  padding: 10px !important;
+}
+
+html body #customer-outer #cust-auth-screen #captcha-question {
+  background: #ffffff !important;
+  color: #1e1b4b !important;
+}
+
+html body #customer-outer #cust-auth-screen #captcha-refresh {
+  background: #312e81 !important;
+  color: #fde68a !important;
+  border-color: rgba(165, 180, 252, 0.4) !important;
+}
+
+html body #customer-outer #cust-auth-screen #captcha-answer {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  width: 142px !important;
+  font-size: 12px !important;
+}
+
+html body #customer-outer #cust-auth-screen .btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35) !important;
+}
   font-weight: 700;
 }
 
@@ -1428,6 +1524,7 @@
   border: 2px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important;
 }
+
 </style>
 </head>
 <body>
@@ -1450,8 +1547,7 @@
 
     <!-- AUTH SCREEN -->
     <div id="cust-auth-screen" class="auth-box">
-      <div class="auth-card-inner">
-
+<div class="auth-card-inner" style="background: linear-gradient(180deg, #1a2142 0%, #232b57 58%, #15293d 100%); border: 1.5px solid rgba(129, 140, 248, 0.5); border-radius: 24px; padding: 24px 18px; color: #f8fafc;">
         <div class="brand-logo">
           <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
