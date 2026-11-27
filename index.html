@@ -2748,11 +2748,9 @@ async function startRealtimeSync() {
         user.id
       );
     }
-// Get the latest in-memory user data after async ledger loading
-const latestRecord =
-  (state.users || []).find(x => x.id === user.id) || prevRecord;
 const keepRecentTaskState =
-  latestRecord._taskSyncUntil && Date.now() < Number(latestRecord._taskSyncUntil);
+  Boolean(latestRecord._taskSyncUntil) &&
+  Date.now() < Number(latestRecord._taskSyncUntil);
 
 const incomingCompleted = Number(
   data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
@@ -2775,7 +2773,14 @@ const record = makeUserRecord({
   name: data.display_name || data.metadata?.name || latestRecord.name || "",
   phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
   email: data.email || user.email || latestRecord.email || "",
-  balance: Number(balance)
+  balance: Number(balance),
+  completedTasks: keepRecentTaskState
+    ? Math.max(incomingCompleted, currentCompleted)
+    : incomingCompleted,
+  todayEarn: keepRecentTaskState
+    ? Math.max(incomingTodayEarn, currentTodayEarn)
+    : incomingTodayEarn,
+  _taskSyncUntil: latestRecord._taskSyncUntil || 0
 });
     delete record.loginPassword;
     delete record.withdrawPassword;
@@ -2784,7 +2789,9 @@ const record = makeUserRecord({
     state.activeUserId = user.id;
     state.customerLoggedIn = true;
 
-   
+    if (typeof syncLiveTransactionsFromSupabase === "function") {
+      await syncLiveTransactionsFromSupabase();
+    }
 
     applyRouting();
     renderAll();
@@ -2801,7 +2808,6 @@ const record = makeUserRecord({
     }, loadMyProfile)
     .subscribe();
 }
-
 // ================= SAVE DATA TO SUPABASE =================
 
 async function pushToBackend() {
@@ -5157,62 +5163,83 @@ if (u.withdrawBlocked) {
   if (noticeEl && u.adminNotification) {
     noticeEl.textContent = u.adminNotification;
   }
-     } else if (type === 'history') {
-        const userTx = (Array.isArray(u.transactions) && u.transactions.length > 0
-          ? u.transactions
-          : (state.txHistory || []).filter(t => t.userId === u.id))
-          .slice()
-          .sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
+   } else if (type === 'history') {
+        const renderHistoryModalContent = () => {
+          let allTx = Array.isArray(state.txHistory) ? state.txHistory : [];
+          if (allTx.length === 0) {
+            try {
+              const cached = JSON.parse(sessionStorage.getItem("ge_tx_history_cache") || "[]");
+              if (Array.isArray(cached) && cached.length > 0) {
+                allTx = cached;
+              }
+            } catch (_) {}
+          }
 
-        const approvedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "approved");
-        const rejectedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "rejected");
-        const approvedSum = approvedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
-        const rejectedSum = rejectedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+          const userTx = allTx
+            .filter(t => String(t.userId) === String(u.id))
+            .slice()
+            .sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
 
-        const summaryCards = `
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
-            <div style="background:#ecfdf5; border:1px solid #86efac; border-radius:12px; padding:10px; text-align:center;">
-              <div style="font-size:10px; font-weight:700; color:#15803d;">APPROVED (${approvedItems.length})</div>
-              <div style="font-size:16px; font-weight:800; color:#166534; margin-top:2px;">$${approvedSum.toFixed(2)}</div>
+          const approvedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "approved");
+          const rejectedItems = userTx.filter(t => String(t.status || "").toLowerCase() === "rejected");
+          const approvedSum = approvedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+          const rejectedSum = rejectedItems.reduce((s, x) => s + Number(x.amount || 0), 0);
+
+          const summaryCards = `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+              <div style="background:#ecfdf5; border:1px solid #86efac; border-radius:12px; padding:10px; text-align:center;">
+                <div style="font-size:10px; font-weight:700; color:#15803d;">APPROVED (${approvedItems.length})</div>
+                <div style="font-size:16px; font-weight:800; color:#166534; margin-top:2px;">$${approvedSum.toFixed(2)}</div>
+              </div>
+              <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:10px; text-align:center;">
+                <div style="font-size:10px; font-weight:700; color:#b91c1c;">REJECTED (${rejectedItems.length})</div>
+                <div style="font-size:16px; font-weight:800; color:#991b1b; margin-top:2px;">$${rejectedSum.toFixed(2)}</div>
+              </div>
             </div>
-            <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:10px; text-align:center;">
-              <div style="font-size:10px; font-weight:700; color:#b91c1c;">REJECTED (${rejectedItems.length})</div>
-              <div style="font-size:16px; font-weight:800; color:#991b1b; margin-top:2px;">$${rejectedSum.toFixed(2)}</div>
-            </div>
-          </div>
-        `;
+          `;
 
-        const rows = userTx.length === 0
-          ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No deposit or withdraw history yet.</p>`
-          : userTx.map(t => {
-              const st = String(t.status || "Pending");
-              const lower = st.toLowerCase();
-              const badgeCls = lower === 'approved' ? 'badge-approved' : (lower === 'rejected' ? 'badge-rejected' : 'badge-pending');
-              const trcText = String(t.trc20Address || u.trc20Address || state?.platformConfig?.trc20Address || "Not provided").trim();
-              const dateTimeText = t.createdAt
-                ? new Date(Number(t.createdAt)).toLocaleString()
-                : String(t.time || "");
-              return `
-                <div style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                    <strong style="font-size:12px; color:#0f172a;">${escapeLuckyText(t.type || "Transaction")} • $${Number(t.amount || 0).toFixed(2)}</strong>
-                    <span class="${badgeCls}">${escapeLuckyText(st.charAt(0).toUpperCase() + st.slice(1))}</span>
+          const rows = userTx.length === 0
+            ? `<p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px 0;">No deposit or withdraw history yet.</p>`
+            : userTx.map(t => {
+                const st = String(t.status || "Pending");
+                const lower = st.toLowerCase();
+                const badgeCls = lower === 'approved' ? 'badge-approved' : (lower === 'rejected' ? 'badge-rejected' : 'badge-pending');
+                const trcText = String(t.trc20Address || u.trc20Address || state?.platformConfig?.trc20Address || "Not provided").trim();
+                const dateTimeText = t.createdAt
+                  ? new Date(Number(t.createdAt)).toLocaleString()
+                  : String(t.time || "");
+                return `
+                  <div style="padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                      <strong style="font-size:12px; color:#0f172a;">${escapeLuckyText(t.type || "Transaction")} • $${Number(t.amount || 0).toFixed(2)}</strong>
+                      <span class="${badgeCls}">${escapeLuckyText(st.charAt(0).toUpperCase() + st.slice(1))}</span>
+                    </div>
+                    <p style="font-size:10px; color:#334155; margin-top:4px; word-break:break-all;">
+                      <strong>TRC20:</strong> ${escapeLuckyText(trcText)}
+                    </p>
+                    <p style="font-size:10px; color:#64748b; margin-top:2px;">
+                      <strong>Date & Time:</strong> ${escapeLuckyText(dateTimeText)}
+                    </p>
                   </div>
-                  <p style="font-size:10px; color:#334155; margin-top:4px; word-break:break-all;">
-                    <strong>TRC20:</strong> ${escapeLuckyText(trcText)}
-                  </p>
-                  <p style="font-size:10px; color:#64748b; margin-top:2px;">
-                    <strong>Date & Time:</strong> ${escapeLuckyText(dateTimeText)}
-                  </p>
-                </div>
-              `;
-            }).join('');
+                `;
+              }).join('');
 
-        content.innerHTML = `
-          <h3 style="font-size:15px; margin-bottom:10px;">Deposit & Withdraw History</h3>
-          ${summaryCards}
-          ${rows}
-        `;
+          content.innerHTML = `
+            <h3 style="font-size:15px; margin-bottom:10px;">Deposit & Withdraw History</h3>
+            ${summaryCards}
+            ${rows}
+          `;
+        };
+
+        renderHistoryModalContent();
+
+        if (typeof syncLiveTransactionsFromSupabase === "function") {
+          syncLiveTransactionsFromSupabase().then(() => {
+            if (document.getElementById('modal-overlay')?.style.display === 'flex') {
+              renderHistoryModalContent();
+            }
+          });
+        }
 
   } else if (type === 'bindWallet') {
         content.innerHTML = `
