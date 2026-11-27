@@ -2832,14 +2832,36 @@ async function safeRemoveChannelByTopic(topic) {
     } catch (_) {}
   }
 }
+function setAdminScreenState(isLoggedIn) {
+  state.adminLoggedIn = !!isLoggedIn;
+
+  const authScreen =
+    document.getElementById("admin-auth-screen") ||
+    document.getElementById("admin-login-screen") ||
+    document.getElementById("admin-auth-box");
+  const appScreen =
+    document.getElementById("admin-app-screen") ||
+    document.getElementById("admin-dashboard");
+
+  if (authScreen) {
+    authScreen.style.display = isLoggedIn ? "none" : "flex";
+  }
+  if (appScreen) {
+    appScreen.style.display = isLoggedIn ? "flex" : "none";
+  }
+}
 
 function showAdminPortalView() {
-  state.adminLoggedIn = true;
+  setAdminScreenState(true);
+
   if (typeof applyRouting === "function") {
     applyRouting();
   }
+
   const custOuter = document.getElementById("customer-outer");
-  if (custOuter) custOuter.style.display = "none";
+  if (custOuter) {
+    custOuter.style.display = "none";
+  }
 
   const adminOuter =
     document.getElementById("admin-outer") ||
@@ -2847,9 +2869,9 @@ function showAdminPortalView() {
     document.getElementById("admin-dashboard") ||
     document.getElementById("admin-screen");
   if (adminOuter) {
-    adminOuter.style.display = "block";
+    adminOuter.style.display = "flex";
   }
-
+}
   const adminLoginBox =
     document.getElementById("admin-login-screen") ||
     document.getElementById("admin-auth-box");
@@ -3570,7 +3592,6 @@ function buildWhatsappHref(raw) {
   const digits = String(raw || "").replace(/[^0-9]/g, "");
   return digits ? "https://wa.me/" + digits : "https://wa.me/";
 }
-
 function applyRouting() {
   if (!authReady) {
     document.getElementById('admin-outer').style.display = 'none';
@@ -3580,6 +3601,15 @@ function applyRouting() {
   const isAdmin = isAdminPath();
   document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
   document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+
+  if (isAdmin) {
+    const adminLoggedIn = !!state.adminLoggedIn;
+    const adminAuth = document.getElementById('admin-auth-screen');
+    const adminApp = document.getElementById('admin-app-screen');
+    if (adminAuth) adminAuth.style.display = adminLoggedIn ? 'none' : 'flex';
+    if (adminApp) adminApp.style.display = adminLoggedIn ? 'flex' : 'none';
+    return;
+  }
 
   if (!isAdmin) {
     const loggedIn = !!state.customerLoggedIn;
@@ -3609,7 +3639,6 @@ window.addEventListener("DOMContentLoaded", () => {
   generateLoginCaptcha();
   renderLiveFeed();
 });
-
 function renderLiveFeed() {
   const el = document.getElementById('live-tx-container');
   if (!el) return;
