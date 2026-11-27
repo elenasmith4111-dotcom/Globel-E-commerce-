@@ -2823,6 +2823,41 @@ let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
 
+async function safeRemoveChannelByTopic(topic) {
+  if (!sb || typeof sb.getChannels !== "function") return;
+  const existing = sb.getChannels().find((ch) => ch && ch.topic === topic);
+  if (existing) {
+    try {
+      await sb.removeChannel(existing);
+    } catch (_) {}
+  }
+}
+
+function showAdminPortalView() {
+  state.adminLoggedIn = true;
+  if (typeof applyRouting === "function") {
+    applyRouting();
+  }
+  const custOuter = document.getElementById("customer-outer");
+  if (custOuter) custOuter.style.display = "none";
+
+  const adminOuter =
+    document.getElementById("admin-outer") ||
+    document.getElementById("admin-portal") ||
+    document.getElementById("admin-dashboard") ||
+    document.getElementById("admin-screen");
+  if (adminOuter) {
+    adminOuter.style.display = "block";
+  }
+
+  const adminLoginBox =
+    document.getElementById("admin-login-screen") ||
+    document.getElementById("admin-auth-box");
+  if (adminLoginBox) {
+    adminLoginBox.style.display = "none";
+  }
+}
+
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
   if (authError || !authData?.user) {
@@ -2845,12 +2880,24 @@ async function startRealtimeSync() {
 
   // Remove channels from any previous session before creating fresh ones.
   for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
-    if (channel) await sb.removeChannel(channel);
+    if (channel) {
+      try {
+        await sb.removeChannel(channel);
+      } catch (_) {}
+    }
   }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
   adminLuckyOrdersChannel = null;
+
+  await safeRemoveChannelByTopic("realtime:admin-deposit-requests");
+  await safeRemoveChannelByTopic("realtime:admin-withdraw-requests");
+  await safeRemoveChannelByTopic("realtime:admin-global-state");
+  await safeRemoveChannelByTopic("realtime:admin-customer-profiles");
+  await safeRemoveChannelByTopic("realtime:admin-wallet-ledger");
+  await safeRemoveChannelByTopic("realtime:customer-tx-live-" + user.id);
+  await safeRemoveChannelByTopic("realtime:customer-profile-wallet-" + user.id);
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2924,37 +2971,46 @@ async function startRealtimeSync() {
       if (typeof renderAll === "function") {
         renderAll();
       } else {
-        renderAdminUserLines();
-        renderAdminTxLists();
-
- }
+        if (typeof renderAdminUserLines === "function") renderAdminUserLines();
+        if (typeof renderAdminTxLists === "function") renderAdminTxLists();
+      }
       setBackendStatus(true);
     };
 
     await loadGlobalState();
     await loadCustomerProfiles();
 
-    if (sb.getChannels) {
-      const existingDep = sb.getChannels().find(ch => ch.topic === "realtime:admin-deposit-requests");
-      const existingWd = sb.getChannels().find(ch => ch.topic === "realtime:admin-withdraw-requests");
-      if (existingDep) await sb.removeChannel(existingDep);
-      if (existingWd) await sb.removeChannel(existingWd);
+    if (typeof syncLiveTransactionsFromSupabase === "function") {
+      await syncLiveTransactionsFromSupabase();
+    }
+    if (typeof renderAdminTxLists === "function") {
+      renderAdminTxLists();
     }
 
-    await syncLiveTransactionsFromSupabase();
-    renderAdminTxLists();
+    showAdminPortalView();
+    if (typeof renderAll === "function") {
+      renderAll();
+    }
 
     sb.channel("admin-deposit-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
-        await syncLiveTransactionsFromSupabase();
-        renderAdminTxLists();
+        if (typeof syncLiveTransactionsFromSupabase === "function") {
+          await syncLiveTransactionsFromSupabase();
+        }
+        if (typeof renderAdminTxLists === "function") {
+          renderAdminTxLists();
+        }
       })
       .subscribe();
 
     sb.channel("admin-withdraw-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
-        await syncLiveTransactionsFromSupabase();
-        renderAdminTxLists();
+        if (typeof syncLiveTransactionsFromSupabase === "function") {
+          await syncLiveTransactionsFromSupabase();
+        }
+        if (typeof renderAdminTxLists === "function") {
+          renderAdminTxLists();
+        }
       })
       .subscribe();
 
@@ -2970,25 +3026,6 @@ async function startRealtimeSync() {
       }, loadCustomerProfiles)
       .subscribe();
 
-     const refreshCustomerTx = async () => {
-    await syncLiveTransactionsFromSupabase();
-    if (typeof renderAll === "function") renderAll();
-  };
-
-  await refreshCustomerTx();
-
-  sb.channel("customer-tx-live-" + user.id)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
-      refreshCustomerTx
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "withdraw_requests", filter: "user_id=eq." + user.id },
-      refreshCustomerTx
-    )
-    .subscribe();
     profileChannel = sb.channel("admin-wallet-ledger")
       .on("postgres_changes", {
         event: "*", schema: "public", table: "wallet_ledger"
@@ -3012,7 +3049,7 @@ async function startRealtimeSync() {
       return;
     }
 
-  const prevRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || {};
+    const prevRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || {};
     const latestRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || prevRecord;
 
     // Keep the last known balance if the ledger has no rows. An empty ledger
@@ -3041,40 +3078,41 @@ async function startRealtimeSync() {
         user.id
       );
     }
-const keepRecentTaskState =
-  Boolean(latestRecord._taskSyncUntil) &&
-  Date.now() < Number(latestRecord._taskSyncUntil);
 
-const incomingCompleted = Number(
-  data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
-);
-const currentCompleted = Number(
-  latestRecord.completedTasks ?? latestRecord.tasksCompleted ?? 0
-);
+    const keepRecentTaskState =
+      Boolean(latestRecord._taskSyncUntil) &&
+      Date.now() < Number(latestRecord._taskSyncUntil);
 
-const incomingTodayEarn = Number(
-  data.metadata?.todayEarn ?? data.metadata?.todayCommission ?? 0
-);
-const currentTodayEarn = Number(
-  latestRecord.todayEarn ?? latestRecord.todayCommission ?? 0
-);
+    const incomingCompleted = Number(
+      data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
+    );
+    const currentCompleted = Number(
+      latestRecord.completedTasks ?? latestRecord.tasksCompleted ?? 0
+    );
 
-const record = makeUserRecord({
-  ...latestRecord,
-  ...(data.metadata || {}),
-  id: user.id,
-  name: data.display_name || data.metadata?.name || latestRecord.name || "",
-  phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
-  email: data.email || user.email || latestRecord.email || "",
-  balance: Number(balance),
-  completedTasks: keepRecentTaskState
-    ? Math.max(incomingCompleted, currentCompleted)
-    : incomingCompleted,
-  todayEarn: keepRecentTaskState
-    ? Math.max(incomingTodayEarn, currentTodayEarn)
-    : incomingTodayEarn,
-  _taskSyncUntil: latestRecord._taskSyncUntil || 0
-});
+    const incomingTodayEarn = Number(
+      data.metadata?.todayEarn ?? data.metadata?.todayCommission ?? 0
+    );
+    const currentTodayEarn = Number(
+      latestRecord.todayEarn ?? latestRecord.todayCommission ?? 0
+    );
+
+    const record = makeUserRecord({
+      ...latestRecord,
+      ...(data.metadata || {}),
+      id: user.id,
+      name: data.display_name || data.metadata?.name || latestRecord.name || "",
+      phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
+      email: data.email || user.email || latestRecord.email || "",
+      balance: Number(balance),
+      completedTasks: keepRecentTaskState
+        ? Math.max(incomingCompleted, currentCompleted)
+        : incomingCompleted,
+      todayEarn: keepRecentTaskState
+        ? Math.max(incomingTodayEarn, currentTodayEarn)
+        : incomingTodayEarn,
+      _taskSyncUntil: latestRecord._taskSyncUntil || 0
+    });
     delete record.loginPassword;
     delete record.withdrawPassword;
 
@@ -3086,8 +3124,8 @@ const record = makeUserRecord({
       await syncLiveTransactionsFromSupabase();
     }
 
-    applyRouting();
-    renderAll();
+    if (typeof applyRouting === "function") applyRouting();
+    if (typeof renderAll === "function") renderAll();
     setBackendStatus(true);
   };
 
@@ -3101,6 +3139,7 @@ const record = makeUserRecord({
     }, loadMyProfile)
     .subscribe();
 }
+
 // ================= SAVE DATA TO SUPABASE =================
 
 async function pushToBackend() {
