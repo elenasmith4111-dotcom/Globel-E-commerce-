@@ -3935,7 +3935,8 @@ async function userToggleWdBlock(userId, blocked) {
     alert("Setting update failed: " + (err.message || err));
     renderAdminUserLines();
   }
-}async function userResetTasks(userId) {
+}
+async function userResetTasks(userId) {
   const u = (state.users || []).find(x => String(x.id) === String(userId));
   if (!u) {
     alert("User not found.");
@@ -4072,21 +4073,6 @@ async function deleteDemoLuckyOrder(userId, orderId) {
       openUserPanels[userId] = openUserPanels[userId] === mode ? null : mode;
       renderAdminUserLines();
     }
-
-    function userResetTasks(userId) {
-      const u = state.users.find(x => x.id === userId);
-      if (!u) return;
-      u.completedTasks = 0;
-      u.todayEarn = 0;
-      if (u.activeLuckyOrder) {
-        u.activeLuckyOrder.triggered = false;
-        u.activeLuckyOrder.completed = false;
-      }
-      state.ordersHistory = state.ordersHistory.filter(o => o.userId !== userId);
-      saveState();
-      alert(`Tasks reset to 0/25, Today's Earn reset to $0.00, and previous order history cleared for ${u.name}!`);
-    }
-
    async function userAdjustFunds(userId, mode) {
   const u = state.users.find(x => x.id === userId);
   const input = document.getElementById('fund-input-' + userId);
