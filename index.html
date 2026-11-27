@@ -3783,7 +3783,8 @@ async function grabOrder() {
   const lucky = u.activeLuckyOrder;
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
   const currentBal = Number(u.balance || 0);
-
+if (window.__grabLock) return;
+  window.__grabLock = true;
   if (u.accountStatus !== "Active") {
     alert(`Action blocked: Account is ${u.accountStatus}.`);
     return;
@@ -3869,62 +3870,66 @@ if (ledgerResult === null || !Number.isFinite(Number(ledgerResult))) {
 const updatedBal = Number(ledgerResult);
 
 // Re-fetch the latest user record after the async ledger update
-const currentUser =
-  (state.users || []).find(x => x.id === u.id) || u;
+    const currentUser =
+      (state.users || []).find(x => x.id === u.id) || u;
 
-currentUser.completedTasks = Math.min(
-  Number(currentUser.totalTasks || 25),
-  Number(currentUser.completedTasks || 0) + 1
-);
+    const nextCompletedCount = Math.min(
+      Number(currentUser.totalTasks || 25),
+      Math.max(Number(currentUser.completedTasks || 0), nextTaskNum - 1) + 1
+    );
+    const nextTodayEarn = Number(
+      (Number(currentUser.todayEarn || 0) + Number(item.comm || 0)).toFixed(2)
+    );
 
-currentUser.productRevealed = false;
-currentUser.pendingTaskCommission = null;
-currentUser.balance = updatedBal;
-currentUser.todayEarn =
-  Number(currentUser.todayEarn || 0) + Number(item.comm || 0);
+    currentUser.completedTasks = nextCompletedCount;
+    currentUser.tasksCompleted = nextCompletedCount;
+    currentUser.todayEarn = nextTodayEarn;
+    currentUser.todayCommission = nextTodayEarn;
+    currentUser.productRevealed = false;
+    currentUser.pendingTaskCommission = null;
+    currentUser.balance = updatedBal;
+    currentUser._taskSyncUntil = Date.now() + 8000;
 
     state.ordersHistory.unshift({
       userId: u.id,
-      taskNum: nextTaskNum,
+      taskNum: nextCompletedCount,
       name: item.name,
       store: item.store,
       comm: item.comm,
       img: item.img
     });
 
-currentUser._taskSyncUntil = Date.now() + 6000;
+    if (typeof sb !== "undefined" && sb) {
+      const { data: profMetaRow } = await sb
+        .from("profiles")
+        .select("metadata")
+        .eq("id", u.id)
+        .maybeSingle();
 
-if (typeof sb !== "undefined" && sb) {
-  const { data: profMetaRow } = await sb
-    .from("profiles")
-    .select("metadata")
-    .eq("id", u.id)
-    .maybeSingle();
+      const nextMeta = {
+        ...(profMetaRow?.metadata || {}),
+        completedTasks: nextCompletedCount,
+        tasksCompleted: nextCompletedCount,
+        todayEarn: nextTodayEarn,
+        todayCommission: nextTodayEarn,
+        productRevealed: false,
+        pendingTaskCommission: null
+      };
+      delete nextMeta.balance;
+      delete nextMeta.id;
+      delete nextMeta.email;
+      delete nextMeta.loginPassword;
 
-  const nextMeta = {
-    ...(profMetaRow?.metadata || {}),
-    completedTasks: currentUser.completedTasks,
-    tasksCompleted: currentUser.completedTasks,
-    todayEarn: currentUser.todayEarn,
-    todayCommission: currentUser.todayEarn,
-    productRevealed: false,
-    pendingTaskCommission: null
-  };
-  delete nextMeta.balance;
-  delete nextMeta.id;
-  delete nextMeta.email;
-  delete nextMeta.loginPassword;
-
-  await sb
-    .from("profiles")
-    .update({ metadata: nextMeta })
-    .eq("id", u.id);
-}
+      await sb
+        .from("profiles")
+        .update({ metadata: nextMeta })
+        .eq("id", u.id);
+    }
 
     if (typeof renderAll === "function") renderAll();
-    if (typeof saveState === "function") saveState();
   } catch (err) {
     console.error("Grab order error:", err);
+    const btn = document.getElementById('grab-btn');
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Task';
@@ -3932,7 +3937,6 @@ if (typeof sb !== "undefined" && sb) {
     alert(err.message || "Could not complete task.");
   }
 }
-
 window.grabOrder = grabOrder;
 async function userToggleWdBlock(userId, blocked) {
   const isBlocked = Boolean(blocked);
