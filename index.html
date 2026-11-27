@@ -3935,28 +3935,26 @@ async function userToggleWdBlock(userId, blocked) {
     alert("Setting update failed: " + (err.message || err));
     renderAdminUserLines();
   }
-}
-async function userResetTasks(userId) {
+}async function userResetTasks(userId) {
   const u = (state.users || []).find(x => String(x.id) === String(userId));
   if (!u) {
-    alert("User not found in list.");
+    alert("User not found.");
     return;
   }
 
-  const nextMetaPatch = {
+  const nextLucky = u.activeLuckyOrder
+    ? { ...u.activeLuckyOrder, triggered: false, completed: false }
+    : null;
+
+  const resetPatch = {
     completedTasks: 0,
     tasksCompleted: 0,
     todayEarn: 0,
     todayCommission: 0,
     productRevealed: false,
-    pendingTaskCommission: null
+    pendingTaskCommission: null,
+    activeLuckyOrder: nextLucky
   };
-
-  if (u.activeLuckyOrder) {
-    u.activeLuckyOrder.triggered = false;
-    u.activeLuckyOrder.completed = false;
-    nextMetaPatch.activeLuckyOrder = u.activeLuckyOrder;
-  }
 
   try {
     const { data: existingRow, error: readErr } = await sb
@@ -3965,45 +3963,43 @@ async function userResetTasks(userId) {
       .eq("id", userId)
       .single();
 
-    if (readErr) throw new Error("Read failed: " + readErr.message);
+    if (readErr) throw readErr;
 
     const mergedMeta = {
       ...(existingRow?.metadata || {}),
-      ...nextMetaPatch
+      ...resetPatch
     };
     delete mergedMeta.balance;
     delete mergedMeta.id;
     delete mergedMeta.email;
     delete mergedMeta.loginPassword;
 
-    const { data: updatedRow, error: updErr } = await sb
+    const { error: updErr } = await sb
       .from("profiles")
       .update({ metadata: mergedMeta })
-      .eq("id", userId)
-      .select("id, metadata")
-      .single();
+      .eq("id", userId);
 
-    if (updErr) throw new Error("Update failed: " + updErr.message);
+    if (updErr) throw updErr;
 
-    const savedMeta = updatedRow?.metadata || mergedMeta;
-    Object.assign(u, {
-      completedTasks: Number(savedMeta.completedTasks ?? 0),
-      tasksCompleted: Number(savedMeta.tasksCompleted ?? 0),
-      todayEarn: Number(savedMeta.todayEarn ?? 0),
-      todayCommission: Number(savedMeta.todayCommission ?? 0),
-      productRevealed: false,
-      pendingTaskCommission: null
-    });
+    u.completedTasks = 0;
+    u.tasksCompleted = 0;
+    u.todayEarn = 0;
+    u.todayCommission = 0;
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
+    if (nextLucky) u.activeLuckyOrder = nextLucky;
 
-    state.ordersHistory = (state.ordersHistory || []).filter(o => String(o.userId) !== String(userId));
+    state.ordersHistory = (state.ordersHistory || []).filter(
+      o => String(o.userId) !== String(userId)
+    );
 
     renderAdminUserLines();
     if (typeof renderAll === "function") renderAll();
 
-    alert(`Reset confirmed! ${u.name} -> Tasks: ${u.completedTasks}/25, Today: $${u.todayEarn.toFixed(2)}`);
+    alert(`Reset confirmed! ${u.name} -> Tasks: 0/25, Today: $0.00`);
   } catch (err) {
-    console.error("Reset error:", err);
-    alert(err.message || "Reset failed");
+    console.error("Reset tasks error:", err);
+    alert("Reset failed: " + (err.message || err));
   }
 }
 async function renderAdminLuckyOrders(userId) {
