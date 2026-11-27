@@ -4402,36 +4402,107 @@ function hideAuthVerifying() {
   if (fill) fill.style.width = "0%";
 }
 function applyPlatformSettings(data) {
-    if (!data) return;
+  if (!data || typeof data !== "object") return;
 
-    state.platformConfig = {
-        ...(state.platformConfig || {}),
-        ...data
-    };
+  const trc = String(
+    data.trc20Address ?? data.trc20_address ?? state.platformConfig?.trc20Address ?? ""
+  ).trim();
 
-    if (typeof updateCustomerTelegramLink === "function") {
-        updateCustomerTelegramLink();
-    }
+  const tg = String(
+    data.telegramSupport ?? data.telegram_support ?? state.platformConfig?.telegramSupport ?? ""
+  ).trim();
 
-    if (typeof renderAll === "function") {
-        renderAll();
-    }
+  const wa = String(
+    data.whatsappSupport ?? data.whatsapp_support ?? state.platformConfig?.whatsappSupport ?? ""
+  ).trim();
+
+  state.platformConfig = {
+    ...(state.platformConfig || {}),
+    ...data,
+    trc20Address: trc,
+    telegramSupport: tg,
+    whatsappSupport: wa
+  };
+
+  if (typeof updateCustomerTelegramLink === "function") {
+    updateCustomerTelegramLink();
+  }
+  if (typeof renderAll === "function") {
+    renderAll();
+  }
 }
-let platformSettingsChannel = null;
 
 async function loadPlatformSettings() {
-    const { data, error } = await sb
-        .from("platform_settings")
-        .select("*")
-        .eq("id", 1)
-        .single();
+  const { data, error } = await sb
+    .from("platform_settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
 
-    if (error) {
-        console.error("Settings load error:", error);
-        return;
-    }
+  if (error) {
+    console.error("Settings load error:", error);
+    return;
+  }
 
+  if (data) {
     applyPlatformSettings(data);
+  }
+}
+
+function goDepositStep2() {
+  const amt = parseFloat(document.getElementById('dep-amt-input')?.value);
+  if (!amt || amt <= 0) {
+    alert("Enter a valid amount.");
+    return;
+  }
+
+  pendingDepositAmt = amt;
+  const addr = String(
+    state.platformConfig?.trc20Address ||
+    state.platformConfig?.trc20_address ||
+    ""
+  ).trim();
+
+  if (!addr) {
+    alert("TRC20 wallet address is not configured yet. Please contact support.");
+    return;
+  }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(addr)}`;
+
+  document.getElementById('modal-content').innerHTML = `
+    <h3 style="font-size:15px; color:#4f46e5;">TRC20 Payment ($${amt.toFixed(2)})</h3>
+    <div style="text-align:center; background:#eef2ff; padding:12px; border-radius:12px; margin:10px 0; border:1px solid #c7d2fe;">
+      <img
+        src="${qrUrl}"
+        alt="TRC20 QR Code"
+        style="width:160px; height:160px; border-radius:10px; background:#fff; padding:6px; display:block; margin:0 auto;"
+        onerror="this.style.display='none'; document.getElementById('qr-fallback-box').style.display='block';"
+      />
+      <div id="qr-fallback-box" style="display:none; background:#fff; border:1px dashed #6366f1; border-radius:10px; padding:12px; font-size:11px; color:#1e1b4b; word-break:break-all;">
+        <strong>USDT (TRC20) Address:</strong><br/>${escapeLuckyText(addr)}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:#e2e8f0; padding:8px 10px; border-radius:8px; margin-top:10px; font-size:11px;">
+        <span id="trc20-copy-text" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; text-align:left; font-weight:700; color:#0f172a;">${escapeLuckyText(addr)}</span>
+        <button type="button" class="btn-sm" style="background:#4f46e5; flex-shrink:0;" onclick="copyTrc20Addr()">Copy</button>
+      </div>
+    </div>
+    <button type="button" class="btn-primary" onclick="confirmPaid()">I Have Paid</button>
+  `;
+}
+
+function copyTrc20Addr() {
+  const addr = String(
+    state.platformConfig?.trc20Address ||
+    state.platformConfig?.trc20_address ||
+    ""
+  ).trim();
+  if (!addr) return;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).catch(() => {});
+  }
+  alert("TRC20 Address Copied!");
 }
 
 function startPlatformSettingsLive() {
