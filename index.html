@@ -3324,30 +3324,28 @@ function renderAll() {
       ? `<div class="status-banner-alert"><i class="fa-solid fa-circle-info"></i> Please contact with customer service for active your tasks</div>`
       : '';
   }
-
- const notifArea = document.getElementById('cust-admin-notif-area');
+const notifArea = document.getElementById('cust-admin-notif-area');
 
 if (notifArea) {
-  const notice = (u.adminNotification || "").trim();
+  const notice = String(u.adminNotification || "").trim();
 
   if (notice) {
     notifArea.innerHTML = `
-      <div class="admin-push-notif">
-        <div>
-          <strong style="display:block; margin-bottom:2px;">
-            <i class="fa-solid fa-bell"></i> Administration
+      <div class="admin-push-notif" style="position:sticky; top:54px; z-index:80; border-left:4px solid #d97706; box-shadow:0 4px 12px rgba(120,53,15,0.14);">
+        <div style="width:100%;">
+          <strong style="display:block; margin-bottom:3px; font-size:12px; color:#92400e;">
+            <i class="fa-solid fa-bell"></i> Admin Notice
           </strong>
-          ${escapeLuckyText(notice)}
+          <div style="font-size:12px; line-height:1.45; color:#78350f;">
+            ${escapeLuckyText(notice)}
+          </div>
         </div>
-        <span onclick="dismissCustomerNotification()"
-          style="cursor:pointer;font-weight:700;">✕</span>
       </div>
     `;
   } else {
     notifArea.innerHTML = '';
   }
 }
-
   if (demoOrder && notifArea) {
     const absAmt = Math.abs(Number(demoOrder.amount || 0));
     const rechargeAmt = absAmt;
@@ -4699,11 +4697,10 @@ function switchCustPage(pageId, navEl) {
 
   renderAll();
 }
-    function dismissCustomerNotification() {
-      const u = getActiveUser();
-      u.adminNotification = "";
-      saveState();
-    }
+
+function dismissCustomerNotification() {
+  return false;
+}
 
     function revealNextProduct() {
       const u = getActiveUser();
