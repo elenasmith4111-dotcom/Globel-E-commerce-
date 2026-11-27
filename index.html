@@ -3900,35 +3900,74 @@ async function userToggleWdBlock(userId, blocked) {
     alert(isBlocked ? "Withdraw slide ON (Customer withdraw blocked live)." : "Withdraw slide OFF.");
   }
 }
-async function userResetTasks(userId) {
-  const u = state.users.find(x => String(x.id) === String(userId));
-  if (!u) return;
-
-  u.completedTasks = 0;
-  u.tasksCompleted = 0;
-  u.todayEarn = 0;
-  u.todayCommission = 0;
-  u.productRevealed = false;
-  u.pendingTaskCommission = null;
-  if (u.activeLuckyOrder) {
-    u.activeLuckyOrder.triggered = false;
-    u.activeLuckyOrder.completed = false;
+aasync function userResetTasks(userId) {
+  const u = (state.users || []).find(x => String(x.id) === String(userId));
+  if (!u) {
+    alert("User not found in list.");
+    return;
   }
-  state.ordersHistory = state.ordersHistory.filter(o => String(o.userId) !== String(userId));
 
-  const saved = await saveLiveCustomerControls(userId, {
+  const nextMetaPatch = {
     completedTasks: 0,
     tasksCompleted: 0,
     todayEarn: 0,
     todayCommission: 0,
     productRevealed: false,
-    pendingTaskCommission: null,
-    activeLuckyOrder: u.activeLuckyOrder || null
-  });
+    pendingTaskCommission: null
+  };
 
-  if (saved) {
-    renderAll();
-    alert(`Tasks (0/25) and Today's Earn ($0.00) reset live for ${u.name}!`);
+  if (u.activeLuckyOrder) {
+    u.activeLuckyOrder.triggered = false;
+    u.activeLuckyOrder.completed = false;
+    nextMetaPatch.activeLuckyOrder = u.activeLuckyOrder;
+  }
+
+  try {
+    const { data: existingRow, error: readErr } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", userId)
+      .single();
+
+    if (readErr) throw new Error("Read failed: " + readErr.message);
+
+    const mergedMeta = {
+      ...(existingRow?.metadata || {}),
+      ...nextMetaPatch
+    };
+    delete mergedMeta.balance;
+    delete mergedMeta.id;
+    delete mergedMeta.email;
+    delete mergedMeta.loginPassword;
+
+    const { data: updatedRow, error: updErr } = await sb
+      .from("profiles")
+      .update({ metadata: mergedMeta })
+      .eq("id", userId)
+      .select("id, metadata")
+      .single();
+
+    if (updErr) throw new Error("Update failed: " + updErr.message);
+
+    const savedMeta = updatedRow?.metadata || mergedMeta;
+    Object.assign(u, {
+      completedTasks: Number(savedMeta.completedTasks ?? 0),
+      tasksCompleted: Number(savedMeta.tasksCompleted ?? 0),
+      todayEarn: Number(savedMeta.todayEarn ?? 0),
+      todayCommission: Number(savedMeta.todayCommission ?? 0),
+      productRevealed: false,
+      pendingTaskCommission: null
+    });
+
+    state.ordersHistory = (state.ordersHistory || []).filter(o => String(o.userId) !== String(userId));
+
+    renderAdminUserLines();
+    if (typeof renderAll === "function") renderAll();
+
+    alert(`Reset confirmed! ${u.name} -> Tasks: ${u.completedTasks}/25, Today: $${u.todayEarn.toFixed(2)}`);
+  } catch (err) {
+    console.error("Reset error:", err);
+    alert(err.message || "Reset failed");
   }
 }
 async function renderAdminLuckyOrders(userId) {
