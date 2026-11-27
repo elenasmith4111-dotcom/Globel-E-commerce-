@@ -3774,8 +3774,6 @@ function escapeLuckyText(value) {
   })[char]);
 }
 
-
-
 async function grabOrder() {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
@@ -3783,8 +3781,7 @@ async function grabOrder() {
   const lucky = u.activeLuckyOrder;
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
   const currentBal = Number(u.balance || 0);
-if (window.__grabLock) return;
-  window.__grabLock = true;
+
   if (u.accountStatus !== "Active") {
     alert(`Action blocked: Account is ${u.accountStatus}.`);
     return;
@@ -3794,7 +3791,9 @@ if (window.__grabLock) return;
     return;
   }
 
-  const matchedDemoOrder = Object.values(typeof demoLuckyOrders === "object" && demoLuckyOrders ? demoLuckyOrders : {}).find(
+  const matchedDemoOrder = Object.values(
+    typeof demoLuckyOrders === "object" && demoLuckyOrders ? demoLuckyOrders : {}
+  ).find(
     o =>
       o &&
       o.status !== "Approved" &&
@@ -3802,23 +3801,24 @@ if (window.__grabLock) return;
       Number(o.taskNum) === nextTaskNum
   );
 
-if (matchedDemoOrder) {
-  const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
-  const approvedForThisOrder = Number(
-    luckyOrderApprovedFunds[String(matchedDemoOrder.id)] || 0
-  );
+  if (matchedDemoOrder) {
+    const reqAmt = Math.abs(Number(matchedDemoOrder.amount || 0));
+    const approvedForThisOrder = Number(
+      luckyOrderApprovedFunds[String(matchedDemoOrder.id)] || 0
+    );
 
-  u.productRevealed = false;
-  u.pendingTaskCommission = null;
+    u.productRevealed = false;
+    u.pendingTaskCommission = null;
 
-  if (typeof renderAll === "function") renderAll();
-  if (typeof saveState === "function") saveState();
+    if (typeof renderAll === "function") renderAll();
+    if (typeof saveState === "function") saveState();
 
-  if (reqAmt > 0 && approvedForThisOrder < reqAmt && typeof openCustModal === "function") {
-    openCustModal('deposit1', reqAmt.toFixed(2), String(matchedDemoOrder.id));
+    if (reqAmt > 0 && approvedForThisOrder < reqAmt && typeof openCustModal === "function") {
+      openCustModal('deposit1', reqAmt.toFixed(2), String(matchedDemoOrder.id));
+    }
+    return;
   }
-  return;
-}
+
   if (lucky && !lucky.completed && (lucky.triggered || Number(lucky.taskNum) === nextTaskNum)) {
     lucky.triggered = true;
     const reqAmt = Math.abs(Number(lucky.amount || 0));
@@ -3844,6 +3844,9 @@ if (matchedDemoOrder) {
     return;
   }
 
+  if (window.__grabLock) return;
+  window.__grabLock = true;
+
   const btn = document.getElementById('grab-btn');
   if (btn) {
     btn.disabled = true;
@@ -3857,19 +3860,19 @@ if (matchedDemoOrder) {
   };
 
   try {
-  if (typeof creditLedgerEntry !== "function") {
-  throw new Error("Wallet ledger function is unavailable.");
-}
+    if (typeof creditLedgerEntry !== "function") {
+      throw new Error("Wallet ledger function is unavailable.");
+    }
 
-const ledgerResult = await creditLedgerEntry(u.id, item.comm);
+    const ledgerResult = await creditLedgerEntry(u.id, item.comm);
 
-if (ledgerResult === null || !Number.isFinite(Number(ledgerResult))) {
-  throw new Error("Commission credit could not be verified.");
-}
+    if (ledgerResult === null || !Number.isFinite(Number(ledgerResult))) {
+      throw new Error("Commission credit could not be verified.");
+    }
 
-const updatedBal = Number(ledgerResult);
+    const updatedBal = Number(ledgerResult);
 
-// Re-fetch the latest user record after the async ledger update
+    // Re-fetch the latest user record after the async ledger update
     const currentUser =
       (state.users || []).find(x => x.id === u.id) || u;
 
@@ -3929,14 +3932,17 @@ const updatedBal = Number(ledgerResult);
     if (typeof renderAll === "function") renderAll();
   } catch (err) {
     console.error("Grab order error:", err);
-    const btn = document.getElementById('grab-btn');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Task';
+    const currentBtn = document.getElementById('grab-btn');
+    if (currentBtn) {
+      currentBtn.disabled = false;
+      currentBtn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Task';
     }
     alert(err.message || "Could not complete task.");
+  } finally {
+    window.__grabLock = false;
   }
 }
+
 window.grabOrder = grabOrder;
 async function userToggleWdBlock(userId, blocked) {
   const isBlocked = Boolean(blocked);
