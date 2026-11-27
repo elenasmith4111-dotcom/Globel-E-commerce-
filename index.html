@@ -1262,6 +1262,11 @@
     width: 115px;
   }
 }
+#bound-wallet-label {
+  color: #047857 !important;
+  font-weight: 700 !important;
+  word-break: break-all;
+}
 </style>
 </head>
 <body>
@@ -3318,13 +3323,41 @@ function renderAll() {
 
   if (u.balance > 0) showZeroBalAlert = false;
 
-  document.getElementById('prof-name').innerText = u.name;
+ document.getElementById('prof-name').innerText = u.name;
   document.getElementById('prof-email').innerText = u.email;
   document.getElementById('prof-phone').innerText = u.phone;
   document.getElementById('prof-tier-badge').innerText = u.tier;
-  document.getElementById('bound-wallet-label').innerText = u.boundWallet;
+
+  let savedBindCache = null;
+  try {
+    savedBindCache = JSON.parse(sessionStorage.getItem("ge_bound_wallet_" + u.id) || "null");
+  } catch (_) {}
+
+  if (!u.trc20Address && savedBindCache?.trc20Address) {
+    u.trc20Address = savedBindCache.trc20Address;
+  }
+  if ((!u.boundWallet || u.boundWallet === "TRC20 or Bank Transfer") && savedBindCache?.boundWallet) {
+    u.boundWallet = savedBindCache.boundWallet;
+  }
+
+  const boundLabelEl = document.getElementById('bound-wallet-label');
+  if (boundLabelEl) {
+    const displayWallet = u.trc20Address
+      ? `${u.boundWallet && u.boundWallet !== "TRC20 or Bank Transfer" ? u.boundWallet : "USDT (TRC20): " + u.trc20Address}`
+      : (u.boundWallet || "TRC20 or Bank Transfer");
+    boundLabelEl.textContent = displayWallet;
+  }
 
   const tgVal = state.platformConfig.telegramSupport;
+  document.getElementById('tg-handle-display').innerText = tgVal;
+  document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
+  const waLink = document.getElementById('cust-whatsapp-direct-link');
+  if (waLink) {
+    waLink.href = buildWhatsappHref(state.platformConfig.whatsappSupport);
+    waLink.style.opacity = state.platformConfig.whatsappSupport ? '1' : '.65';
+    waLink.title = state.platformConfig.whatsappSupport ? 'Open WhatsApp support' : 'Admin must add a WhatsApp number in Settings';
+  }
+
   document.getElementById('tg-handle-display').innerText = tgVal;
   document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
   const waLink = document.getElementById('cust-whatsapp-direct-link');
@@ -5037,10 +5070,18 @@ async function saveBind() {
   }
 
   try {
-    u.boundWallet = `${t}: ${v}`;
+    const formattedBound = `${t}: ${v}`;
+    u.boundWallet = formattedBound;
     if (t.toLowerCase().includes("trc20")) {
       u.trc20Address = v;
     }
+
+    try {
+      sessionStorage.setItem("ge_bound_wallet_" + u.id, JSON.stringify({
+        boundWallet: u.boundWallet,
+        trc20Address: u.trc20Address
+      }));
+    } catch (_) {}
 
     const { data: authData } = await sb.auth.getUser();
     if (authData?.user) {
@@ -5075,7 +5116,6 @@ async function saveBind() {
     alert("Failed to save wallet: " + (err.message || "Unknown error"));
   }
 }
-
 function openCustModal(type, presetAmount = "", luckyOrderId = null) {
       const u = getActiveUser();
      pendingLuckyOrderId = type === "deposit1" && luckyOrderId
@@ -5241,11 +5281,36 @@ if (u.withdrawBlocked) {
           });
         }
 
-  } else if (type === 'bindWallet') {
+} else if (type === 'bindWallet') {
+        const currentBoundText = String(
+          u.boundWallet || u.trc20Address || "TRC20 or Bank Transfer"
+        ).trim();
+        const currentAddrValue = String(
+          u.trc20Address ||
+          (currentBoundText.includes(":")
+            ? currentBoundText.split(":").slice(1).join(":").trim()
+            : "")
+        ).trim();
+
         content.innerHTML = `
           <h3 style="font-size:15px; margin-bottom:10px;">Bind Wallet / Bank</h3>
-          <div class="input-group"><label>Method</label><select id="bind-type"><option>USDT (TRC20)</option><option>Bank Transfer</option></select></div>
-          <div class="input-group"><label>Address / Account No.</label><input type="text" id="bind-val" placeholder="Enter wallet or account" /></div>
+          <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:12px; padding:10px 12px; margin-bottom:12px;">
+            <div style="font-size:10px; font-weight:700; color:#4338ca; text-transform:uppercase;">Currently Bound Wallet</div>
+            <div id="modal-bound-wallet-display" style="font-size:12px; font-weight:700; color:#0f172a; margin-top:4px; word-break:break-all;">
+              ${escapeLuckyText(currentBoundText)}
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Method</label>
+            <select id="bind-type">
+              <option value="USDT (TRC20)" ${currentBoundText.toLowerCase().includes("bank") ? "" : "selected"}>USDT (TRC20)</option>
+              <option value="Bank Transfer" ${currentBoundText.toLowerCase().includes("bank") ? "selected" : ""}>Bank Transfer</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Address / Account No.</label>
+            <input type="text" id="bind-val" value="${escapeLuckyText(currentAddrValue)}" placeholder="Enter wallet or account" />
+          </div>
           <button class="btn-primary" onclick="saveBind()">Save Binding</button>
         `;
       } else if (type === 'how') {
