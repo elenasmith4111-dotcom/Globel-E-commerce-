@@ -1546,10 +1546,13 @@ html body #customer-outer #cust-auth-screen .btn-primary {
   <div class="mobile-container">
 
     <!-- AUTH SCREEN -->
-    <div id="cust-auth-screen" class="auth-box">
-<div class="auth-card-inner" style="background: linear-gradient(180deg, #1a2142 0%, #232b57 58%, #15293d 100%); border: 1.5px solid rgba(129, 140, 248, 0.5); border-radius: 24px; padding: 24px 18px; color: #f8fafc;">
-        <div class="brand-logo">
-          <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <!-- AUTH SCREEN -->
+    <div id="cust-auth-screen" class="auth-box" style="background: linear-gradient(155deg, #090d1a 0%, #16183d 52%, #0b2233 100%); padding: 24px 16px; min-height: 100%; display: flex; align-items: center; justify-content: center;">
+      <div class="auth-card-inner" style="width: 100%; max-width: 400px; background: linear-gradient(180deg, #192042 0%, #222954 56%, #13263a 100%); border: 1.5px solid rgba(129, 140, 248, 0.55); border-radius: 24px; box-shadow: 0 22px 50px rgba(2, 6, 23, 0.72); padding: 22px 18px; color: #f8fafc;">
+
+        <!-- GLOBAL E-COMMERCE HEADING CARD -->
+        <div class="brand-logo" style="background: linear-gradient(135deg, #312e81 0%, #4f46e5 55%, #0d9488 100%); border: 1px solid rgba(253, 230, 138, 0.4); border-radius: 18px; padding: 16px 14px; margin-bottom: 18px; text-align: center; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.45);">
+          <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 54px; height: 54px; display: block; margin: 0 auto 8px;">
             <defs>
               <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#38BDF8"/>
@@ -1557,36 +1560,36 @@ html body #customer-outer #cust-auth-screen .btn-primary {
                 <stop offset="100%" stop-color="#F59E0B"/>
               </linearGradient>
             </defs>
-            <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.16)"/>
+            <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.18)"/>
             <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
             <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
             <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
             <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
           </svg>
-          <h2 style="font-size:21px; letter-spacing:0.3px;">Global E-Commerce</h2>
-          <span class="brand-tagline">Merchant Order Boosting &amp; Daily Rewards</span>
+          <h2 style="margin: 0; font-size: 21px; font-weight: 800; color: #fde68a; letter-spacing: 0.3px;">Global E-Commerce</h2>
+          <div style="margin-top: 5px; font-size: 11px; font-weight: 600; color: #e0e7ff;">Merchant Order Boosting &amp; Daily Rewards</div>
         </div>
 
-        <div class="auth-tabs">
-          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn">Sign In</div>
-          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register">Register</div>
+        <div class="auth-tabs" style="display: flex; gap: 6px; background: rgba(15, 23, 42, 0.5); padding: 4px; border-radius: 12px; margin-bottom: 16px; border-bottom: none;">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: #ffffff; border-bottom: none;">Sign In</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; color: #cbd5e1; border-bottom: none;">Register</div>
         </div>
 
         <!-- LOGIN FORM -->
         <div id="form-login">
 
-          <div class="input-group">
-            <label data-i18n="emailLabel">Email Address</label>
-            <input type="email" id="login-email" value="sara.khan@email.com" />
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
+            <input type="email" id="login-email" value="sara.khan@email.com" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="input-group">
-            <label data-i18n="passLabel">Login Password</label>
-            <input type="password" id="login-pass" value="123456" />
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Login Password</label>
+            <input type="password" id="login-pass" value="123456" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="simple-captcha">
-            <span id="captcha-question">3354</span>
+          <div class="simple-captcha" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(15, 23, 42, 0.58); border: 1px solid rgba(129, 140, 248, 0.38); border-radius: 14px; padding: 10px; margin-bottom: 16px;">
+            <span id="captcha-question" style="background: #ffffff; color: #1e1b4b; font-weight: 800; font-size: 14px; letter-spacing: 3px; padding: 8px 10px; border-radius: 9px; border: 1px dashed #6366f1; white-space: nowrap;">3354</span>
 
             <button
               type="button"
@@ -1594,6 +1597,7 @@ html body #customer-outer #cust-auth-screen .btn-primary {
               onclick="generateLoginCaptcha()"
               aria-label="Refresh captcha"
               title="Refresh code"
+              style="width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(165, 180, 252, 0.4); background: #312e81; color: #fde68a; font-size: 16px; cursor: pointer; flex-shrink: 0;"
             >
               ↻
             </button>
@@ -1606,10 +1610,11 @@ html body #customer-outer #cust-auth-screen .btn-primary {
               inputmode="numeric"
               pattern="[0-9]{4}"
               autocomplete="off"
+              style="flex: 1; min-width: 0; padding: 9px 10px; border-radius: 9px; border: 1px solid rgba(148, 163, 184, 0.45); background: #ffffff; color: #0f172a; font-size: 12px; font-weight: 600; box-sizing: border-box;"
             />
           </div>
 
-          <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn">
+          <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
             Sign In
           </button>
         </div>
@@ -1617,27 +1622,27 @@ html body #customer-outer #cust-auth-screen .btn-primary {
         <!-- REGISTER FORM -->
         <div id="form-register" style="display:none;">
 
-          <div class="input-group">
-            <label data-i18n="fullName">Full Name</label>
-            <input type="text" id="reg-name" placeholder="Enter full name" />
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="fullName" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter full name" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="input-group">
-            <label data-i18n="phoneNum">Phone Number</label>
-            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" />
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="phoneNum" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Phone Number</label>
+            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="input-group">
-            <label data-i18n="emailLabel">Email Address</label>
-            <input type="email" id="reg-email" placeholder="Enter email address" />
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
+            <input type="email" id="reg-email" placeholder="Enter email address" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="input-group">
-            <label data-i18n="passLabel">Login Password</label>
-            <input type="password" id="reg-pass" placeholder="Create password" />
+          <div class="input-group" style="margin-bottom: 14px;">
+            <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Login Password</label>
+            <input type="password" id="reg-pass" placeholder="Create password" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter">
+          <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
             Register &amp; Enter
           </button>
         </div>
