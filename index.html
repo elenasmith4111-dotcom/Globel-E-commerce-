@@ -3348,16 +3348,7 @@ function renderAll() {
     boundLabelEl.textContent = displayWallet;
   }
 
-  const tgVal = state.platformConfig.telegramSupport;
-  document.getElementById('tg-handle-display').innerText = tgVal;
-  document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
-  const waLink = document.getElementById('cust-whatsapp-direct-link');
-  if (waLink) {
-    waLink.href = buildWhatsappHref(state.platformConfig.whatsappSupport);
-    waLink.style.opacity = state.platformConfig.whatsappSupport ? '1' : '.65';
-    waLink.title = state.platformConfig.whatsappSupport ? 'Open WhatsApp support' : 'Admin must add a WhatsApp number in Settings';
-  }
-
+ const tgVal = state.platformConfig.telegramSupport;
   document.getElementById('tg-handle-display').innerText = tgVal;
   document.getElementById('cust-telegram-direct-link').href = buildTelegramHref(tgVal);
   const waLink = document.getElementById('cust-whatsapp-direct-link');
@@ -3377,7 +3368,6 @@ function renderAll() {
   if (todayProfitEl) {
     todayProfitEl.textContent = '$' + todayProfit.toFixed(2);
   }
-
   document.getElementById('grab-total-tasks').innerText = `${u.completedTasks} / ${u.totalTasks}`;
   document.getElementById('grab-rem-tasks').innerText = Math.max(0, u.totalTasks - u.completedTasks);
 
