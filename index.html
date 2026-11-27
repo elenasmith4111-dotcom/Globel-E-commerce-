@@ -1267,6 +1267,167 @@
   font-weight: 700 !important;
   word-break: break-all;
 }
+/* ==================== BEAUTIFIED PROFILE & BOTTOM NAV ==================== */
+#cust-app-screen {
+  background: linear-gradient(180deg, #12182b 0%, #1c1b4b 46%, #132238 100%) !important;
+}
+
+#cust-page-profile .profile-top-card {
+  background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 55%, #0f766e 100%) !important;
+  border: 1px solid rgba(165, 180, 252, 0.35);
+  box-shadow: 0 12px 28px rgba(7, 11, 25, 0.45);
+}
+
+#cust-page-profile .action-3-grid {
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+#cust-page-profile .action-box {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(238, 242, 255, 0.92)) !important;
+  border: 1px solid rgba(199, 210, 254, 0.85) !important;
+  border-radius: 15px !important;
+  padding: 13px 6px !important;
+  box-shadow: 0 6px 16px rgba(9, 13, 30, 0.22) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+#cust-page-profile .action-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(9, 13, 30, 0.3) !important;
+}
+
+.profile-unified-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+  border: 1px solid rgba(199, 210, 254, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(9, 13, 30, 0.28);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.profile-unified-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.18s ease;
+}
+
+.profile-unified-row:hover {
+  background: #eef2ff;
+}
+
+.profile-unified-row + .profile-unified-row {
+  border-top: 1px solid #e2e8f0;
+}
+
+.profile-unified-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-row-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.profile-unified-card .account-settings-accordion {
+  background: transparent;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+.profile-unified-card .acc-settings-header {
+  background: transparent;
+  padding: 13px 15px;
+}
+
+.profile-unified-card .acc-settings-header:hover {
+  background: #eef2ff;
+}
+
+.profile-unified-card .acc-settings-body {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 12px 14px;
+}
+
+.profile-logout-center-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 13px 15px 15px;
+  border-top: 1px solid #e2e8f0;
+  background: #fffafa;
+}
+
+.profile-unified-card .logout-card-btn {
+  width: auto;
+  min-width: 138px;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  border: 1px solid #fca5a5;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(220, 38, 38, 0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.profile-unified-card .logout-card-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.36);
+}
+
+#cust-app-screen .bottom-nav {
+  background: linear-gradient(90deg, #16153a 0%, #282366 50%, #112a3d 100%) !important;
+  border-top: 1px solid rgba(165, 180, 252, 0.28) !important;
+  box-shadow: 0 -6px 20px rgba(7, 11, 25, 0.45) !important;
+}
+
+#cust-app-screen .nav-item {
+  color: #c7d2fe !important;
+  font-weight: 600;
+}
+
+#cust-app-screen .nav-item i {
+  color: #e0e7ff;
+}
+
+#cust-app-screen .nav-item.active {
+  color: #fde68a !important;
+  font-weight: 700;
+}
+
+#cust-app-screen .nav-item.active i {
+  color: #fde68a !important;
+}
+
+#cust-app-screen .nav-item.grab-tab i {
+  background: linear-gradient(135deg, #10b981, #4f46e5) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important;
+}
 </style>
 </head>
 <body>
@@ -1766,10 +1927,10 @@
           </div>
 
           <!-- PROFILE PAGE (ACCOUNT SETTINGS ACCORDION CARD + COMPACT LOGOUT, NO WHITE SPACE) -->
-          <div id="cust-page-profile" class="page">
+        <div id="cust-page-profile" class="page">
             <div class="profile-top-card">
-              <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:10px; margin-bottom:10px;">
-                <div style="width:46px; height:46px; border-radius:50%; background:#4f46e5; border:2px solid #a5b4fc; display:flex; justify-content:center; align-items:center; font-size:19px;">
+              <div style="display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.16); padding-bottom:10px; margin-bottom:10px;">
+                <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.14); border:2px solid #a5b4fc; display:flex; justify-content:center; align-items:center; font-size:19px;">
                   <i class="fa-solid fa-user"></i>
                 </div>
                 <div>
@@ -1782,19 +1943,18 @@
                   </div>
                 </div>
               </div>
+
               <div style="display:flex; justify-content:space-between; align-items:center;">
-    <span style="font-size:12px; opacity:0.85;" data-i18n="accBalanceShort">Account Balance:</span>
-    <h2 id="profile-balance" style="font-size:22px; color:#fde68a;">$0.00</h2>
-</div>
+                <span style="font-size:12px; opacity:0.88;" data-i18n="accBalanceShort">Account Balance:</span>
+                <h2 id="profile-balance" style="font-size:22px; color:#fde68a;">$0.00</h2>
+              </div>
 
-<!-- Today's Profit -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.2);">
-    <span style="font-size:12px; opacity:0.85;">Today's Profit:</span>
-    <h2 id="profile-today-profit" style="font-size:20px; color:#fde68a;">$0.00</h2>
-</div>
-
-</div>
-                
+              <!-- Today's Profit -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.2);">
+                <span style="font-size:12px; opacity:0.88;">Today's Profit:</span>
+                <h2 id="profile-today-profit" style="font-size:20px; color:#6ee7b7;">$0.00</h2>
+              </div>
+            </div>
 
             <div class="action-3-grid">
               <div class="action-box" onclick="openCustModal('deposit1')">
@@ -1811,53 +1971,64 @@
               </div>
             </div>
 
-            <div class="card-box" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openCustModal('bindWallet')">
-              <div style="display:flex; align-items:center; gap:10px;">
-                <i class="fa-solid fa-wallet" style="font-size:18px; color:#059669;"></i>
-                <div>
-                  <h4 style="font-size:13px;" data-i18n="bindWallet">Bind Wallet / Bank</h4>
-                  <p style="font-size:11px; color:#64748b;" id="bound-wallet-label">TRC20 or Bank Transfer</p>
-                </div>
-              </div>
-              <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#94a3b8;"></i>
-            </div>
-
-            <!-- ACCOUNT SETTINGS ACCORDION CARD (BOTH PASSWORDS INSIDE ON CLICK) -->
-            <div class="account-settings-accordion">
-              <div class="acc-settings-header" onclick="toggleProfileSettingsCard()">
-                <span><i class="fa-solid fa-gear" style="color:#4f46e5; margin-right:6px;"></i> <span data-i18n="accSettings">Account Settings</span></span>
-                <i id="acc-settings-chevron" class="fa-solid fa-chevron-down" style="font-size:12px; color:#4f46e5;"></i>
-              </div>
-              <div id="acc-settings-body" class="acc-settings-body">
-                <div class="inline-pass-box">
-                  <label style="display:block; font-size:11px; font-weight:700; color:#312e81; margin-bottom:6px;">
-                    <i class="fa-solid fa-lock" style="color:#4f46e5;"></i> <span data-i18n="chgLoginPass">Change Login Password</span>
-                  </label>
-                  <div style="display:flex; gap:8px;">
-                    <input type="password" id="inline-login-pass" placeholder="Enter new login password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
-                    <button class="btn-sm" style="background:#4f46e5; padding:8px 12px;" onclick="updateCustLoginPassInline()">Update</button>
+            <!-- UNIFIED CARD: BIND WALLET / BANK + ACCOUNT SETTINGS + CENTERED LOGOUT -->
+            <div class="profile-unified-card">
+              <div class="profile-unified-row" onclick="openCustModal('bindWallet')">
+                <div class="profile-unified-left">
+                  <div class="profile-row-icon" style="background:#ecfdf5; color:#059669;">
+                    <i class="fa-solid fa-wallet"></i>
+                  </div>
+                  <div style="min-width:0;">
+                    <h4 style="font-size:13px; color:#0f172a;" data-i18n="bindWallet">Bind Wallet / Bank</h4>
+                    <p style="font-size:11px; color:#047857; font-weight:600; word-break:break-all;" id="bound-wallet-label">TRC20 or Bank Transfer</p>
                   </div>
                 </div>
+                <i class="fa-solid fa-chevron-right" style="font-size:12px; color:#64748b; flex-shrink:0;"></i>
+              </div>
 
-                <div class="inline-pass-box" style="margin-bottom:0;">
-                  <label style="display:block; font-size:11px; font-weight:700; color:#92400e; margin-bottom:6px;">
-                    <i class="fa-solid fa-shield-halved" style="color:#d97706;"></i> <span data-i18n="chgWdPass">Change Withdraw Password</span>
-                  </label>
-                  <div style="display:flex; gap:8px;">
-                    <input type="password" id="inline-wd-pass" placeholder="Enter new withdraw password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
-                    <button class="btn-sm" style="background:#d97706; padding:8px 12px;" onclick="updateCustWithdrawPassInline()">Update</button>
+              <!-- ACCOUNT SETTINGS ACCORDION CARD (BOTH PASSWORDS INSIDE ON CLICK) -->
+              <div class="account-settings-accordion">
+                <div class="acc-settings-header" onclick="toggleProfileSettingsCard()">
+                  <span style="display:flex; align-items:center; gap:11px;">
+                    <span class="profile-row-icon" style="background:#eef2ff; color:#4f46e5;">
+                      <i class="fa-solid fa-gear"></i>
+                    </span>
+                    <span data-i18n="accSettings">Account Settings</span>
+                  </span>
+                  <i id="acc-settings-chevron" class="fa-solid fa-chevron-down" style="font-size:12px; color:#4f46e5;"></i>
+                </div>
+                <div id="acc-settings-body" class="acc-settings-body">
+                  <div class="inline-pass-box">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#312e81; margin-bottom:6px;">
+                      <i class="fa-solid fa-lock" style="color:#4f46e5;"></i> <span data-i18n="chgLoginPass">Change Login Password</span>
+                    </label>
+                    <div style="display:flex; gap:8px;">
+                      <input type="password" id="inline-login-pass" placeholder="Enter new login password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
+                      <button class="btn-sm" style="background:#4f46e5; padding:8px 12px;" onclick="updateCustLoginPassInline()">Update</button>
+                    </div>
+                  </div>
+
+                  <div class="inline-pass-box" style="margin-bottom:0;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#92400e; margin-bottom:6px;">
+                      <i class="fa-solid fa-shield-halved" style="color:#d97706;"></i> <span data-i18n="chgWdPass">Change Withdraw Password</span>
+                    </label>
+                    <div style="display:flex; gap:8px;">
+                      <input type="password" id="inline-wd-pass" placeholder="Enter new withdraw password" style="flex:1; padding:8px 10px; border-radius:9px; border:1px solid #cbd5e1; font-size:12px;" />
+                      <button class="btn-sm" style="background:#d97706; padding:8px 12px;" onclick="updateCustWithdrawPassInline()">Update</button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- COMPACT LOGOUT BUTTON -->
-            <div class="logout-card-btn" onclick="handleCustLogout()">
-              <span><i class="fa-solid fa-right-from-bracket" style="margin-right:8px;"></i> <span data-i18n="logout">Logout</span></span>
-              <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i>
+              <!-- CENTERED COMPACT LOGOUT BUTTON -->
+              <div class="profile-logout-center-wrap">
+                <div class="logout-card-btn" onclick="handleCustLogout()">
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span data-i18n="logout">Logout</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
         <!-- BOTTOM NAVIGATION: HOME -> SERVICE -> GRABBING -> ORDERS -> PROFILE -->
         <div class="bottom-nav">
