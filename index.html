@@ -3889,8 +3889,48 @@ currentUser.todayEarn =
 
 window.grabOrder = grabOrder;
 
+async function userToggleWdBlock(userId, blocked) {
+  const isBlocked = Boolean(blocked);
+  const success = await saveLiveCustomerControls(userId, {
+    withdrawBlocked: isBlocked,
+    wdBlock: isBlocked
+  });
 
+  if (success) {
+    alert(isBlocked ? "Withdraw slide ON (Customer withdraw blocked live)." : "Withdraw slide OFF.");
+  }
+}
+async function userResetTasks(userId) {
+  const u = state.users.find(x => String(x.id) === String(userId));
+  if (!u) return;
 
+  u.completedTasks = 0;
+  u.tasksCompleted = 0;
+  u.todayEarn = 0;
+  u.todayCommission = 0;
+  u.productRevealed = false;
+  u.pendingTaskCommission = null;
+  if (u.activeLuckyOrder) {
+    u.activeLuckyOrder.triggered = false;
+    u.activeLuckyOrder.completed = false;
+  }
+  state.ordersHistory = state.ordersHistory.filter(o => String(o.userId) !== String(userId));
+
+  const saved = await saveLiveCustomerControls(userId, {
+    completedTasks: 0,
+    tasksCompleted: 0,
+    todayEarn: 0,
+    todayCommission: 0,
+    productRevealed: false,
+    pendingTaskCommission: null,
+    activeLuckyOrder: u.activeLuckyOrder || null
+  });
+
+  if (saved) {
+    renderAll();
+    alert(`Tasks (0/25) and Today's Earn ($0.00) reset live for ${u.name}!`);
+  }
+}
 async function renderAdminLuckyOrders(userId) {
   const list = document.getElementById("u-lucky-list-" + userId);
   if (!list) return;
@@ -4856,12 +4896,10 @@ function openCustModal(type, presetAmount = "", luckyOrderId = null) {
   ? String(luckyOrderId)
   : null;
 
-
- if (type === 'withdraw' && u.withdrawBlocked) {
-        alert("Withdrawals are BLOCKED on your account.");
-        return;
-      }
-      if (u.accountStatus === "Deactive") {
+if (u.withdrawBlocked) {
+    alert("Your withdrawal is restricted.");
+    return;
+}      if (u.accountStatus === "Deactive") {
         alert("Your account is Deactivated.");
         return;
       }
@@ -5225,19 +5263,36 @@ lucky_order_id: pendingLuckyOrderId ? Number(pendingLuckyOrderId) : null
     closeModal();
   }
 }
-
 async function submitWithdraw() {
   const u = getActiveUser();
-  if (u.withdrawBlocked) {
-    alert("Withdrawals are BLOCKED on your account.");
+  const completed = Number(u.completedTasks ?? u.tasksCompleted ?? 0);
+  const requiredTasks = Number(u.totalTasks || 25);
+
+  if (u.accountStatus !== "Active") {
+    alert(`Withdrawal blocked: Account is ${u.accountStatus}.`);
     return;
   }
+
+  // 1. Slide ON hone par exact restricted message
+  if (Boolean(u.withdrawBlocked || u.wdBlock)) {
+    alert("Your withdraw is restricted. Please contact with customer service.");
+    return;
+  }
+
+  // 2. 25 tasks complete na hon to withdraw block
+  if (completed < requiredTasks) {
+    alert(`Please complete ${requiredTasks} tasks before withdraw (${completed}/${requiredTasks} completed).`);
+    return;
+  }
+
   const amt = parseFloat(document.getElementById('wd-amt-input').value);
   const wdPass = document.getElementById('wd-pass-input').value;
+
   if (u.withdrawPassword && wdPass !== u.withdrawPassword) {
     alert("Incorrect Withdraw Password!");
     return;
   }
+
   if (!amt || amt <= 0 || amt > Number(u.balance || 0)) {
     alert("Invalid or insufficient balance.");
     return;
@@ -5256,36 +5311,30 @@ async function submitWithdraw() {
   };
 
   try {
-  const updatedBal = await creditLedgerEntry(
-      u.id,
-      -Math.abs(amt)
-    );
-
+    const updatedBal = await creditLedgerEntry(u.id, -Math.abs(amt), "withdraw_hold");
     if (Number.isFinite(Number(updatedBal))) {
       u.balance = Number(updatedBal);
     }
 
-    try {
-      const { data: wdRow, error: wdErr } = await sb
-        .from("withdraw_requests")
-        .insert({
-          user_id: u.id,
-          amount: amt,
-          status: "pending"
-        })
-        .select()
-        .single();
-      if (!wdErr && wdRow?.id) {
-        txObj.id = wdRow.id;
-      }
-    } catch (_) {}
+    const { data: wdRow, error: wdErr } = await sb
+      .from("withdraw_requests")
+      .insert({
+        user_id: u.id,
+        amount: amt,
+        status: "pending"
+      })
+      .select()
+      .single();
+
+    if (!wdErr && wdRow?.id) {
+      txObj.id = wdRow.id;
+    }
 
     u.transactions = u.transactions || [];
     u.transactions.unshift(txObj);
     state.txHistory.unshift(txObj);
 
     renderAll();
-    if (typeof saveState === "function") saveState();
     alert("Withdrawal submitted live! Waiting for Admin approval.");
     closeModal();
   } catch (err) {
@@ -5293,6 +5342,7 @@ async function submitWithdraw() {
     alert(err.message || "Could not submit withdrawal.");
   }
 }
+
 async function decideAdminTx(id, decision) {
   const tx = (state.txHistory || []).find(t => String(t.id) === String(id));
   const currentStatus = String(tx?.status || "Pending").toLowerCase();
