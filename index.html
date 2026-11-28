@@ -1548,7 +1548,7 @@ html body #customer-outer #cust-auth-screen .btn-primary {
     </div>
   </div>
 
-<<!-- =====================================================================
+<!-- =====================================================================
      1. CUSTOMER FULL-FIT PAGE
      ===================================================================== -->
 <div id="customer-outer" class="customer-outer" style="display:none;">
@@ -3507,22 +3507,22 @@ const demoFeed = [
   { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
   { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
 ];
-
 function isAdminPath() {
-  const path = window.location.pathname.toLowerCase();
-  const hash = window.location.hash.toLowerCase();
-  const search = window.location.search.toLowerCase();
+  const path = (window.location.pathname || "").toLowerCase();
+  const hash = (window.location.hash || "").toLowerCase();
+  const search = (window.location.search || "").toLowerCase();
+
   return (
     path.endsWith("/admin/login") ||
     path.includes("/admin/login") ||
-    hash === "#/admin/login" ||
-    hash === "#admin/login" ||
+    hash.startsWith("#/admin/login") ||
+    hash.startsWith("#admin/login") ||
     hash === "#admin" ||
+    hash.startsWith("#admin/") ||
     search.includes("admin/login") ||
     search.includes("admin=login")
   );
 }
-
 async function handleCustLogout() {
   try {
     const { error } = await sb.auth.signOut();
@@ -3605,23 +3605,22 @@ function buildTelegramHref(raw) {
 function buildWhatsappHref(raw) {
   const digits = String(raw || "").replace(/[^0-9]/g, "");
   return digits ? "https://wa.me/" + digits : "https://wa.me/";
-}
-function applyRouting() {
+}function applyRouting() {
   const adminOuter = document.getElementById('admin-outer');
   const customerOuter = document.getElementById('customer-outer');
+  const isAdmin = typeof isAdminPath === 'function' ? isAdminPath() : false;
 
-  if (!authReady) {
+  if (!authReady && !isAdmin) {
     if (adminOuter) adminOuter.style.display = 'none';
     if (customerOuter) customerOuter.style.display = 'none';
     return;
   }
 
-  const isAdmin = typeof isAdminPath === 'function' ? isAdminPath() : false;
   if (adminOuter) adminOuter.style.display = isAdmin ? 'flex' : 'none';
   if (customerOuter) customerOuter.style.display = isAdmin ? 'none' : 'flex';
 
   if (isAdmin) {
-    const adminLoggedIn = !!state.adminLoggedIn;
+    const adminLoggedIn = !!(typeof state !== 'undefined' && state && state.adminLoggedIn);
     const adminAuth = document.getElementById('admin-auth-screen');
     const adminApp = document.getElementById('admin-app-screen');
 
@@ -3634,7 +3633,7 @@ function applyRouting() {
     return;
   }
 
-  const loggedIn = !!state.customerLoggedIn;
+  const loggedIn = !!(typeof state !== 'undefined' && state && state.customerLoggedIn);
   const custAuth = document.getElementById('cust-auth-screen');
   const custApp = document.getElementById('cust-app-screen');
 
