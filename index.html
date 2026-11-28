@@ -3773,7 +3773,7 @@ if (notifArea) {
     // Recharge amount hamesha exact Lucky Order amount ke barabar rahegi (purana balance minus nahi hoga)
     const rechargeAmount = absAmount;
 const approvedForThisOrder = Number(luckyOrderApprovedFunds[String(demoOrder.id)] || 0);
-const hasFullFunds = absAmount > 0 && approvedForThisOrder >= absAmount;
+const hasFullFunds = absAmount > 0 && (approvedForThisOrder >= absAmount || demoOrder.status === "FundsAdded");
     const negativeDisplay = `-$${absAmount.toFixed(2)}`;
 
     if (!hasFullFunds) {
@@ -3858,8 +3858,9 @@ const hasFullFunds = absAmount > 0 && approvedForThisOrder >= absAmount;
 const approvedForThisOrder = Number(
   luckyOrderApprovedFunds[String(luckyOrderData.id)] || 0
 );
-const hasEnough = absLuckyAmt > 0 &&
-  approvedForThisOrder >= absLuckyAmt;
+const hasEnough = absLuckyAmt > 0 && (
+  approvedForThisOrder >= absLuckyAmt || luckyOrderData.fundsAdded === true
+);
     const rechargeNeeded = absLuckyAmt;
 
     if (!hasEnough) {
@@ -4530,14 +4531,23 @@ if (Number.isFinite(newBalance)) {
   u.balance = newBalance; // RPC se confirmed balance
 }
 
-    if (mode === "add" && typeof demoLuckyOrders === "object" && demoLuckyOrders) {
-      Object.keys(demoLuckyOrders).forEach(key => {
-        const ord = demoLuckyOrders[key];
-        const reqAmt = Math.abs(Number(ord?.amount || 0));
-        if (ord && ord.status !== "Approved" && ord.status !== "Deleted" && reqAmt > 0 && newBalance >= reqAmt) {
-          demoLuckyOrders[key] = { ...ord, status: "FundsAdded" };
+    if (mode === "add") {
+      // Unlock eligible Lucky Orders only after this admin add-funds action.
+      if (typeof demoLuckyOrders === "object" && demoLuckyOrders) {
+        Object.keys(demoLuckyOrders).forEach(key => {
+          const ord = demoLuckyOrders[key];
+          const reqAmt = Math.abs(Number(ord?.amount || 0));
+          if (ord && ord.status !== "Approved" && ord.status !== "Deleted" && reqAmt > 0 && newBalance >= reqAmt) {
+            demoLuckyOrders[key] = { ...ord, status: "FundsAdded" };
+          }
+        });
+      }
+      if (u.activeLuckyOrder && !u.activeLuckyOrder.completed) {
+        const activeReqAmt = Math.abs(Number(u.activeLuckyOrder.amount || 0));
+        if (activeReqAmt > 0 && newBalance >= activeReqAmt) {
+          u.activeLuckyOrder = { ...u.activeLuckyOrder, fundsAdded: true };
         }
-      });
+      }
     }
 
     if (typeof renderAll === "function") {
