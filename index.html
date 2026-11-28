@@ -1524,16 +1524,7 @@ html body #customer-outer #cust-auth-screen .btn-primary {
   border: 2px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important;
 }
-@media (max-width: 520px) {
-  #customer-outer,
-  #customer-outer .mobile-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 100dvh !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-  }
-}
+
 </style>
 </head>
 <body>
@@ -1548,7 +1539,7 @@ html body #customer-outer #cust-auth-screen .btn-primary {
     </div>
   </div>
 
-<!-- =====================================================================
+<<!-- =====================================================================
      1. CUSTOMER FULL-FIT PAGE
      ===================================================================== -->
 <div id="customer-outer" class="customer-outer" style="display:none;">
@@ -1556,107 +1547,104 @@ html body #customer-outer #cust-auth-screen .btn-primary {
 
     <!-- AUTH SCREEN -->
    <!-- AUTH SCREEN -->
-  <!-- AUTH SCREEN -->
-    <div id="cust-auth-screen" class="auth-box" style="background: linear-gradient(180deg, #12182b 0%, #1c1b4b 48%, #132238 100%); padding: 18px 14px; min-height: 100dvh; width: 100%; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
-      <div class="auth-card-inner" style="width: 100%; max-width: 100%; min-height: 560px; box-sizing: border-box; background: linear-gradient(180deg, #1a2144 0%, #242c5a 55%, #142a3f 100%); border: 1.5px solid rgba(165, 180, 252, 0.42); border-radius: 22px; box-shadow: 0 16px 38px rgba(7, 11, 25, 0.55); padding: 22px 16px 26px; color: #f8fafc; display: flex; flex-direction: column; justify-content: space-between;">
+    <div id="cust-auth-screen" class="auth-box" style="background: linear-gradient(155deg, #090d1a 0%, #16183d 52%, #0b2233 100%); padding: 24px 16px; min-height: 100%; display: flex; align-items: center; justify-content: center;">
+      <div class="auth-card-inner" style="width: 100%; max-width: 400px; background: linear-gradient(180deg, #192042 0%, #222954 56%, #13263a 100%); border: 1.5px solid rgba(129, 140, 248, 0.55); border-radius: 24px; box-shadow: 0 22px 50px rgba(2, 6, 23, 0.72); padding: 22px 18px; color: #f8fafc;">
 
-        <div>
-          <!-- GLOBAL E-COMMERCE HEADING CARD -->
-          <div class="brand-logo" style="background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 55%, #0f766e 100%); border: 1px solid rgba(165, 180, 252, 0.4); border-radius: 18px; padding: 18px 14px; margin-bottom: 20px; text-align: center; box-shadow: 0 12px 26px rgba(7, 11, 25, 0.42);">
-            <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 56px; height: 56px; display: block; margin: 0 auto 10px;">
-              <defs>
-                <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#38BDF8"/>
-                  <stop offset="50%" stop-color="#818CF8"/>
-                  <stop offset="100%" stop-color="#F59E0B"/>
-                </linearGradient>
-              </defs>
-              <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.18)"/>
-              <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
-              <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
-              <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
-              <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-            <h2 style="margin: 0; font-size: 21px; font-weight: 800; color: #fde68a; letter-spacing: 0.4px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);">Global E-Commerce</h2>
-            <div style="margin-top: 6px; font-size: 11px; font-weight: 600; color: #e0e7ff;">Merchant Order Boosting &amp; Daily Rewards</div>
+        <!-- GLOBAL E-COMMERCE HEADING CARD -->
+        <div class="brand-logo" style="background: linear-gradient(135deg, #312e81 0%, #4f46e5 55%, #0d9488 100%); border: 1px solid rgba(253, 230, 138, 0.4); border-radius: 18px; padding: 16px 14px; margin-bottom: 18px; text-align: center; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.45);">
+          <svg class="ge-svg-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 54px; height: 54px; display: block; margin: 0 auto 8px;">
+            <defs>
+              <linearGradient id="geGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="50%" stop-color="#818CF8"/>
+                <stop offset="100%" stop-color="#F59E0B"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" stroke="url(#geGrad)" stroke-width="6" fill="rgba(99,102,241,0.18)"/>
+            <ellipse cx="50" cy="50" rx="22" ry="44" stroke="#A5B4FC" stroke-width="3.5"/>
+            <line x1="6" y1="50" x2="94" y2="50" stroke="#A5B4FC" stroke-width="3.5"/>
+            <path d="M32 36H68L63 66H37L32 36Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
+            <path d="M42 36V30C42 25.5817 45.5817 22 50 22C54.4183 22 58 25.5817 58 30V36" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+          </svg>
+          <h2 style="margin: 0; font-size: 21px; font-weight: 800; color: #fde68a; letter-spacing: 0.3px;">Global E-Commerce</h2>
+          <div style="margin-top: 5px; font-size: 11px; font-weight: 600; color: #e0e7ff;">Merchant Order Boosting &amp; Daily Rewards</div>
+        </div>
+
+        <div class="auth-tabs" style="display: flex; gap: 6px; background: rgba(15, 23, 42, 0.5); padding: 4px; border-radius: 12px; margin-bottom: 16px; border-bottom: none;">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: #ffffff; border-bottom: none;">Sign In</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; color: #cbd5e1; border-bottom: none;">Register</div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="form-login">
+
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
+            <input type="email" id="login-email" value="sara.khan@email.com" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <div class="auth-tabs" style="display: flex; gap: 6px; background: rgba(15, 23, 42, 0.48); padding: 4px; border-radius: 12px; margin-bottom: 18px; border-bottom: none;">
-            <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="signIn" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: #ffffff; border-bottom: none;">Sign In</div>
-            <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="register" style="flex: 1; text-align: center; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; color: #cbd5e1; border-bottom: none;">Register</div>
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Login Password</label>
+            <input type="password" id="login-pass" value="123456" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
 
-          <!-- LOGIN FORM -->
-          <div id="form-login">
+          <div class="simple-captcha" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(15, 23, 42, 0.58); border: 1px solid rgba(129, 140, 248, 0.38); border-radius: 14px; padding: 10px; margin-bottom: 16px;">
+            <span id="captcha-question" style="background: #ffffff; color: #1e1b4b; font-weight: 800; font-size: 14px; letter-spacing: 3px; padding: 8px 10px; border-radius: 9px; border: 1px dashed #6366f1; white-space: nowrap;">3354</span>
 
-            <div class="input-group" style="margin-bottom: 14px;">
-              <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px;">Email Address</label>
-              <input type="email" id="login-email" value="sara.khan@email.com" style="width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
-
-            <div class="input-group" style="margin-bottom: 14px;">
-              <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px;">Login Password</label>
-              <input type="password" id="login-pass" value="123456" style="width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
-
-            <div class="simple-captcha" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(165, 180, 252, 0.35); border-radius: 14px; padding: 10px; margin-bottom: 20px;">
-              <span id="captcha-question" style="background: #ffffff; color: #1e1b4b; font-weight: 800; font-size: 14px; letter-spacing: 3px; padding: 8px 10px; border-radius: 9px; border: 1px dashed #4f46e5; white-space: nowrap;">3354</span>
-
-              <button
-                type="button"
-                id="captcha-refresh"
-                onclick="generateLoginCaptcha()"
-                aria-label="Refresh captcha"
-                title="Refresh code"
-                style="width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(165, 180, 252, 0.4); background: #312e81; color: #fde68a; font-size: 16px; cursor: pointer; flex-shrink: 0;"
-              >
-                ↻
-              </button>
-
-              <input
-                type="text"
-                id="captcha-answer"
-                placeholder="Enter 4-digit code"
-                maxlength="4"
-                inputmode="numeric"
-                pattern="[0-9]{4}"
-                autocomplete="off"
-                style="flex: 1; min-width: 0; padding: 9px 10px; border-radius: 9px; border: 1px solid rgba(148, 163, 184, 0.45); background: #ffffff; color: #0f172a; font-size: 12px; font-weight: 600; box-sizing: border-box;"
-              />
-            </div>
-
-            <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
-              Sign In
+            <button
+              type="button"
+              id="captcha-refresh"
+              onclick="generateLoginCaptcha()"
+              aria-label="Refresh captcha"
+              title="Refresh code"
+              style="width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(165, 180, 252, 0.4); background: #312e81; color: #fde68a; font-size: 16px; cursor: pointer; flex-shrink: 0;"
+            >
+              ↻
             </button>
+
+            <input
+              type="text"
+              id="captcha-answer"
+              placeholder="Enter 4-digit code"
+              maxlength="4"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              autocomplete="off"
+              style="flex: 1; min-width: 0; padding: 9px 10px; border-radius: 9px; border: 1px solid rgba(148, 163, 184, 0.45); background: #ffffff; color: #0f172a; font-size: 12px; font-weight: 600; box-sizing: border-box;"
+            />
           </div>
 
-          <!-- REGISTER FORM -->
-          <div id="form-register" style="display:none;">
+          <button class="btn-primary" onclick="handleCustLogin()" data-i18n="signIn" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
+            Sign In
+          </button>
+        </div>
 
-            <div class="input-group" style="margin-bottom: 12px;">
-              <label data-i18n="fullName" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Full Name</label>
-              <input type="text" id="reg-name" placeholder="Enter full name" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
+        <!-- REGISTER FORM -->
+        <div id="form-register" style="display:none;">
 
-            <div class="input-group" style="margin-bottom: 12px;">
-              <label data-i18n="phoneNum" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Phone Number</label>
-              <input type="text" id="reg-phone" placeholder="+971 50 123 4567" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
-
-            <div class="input-group" style="margin-bottom: 12px;">
-              <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
-              <input type="email" id="reg-email" placeholder="Enter email address" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
-
-            <div class="input-group" style="margin-bottom: 16px;">
-              <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Login Password</label>
-              <input type="password" id="reg-pass" placeholder="Create password" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(165, 180, 252, 0.35); background: rgba(15, 23, 42, 0.65); color: #ffffff; font-size: 13px;" />
-            </div>
-
-            <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
-              Register &amp; Enter
-            </button>
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="fullName" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter full name" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
           </div>
+
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="phoneNum" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Phone Number</label>
+            <input type="text" id="reg-phone" placeholder="+971 50 123 4567" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
+          </div>
+
+          <div class="input-group" style="margin-bottom: 12px;">
+            <label data-i18n="emailLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Email Address</label>
+            <input type="email" id="reg-email" placeholder="Enter email address" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
+          </div>
+
+          <div class="input-group" style="margin-bottom: 14px;">
+            <label data-i18n="passLabel" style="display: block; font-size: 12px; font-weight: 600; color: #e2e8f0; margin-bottom: 5px;">Login Password</label>
+            <input type="password" id="reg-pass" placeholder="Create password" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 11px; border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.7); color: #ffffff; font-size: 13px;" />
+          </div>
+
+          <button class="btn-primary" onclick="handleCustRegister()" data-i18n="regEnter" style="width: 100%; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);">
+            Register &amp; Enter
+          </button>
         </div>
 
       </div>
@@ -2823,60 +2811,6 @@ let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
 
-async function safeRemoveChannelByTopic(topic) {
-  if (!sb || typeof sb.getChannels !== "function") return;
-  const existing = sb.getChannels().find((ch) => ch && ch.topic === topic);
-  if (existing) {
-    try {
-      await sb.removeChannel(existing);
-    } catch (_) {}
-  }
-}
-function setAdminScreenState(isLoggedIn) {
-  state.adminLoggedIn = !!isLoggedIn;
-
-  const authScreen =
-    document.getElementById("admin-auth-screen") ||
-    document.getElementById("admin-login-screen") ||
-    document.getElementById("admin-auth-box");
-  const appScreen =
-    document.getElementById("admin-app-screen") ||
-    document.getElementById("admin-dashboard");
-
-  if (authScreen) {
-    authScreen.style.display = isLoggedIn ? "none" : "flex";
-  }
-  if (appScreen) {
-    appScreen.style.display = isLoggedIn ? "flex" : "none";
-  }
-}function showAdminPortalView() {
-  setAdminScreenState(true);
-
-  if (typeof applyRouting === "function") {
-    applyRouting();
-  }
-
-  const custOuter = document.getElementById("customer-outer");
-  if (custOuter) {
-    custOuter.style.display = "none";
-  }
-
-  const adminOuter =
-    document.getElementById("admin-outer") ||
-    document.getElementById("admin-portal") ||
-    document.getElementById("admin-dashboard") ||
-    document.getElementById("admin-screen");
-  if (adminOuter) {
-    adminOuter.style.display = "flex";
-  }
-
-  const adminLoginBox =
-    document.getElementById("admin-login-screen") ||
-    document.getElementById("admin-auth-box");
-  if (adminLoginBox) {
-    adminLoginBox.style.display = "none";
-  }
-}
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
   if (authError || !authData?.user) {
@@ -2899,24 +2833,12 @@ async function startRealtimeSync() {
 
   // Remove channels from any previous session before creating fresh ones.
   for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
-    if (channel) {
-      try {
-        await sb.removeChannel(channel);
-      } catch (_) {}
-    }
+    if (channel) await sb.removeChannel(channel);
   }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
   adminLuckyOrdersChannel = null;
-
-  await safeRemoveChannelByTopic("realtime:admin-deposit-requests");
-  await safeRemoveChannelByTopic("realtime:admin-withdraw-requests");
-  await safeRemoveChannelByTopic("realtime:admin-global-state");
-  await safeRemoveChannelByTopic("realtime:admin-customer-profiles");
-  await safeRemoveChannelByTopic("realtime:admin-wallet-ledger");
-  await safeRemoveChannelByTopic("realtime:customer-tx-live-" + user.id);
-  await safeRemoveChannelByTopic("realtime:customer-profile-wallet-" + user.id);
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2990,46 +2912,37 @@ async function startRealtimeSync() {
       if (typeof renderAll === "function") {
         renderAll();
       } else {
-        if (typeof renderAdminUserLines === "function") renderAdminUserLines();
-        if (typeof renderAdminTxLists === "function") renderAdminTxLists();
-      }
+        renderAdminUserLines();
+        renderAdminTxLists();
+
+ }
       setBackendStatus(true);
     };
 
     await loadGlobalState();
     await loadCustomerProfiles();
 
-    if (typeof syncLiveTransactionsFromSupabase === "function") {
-      await syncLiveTransactionsFromSupabase();
-    }
-    if (typeof renderAdminTxLists === "function") {
-      renderAdminTxLists();
+    if (sb.getChannels) {
+      const existingDep = sb.getChannels().find(ch => ch.topic === "realtime:admin-deposit-requests");
+      const existingWd = sb.getChannels().find(ch => ch.topic === "realtime:admin-withdraw-requests");
+      if (existingDep) await sb.removeChannel(existingDep);
+      if (existingWd) await sb.removeChannel(existingWd);
     }
 
-    showAdminPortalView();
-    if (typeof renderAll === "function") {
-      renderAll();
-    }
+    await syncLiveTransactionsFromSupabase();
+    renderAdminTxLists();
 
     sb.channel("admin-deposit-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
-        if (typeof syncLiveTransactionsFromSupabase === "function") {
-          await syncLiveTransactionsFromSupabase();
-        }
-        if (typeof renderAdminTxLists === "function") {
-          renderAdminTxLists();
-        }
+        await syncLiveTransactionsFromSupabase();
+        renderAdminTxLists();
       })
       .subscribe();
 
     sb.channel("admin-withdraw-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
-        if (typeof syncLiveTransactionsFromSupabase === "function") {
-          await syncLiveTransactionsFromSupabase();
-        }
-        if (typeof renderAdminTxLists === "function") {
-          renderAdminTxLists();
-        }
+        await syncLiveTransactionsFromSupabase();
+        renderAdminTxLists();
       })
       .subscribe();
 
@@ -3045,6 +2958,25 @@ async function startRealtimeSync() {
       }, loadCustomerProfiles)
       .subscribe();
 
+     const refreshCustomerTx = async () => {
+    await syncLiveTransactionsFromSupabase();
+    if (typeof renderAll === "function") renderAll();
+  };
+
+  await refreshCustomerTx();
+
+  sb.channel("customer-tx-live-" + user.id)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "withdraw_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .subscribe();
     profileChannel = sb.channel("admin-wallet-ledger")
       .on("postgres_changes", {
         event: "*", schema: "public", table: "wallet_ledger"
@@ -3068,7 +3000,7 @@ async function startRealtimeSync() {
       return;
     }
 
-    const prevRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || {};
+  const prevRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || {};
     const latestRecord = (state.users || []).find(x => String(x.id) === String(user.id)) || prevRecord;
 
     // Keep the last known balance if the ledger has no rows. An empty ledger
@@ -3097,41 +3029,40 @@ async function startRealtimeSync() {
         user.id
       );
     }
+const keepRecentTaskState =
+  Boolean(latestRecord._taskSyncUntil) &&
+  Date.now() < Number(latestRecord._taskSyncUntil);
 
-    const keepRecentTaskState =
-      Boolean(latestRecord._taskSyncUntil) &&
-      Date.now() < Number(latestRecord._taskSyncUntil);
+const incomingCompleted = Number(
+  data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
+);
+const currentCompleted = Number(
+  latestRecord.completedTasks ?? latestRecord.tasksCompleted ?? 0
+);
 
-    const incomingCompleted = Number(
-      data.metadata?.completedTasks ?? data.metadata?.tasksCompleted ?? 0
-    );
-    const currentCompleted = Number(
-      latestRecord.completedTasks ?? latestRecord.tasksCompleted ?? 0
-    );
+const incomingTodayEarn = Number(
+  data.metadata?.todayEarn ?? data.metadata?.todayCommission ?? 0
+);
+const currentTodayEarn = Number(
+  latestRecord.todayEarn ?? latestRecord.todayCommission ?? 0
+);
 
-    const incomingTodayEarn = Number(
-      data.metadata?.todayEarn ?? data.metadata?.todayCommission ?? 0
-    );
-    const currentTodayEarn = Number(
-      latestRecord.todayEarn ?? latestRecord.todayCommission ?? 0
-    );
-
-    const record = makeUserRecord({
-      ...latestRecord,
-      ...(data.metadata || {}),
-      id: user.id,
-      name: data.display_name || data.metadata?.name || latestRecord.name || "",
-      phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
-      email: data.email || user.email || latestRecord.email || "",
-      balance: Number(balance),
-      completedTasks: keepRecentTaskState
-        ? Math.max(incomingCompleted, currentCompleted)
-        : incomingCompleted,
-      todayEarn: keepRecentTaskState
-        ? Math.max(incomingTodayEarn, currentTodayEarn)
-        : incomingTodayEarn,
-      _taskSyncUntil: latestRecord._taskSyncUntil || 0
-    });
+const record = makeUserRecord({
+  ...latestRecord,
+  ...(data.metadata || {}),
+  id: user.id,
+  name: data.display_name || data.metadata?.name || latestRecord.name || "",
+  phone: data.phone || data.metadata?.phone || latestRecord.phone || "",
+  email: data.email || user.email || latestRecord.email || "",
+  balance: Number(balance),
+  completedTasks: keepRecentTaskState
+    ? Math.max(incomingCompleted, currentCompleted)
+    : incomingCompleted,
+  todayEarn: keepRecentTaskState
+    ? Math.max(incomingTodayEarn, currentTodayEarn)
+    : incomingTodayEarn,
+  _taskSyncUntil: latestRecord._taskSyncUntil || 0
+});
     delete record.loginPassword;
     delete record.withdrawPassword;
 
@@ -3143,8 +3074,8 @@ async function startRealtimeSync() {
       await syncLiveTransactionsFromSupabase();
     }
 
-    if (typeof applyRouting === "function") applyRouting();
-    if (typeof renderAll === "function") renderAll();
+    applyRouting();
+    renderAll();
     setBackendStatus(true);
   };
 
@@ -3158,7 +3089,6 @@ async function startRealtimeSync() {
     }, loadMyProfile)
     .subscribe();
 }
-
 // ================= SAVE DATA TO SUPABASE =================
 
 async function pushToBackend() {
@@ -3280,7 +3210,7 @@ async function handleSupabaseAuth(user) {
       throw new Error("Your profile was not found. Please contact support.");
     }
 
-   // Admin account
+    // Admin account
     if (profileRow.role === "admin") {
       const { data: appData, error: appError } = await sb
         .from("app_state")
@@ -3288,7 +3218,7 @@ async function handleSupabaseAuth(user) {
         .eq("state_key", "main")
         .maybeSingle();
 
-      if (appError) throw appError;
+     if (appError) throw appError;
 
       if (appData?.state) {
         const existingUsers = state.users || [];
@@ -3299,40 +3229,23 @@ async function handleSupabaseAuth(user) {
         state.users = existingUsers;
       }
 
-      state.adminLoggedIn = true;
-      if (typeof setAdminScreenState === "function") {
-        setAdminScreenState(true);
-      }
-
-      const adminAuthEl = document.getElementById("admin-auth-screen");
-      const adminAppEl = document.getElementById("admin-app-screen");
-      if (adminAuthEl) adminAuthEl.style.display = "none";
-      if (adminAppEl) adminAppEl.style.display = "flex";
-
-      if (typeof showAdminPortalView === "function") {
-        showAdminPortalView();
-      } else if (typeof applyRouting === "function") {
-        authReady = true;
-        applyRouting();
-      }
-
-      if (typeof renderAll === "function") {
-        renderAll();
-      }
+      document.getElementById("admin-auth-screen").style.display = "none";
+      document.getElementById("admin-app-screen").style.display = "block";
     } else {
       // Customer account
-      const profile = makeUserRecord({
-        ...(profileRow.metadata || {}),
-        id: user.id,
-        name: profileRow.display_name || profileRow.metadata?.name || "",
-        phone: profileRow.phone || profileRow.metadata?.phone || "",
-        email: user.email || profileRow.email || "",
-        balance: Number(
-          profileRow.metadata?.balance ??
-          state.users?.find(x => x.id === user.id)?.balance ??
-          0
-        )
-      });
+     const profile = makeUserRecord({
+  ...(profileRow.metadata || {}),
+  id: user.id,
+  name: profileRow.display_name || profileRow.metadata?.name || "",
+  phone: profileRow.phone || profileRow.metadata?.phone || "",
+  email: user.email || profileRow.email || "",
+  balance: Number(
+    profileRow.metadata?.balance ??
+    state.users?.find(x => x.id === user.id)?.balance ??
+    0
+  )
+});
+
       delete profile.loginPassword;
       delete profile.withdrawPassword;
 
@@ -3507,22 +3420,22 @@ const demoFeed = [
   { user: "User***77", action: "Withdraw Approved", amount: "+$1,250.00", color: "#059669" },
   { user: "User***03", action: "25 Tasks Done", amount: "+$142.00", color: "#4f46e5" }
 ];
-function isAdminPath() {
-  const path = (window.location.pathname || "").toLowerCase();
-  const hash = (window.location.hash || "").toLowerCase();
-  const search = (window.location.search || "").toLowerCase();
 
+function isAdminPath() {
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const search = window.location.search.toLowerCase();
   return (
     path.endsWith("/admin/login") ||
     path.includes("/admin/login") ||
-    hash.startsWith("#/admin/login") ||
-    hash.startsWith("#admin/login") ||
+    hash === "#/admin/login" ||
+    hash === "#admin/login" ||
     hash === "#admin" ||
-    hash.startsWith("#admin/") ||
     search.includes("admin/login") ||
     search.includes("admin=login")
   );
 }
+
 async function handleCustLogout() {
   try {
     const { error } = await sb.auth.signOut();
@@ -3605,60 +3518,45 @@ function buildTelegramHref(raw) {
 function buildWhatsappHref(raw) {
   const digits = String(raw || "").replace(/[^0-9]/g, "");
   return digits ? "https://wa.me/" + digits : "https://wa.me/";
-}function applyRouting() {
-  const adminOuter = document.getElementById('admin-outer');
-  const customerOuter = document.getElementById('customer-outer');
-  const isAdmin = typeof isAdminPath === 'function' ? isAdminPath() : false;
+}
 
-  if (!authReady && !isAdmin) {
-    if (adminOuter) adminOuter.style.display = 'none';
-    if (customerOuter) customerOuter.style.display = 'none';
+function applyRouting() {
+  if (!authReady) {
+    document.getElementById('admin-outer').style.display = 'none';
+    document.getElementById('customer-outer').style.display = 'none';
     return;
   }
+  const isAdmin = isAdminPath();
+  document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
 
-  if (adminOuter) adminOuter.style.display = isAdmin ? 'flex' : 'none';
-  if (customerOuter) customerOuter.style.display = isAdmin ? 'none' : 'flex';
+  if (!isAdmin) {
+    const loggedIn = !!state.customerLoggedIn;
 
-  if (isAdmin) {
-    const adminLoggedIn = !!(typeof state !== 'undefined' && state && state.adminLoggedIn);
-    const adminAuth = document.getElementById('admin-auth-screen');
-    const adminApp = document.getElementById('admin-app-screen');
+    document.getElementById('cust-auth-screen').style.display =
+      loggedIn ? 'none' : 'flex';
 
-    if (adminAuth) adminAuth.style.display = adminLoggedIn ? 'none' : 'flex';
-    if (adminApp) adminApp.style.display = adminLoggedIn ? 'flex' : 'none';
+    document.getElementById('cust-app-screen').style.display =
+      loggedIn ? 'flex' : 'none';
 
-    if (adminLoggedIn && typeof renderAll === 'function') {
-      renderAll();
+    if (loggedIn) {
+      const lastPage = sessionStorage.getItem('custLastPage') || 'home';
+
+      document.querySelectorAll('#cust-app-screen .page')
+        .forEach(p => p.classList.remove('active'));
+
+      const page = document.getElementById('cust-page-' + lastPage);
+      if (page) page.classList.add('active');
+      else document.getElementById('cust-page-home')?.classList.add('active');
     }
-    return;
-  }
-
-  const loggedIn = !!(typeof state !== 'undefined' && state && state.customerLoggedIn);
-  const custAuth = document.getElementById('cust-auth-screen');
-  const custApp = document.getElementById('cust-app-screen');
-
-  if (custAuth) custAuth.style.display = loggedIn ? 'none' : 'flex';
-  if (custApp) custApp.style.display = loggedIn ? 'flex' : 'none';
-
-  if (loggedIn) {
-    const lastPage = sessionStorage.getItem('custLastPage') || 'home';
-
-    document.querySelectorAll('#cust-app-screen .page')
-      .forEach(p => p.classList.remove('active'));
-
-    const page = document.getElementById('cust-page-' + lastPage);
-    if (page) page.classList.add('active');
-    else document.getElementById('cust-page-home')?.classList.add('active');
   }
 }
 
 window.addEventListener("hashchange", applyRouting);
 window.addEventListener("popstate", applyRouting);
-window.addEventListener("storage", applyRouting);
 window.addEventListener("DOMContentLoaded", () => {
-  applyRouting();
-  if (typeof generateLoginCaptcha === "function") generateLoginCaptcha();
-  if (typeof renderLiveFeed === "function") renderLiveFeed();
+  generateLoginCaptcha();
+  renderLiveFeed();
 });
 
 function renderLiveFeed() {
