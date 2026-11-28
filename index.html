@@ -2367,6 +2367,7 @@ let firebaseUser = null;
     let globalStateListener = null;
     let customerProfilesListener = null;
     let authReady = false;
+    let adminAuthenticated = false;
     let pendingRegistrationProfile = null;
 
     const FIREBASE_DB_URL = "https://globel-e-commerce-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -2809,16 +2810,10 @@ function syncBalanceFromLedger(userId, ledgerBalance) {
 }
 // ================= SUPABASE REALTIME SYNC =================
 
-
 let globalStateChannel = null;
 let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
-
-// Missing channel references (FIX)
-let adminDepositRequestsChannel = null;
-let adminWithdrawRequestsChannel = null;
-let customerTxLiveChannel = null;
 
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
@@ -2840,29 +2835,14 @@ async function startRealtimeSync() {
     return;
   }
 
-// CLEANUP ALL OLD REALTIME CHANNELS
-const oldChannels = sb.getChannels().filter(ch =>
-  ch.topic === "realtime:admin-deposit-requests" ||
-  ch.topic === "realtime:admin-withdraw-requests" ||
-  ch.topic === "realtime:admin-global-state" ||
-  ch.topic === "realtime:admin-customer-profiles" ||
-  ch.topic === "realtime:admin-wallet-ledger" ||
-  ch.topic.startsWith("realtime:customer-tx-live-")
-);
-
-for (const channel of oldChannels) {
-  try {
-    await sb.removeChannel(channel);
-  } catch (err) {
-    console.warn("Realtime cleanup warning:", err);
+  // Remove channels from any previous session before creating fresh ones.
+  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
+    if (channel) await sb.removeChannel(channel);
   }
-}
-
-// Reset saved channel references
-globalStateChannel = null;
-customerProfilesChannel = null;
-profileChannel = null;
-adminLuckyOrdersChannel = null;
+  globalStateChannel = null;
+  customerProfilesChannel = null;
+  profileChannel = null;
+  adminLuckyOrdersChannel = null;
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2989,32 +2969,18 @@ adminLuckyOrdersChannel = null;
 
   await refreshCustomerTx();
 
- // Customer Transaction Realtime
-customerTxLiveChannel = sb
-  .channel("customer-tx-live-" + user.id)
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "deposit_requests",
-      filter: "user_id=eq." + user.id
-    },
-    refreshCustomerTx
-  )
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "withdraw_requests",
-      filter: "user_id=eq." + user.id
-    },
-    refreshCustomerTx
-  )
-  .subscribe((status, err) => {
-    console.log("Customer TX Realtime:", status, err || "");
-  });
+  sb.channel("customer-tx-live-" + user.id)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "withdraw_requests", filter: "user_id=eq." + user.id },
+      refreshCustomerTx
+    )
+    .subscribe();
     profileChannel = sb.channel("admin-wallet-ledger")
       .on("postgres_changes", {
         event: "*", schema: "public", table: "wallet_ledger"
@@ -3212,6 +3178,7 @@ function saveState() {
 let luckyOrdersChannel = null;
 let customerDepositChannel = null;
 async function handleSupabaseAuth(user) {
+  adminAuthenticated = false;
   firebaseUser = null;
   demoLuckyOrders = {};
   demoLuckyFunds = {};
@@ -3250,6 +3217,7 @@ async function handleSupabaseAuth(user) {
 
     // Admin account
     if (profileRow.role === "admin") {
+      adminAuthenticated = true;
       const { data: appData, error: appError } = await sb
         .from("app_state")
         .select("state")
@@ -3576,7 +3544,7 @@ function applyRouting() {
 
   if (!authReady) return;
 
-  if (isAdmin && !state.customerLoggedIn) {
+  if (isAdmin && !adminAuthenticated) {
     adminAuth.style.display = 'flex';
     adminApp.style.display = 'none';
   }
@@ -6125,6 +6093,7 @@ async function decideAdminTx(id, decision) {
 
 
 async function handleAdminLogout() {
+  adminAuthenticated = false;
   try {
     const { error } = await sb.auth.signOut();
 
