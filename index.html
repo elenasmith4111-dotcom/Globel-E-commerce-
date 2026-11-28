@@ -1414,7 +1414,10 @@
 }
 
 #cust-app-screen .nav-item.active {
-  color: #fde68a !important;/* FORCE LOGIN SCREEN & CARD THEME */
+  color: #fde68a !important;
+}
+
+/* FORCE LOGIN SCREEN & CARD THEME */
 html body #customer-outer #cust-auth-screen.auth-box {
   background: linear-gradient(155deg, #0b1021 0%, #171942 50%, #0d2638 100%) !important;
   padding: 22px 16px !important;
@@ -1510,8 +1513,6 @@ html body #customer-outer #cust-auth-screen .btn-primary {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   color: #ffffff !important;
   box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35) !important;
-}
-  font-weight: 700;
 }
 
 #cust-app-screen .nav-item.active i {
@@ -3521,14 +3522,27 @@ function buildWhatsappHref(raw) {
 }
 
 function applyRouting() {
-  if (!authReady) {
-    document.getElementById('admin-outer').style.display = 'none';
-    document.getElementById('customer-outer').style.display = 'none';
-    return;
-  }
   const isAdmin = isAdminPath();
-  document.getElementById('admin-outer').style.display = isAdmin ? 'flex' : 'none';
-  document.getElementById('customer-outer').style.display = isAdmin ? 'none' : 'flex';
+  const adminOuter = document.getElementById('admin-outer');
+  const customerOuter = document.getElementById('customer-outer');
+  const adminAuth = document.getElementById('admin-auth-screen');
+  const adminApp = document.getElementById('admin-app-screen');
+
+  // Admin login route should render immediately, even while Supabase auth initializes.
+  adminOuter.style.display = isAdmin ? 'flex' : 'none';
+  customerOuter.style.display = isAdmin ? 'none' : (authReady ? 'flex' : 'none');
+
+  if (isAdmin && !authReady) {
+    adminAuth.style.display = 'flex';
+    adminApp.style.display = 'none';
+  }
+
+  if (!authReady) return;
+
+  if (isAdmin && !state.customerLoggedIn) {
+    adminAuth.style.display = 'flex';
+    adminApp.style.display = 'none';
+  }
 
   if (!isAdmin) {
     const loggedIn = !!state.customerLoggedIn;
