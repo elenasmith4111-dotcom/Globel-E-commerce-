@@ -2814,8 +2814,22 @@ let globalStateChannel = null;
 let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
+let adminDepositRequestsChannel = null;
+let adminWithdrawRequestsChannel = null;
+let customerTxLiveChannel = null;
+let realtimeSyncInFlight = null;
 
-async function startRealtimeSync() {
+function startRealtimeSync() {
+  // Prevent overlapping auth callbacks from initializing realtime twice.
+  if (realtimeSyncInFlight) return realtimeSyncInFlight;
+  realtimeSyncInFlight = startRealtimeSyncImpl().finally(() => {
+    realtimeSyncInFlight = null;
+  });
+  return realtimeSyncInFlight;
+}
+
+
+async function startRealtimeSyncImpl() {
   const { data: authData, error: authError } = await sb.auth.getUser();
   if (authError || !authData?.user) {
     setBackendStatus(false);
@@ -2835,14 +2849,38 @@ async function startRealtimeSync() {
     return;
   }
 
-  // Remove channels from any previous session before creating fresh ones.
-  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
-    if (channel) await sb.removeChannel(channel);
+  // Remove this app's previous realtime subscriptions before creating fresh ones.
+  const appRealtimeTopics = new Set([
+    "admin-global-state",
+    "admin-customer-profiles",
+    "admin-wallet-ledger",
+    "admin-deposit-requests",
+    "admin-withdraw-requests",
+    "customer-tx-live-" + user.id,
+    "customer-profile-wallet-" + user.id
+  ]);
+  const trackedChannels = [
+    globalStateChannel, customerProfilesChannel, profileChannel,
+    adminLuckyOrdersChannel, adminDepositRequestsChannel,
+    adminWithdrawRequestsChannel, customerTxLiveChannel
+  ].filter(Boolean);
+  const existingChannels = typeof sb.getChannels === "function" ? sb.getChannels() : [];
+  const cleanupChannels = new Set(trackedChannels);
+  for (const ch of existingChannels) {
+    if (appRealtimeTopics.has(String(ch.topic || "").replace(/^realtime:/, ""))) {
+      cleanupChannels.add(ch);
+    }
+  }
+  for (const channel of cleanupChannels) {
+    await sb.removeChannel(channel);
   }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
   adminLuckyOrdersChannel = null;
+  adminDepositRequestsChannel = null;
+  adminWithdrawRequestsChannel = null;
+  customerTxLiveChannel = null;
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2925,25 +2963,17 @@ async function startRealtimeSync() {
 
     await loadGlobalState();
     await loadCustomerProfiles();
-
-    if (sb.getChannels) {
-      const existingDep = sb.getChannels().find(ch => ch.topic === "realtime:admin-deposit-requests");
-      const existingWd = sb.getChannels().find(ch => ch.topic === "realtime:admin-withdraw-requests");
-      if (existingDep) await sb.removeChannel(existingDep);
-      if (existingWd) await sb.removeChannel(existingWd);
-    }
-
     await syncLiveTransactionsFromSupabase();
     renderAdminTxLists();
 
-    sb.channel("admin-deposit-requests")
+    adminDepositRequestsChannel = sb.channel("admin-deposit-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposit_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
       })
       .subscribe();
 
-    sb.channel("admin-withdraw-requests")
+    adminWithdrawRequestsChannel = sb.channel("admin-withdraw-requests")
       .on("postgres_changes", { event: "*", schema: "public", table: "withdraw_requests" }, async () => {
         await syncLiveTransactionsFromSupabase();
         renderAdminTxLists();
@@ -2969,7 +2999,7 @@ async function startRealtimeSync() {
 
   await refreshCustomerTx();
 
-  sb.channel("customer-tx-live-" + user.id)
+  customerTxLiveChannel = sb.channel("customer-tx-live-" + user.id)
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
