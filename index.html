@@ -5264,70 +5264,150 @@ async function creditLedgerEntry(userId, amount, entryType = "commission") {
   }
 
   return totalBal;
-}
-async function completeDemoLuckyOrder(orderId) {
+}async function completeDemoLuckyOrder(orderId) {
   const u = typeof getActiveUser === "function" ? getActiveUser() : null;
   if (!u) return;
 
   const nextTaskNum = Number(u.completedTasks || 0) + 1;
+
   const order = (orderId && demoLuckyOrders[orderId])
     ? demoLuckyOrders[orderId]
     : Object.values(demoLuckyOrders || {}).find(
-        o => o && o.status !== "Approved" && o.status !== "Deleted" && Number(o.taskNum) === nextTaskNum
+        o =>
+          o &&
+          o.status !== "Approved" &&
+          o.status !== "Deleted" &&
+          Number(o.taskNum) === nextTaskNum
       );
 
   if (!order) return;
 
-const reqAmt = Math.abs(Number(order.amount || 0));
-const comm = Number(order.commission || 0);
-const approvedForThisOrder = Number(
-  luckyOrderApprovedFunds[String(order.id)] || 0
-);
+  const reqAmt = Math.abs(Number(order.amount || 0));
+  const comm = Number(order.commission || 0);
 
-if (reqAmt <= 0 || approvedForThisOrder < reqAmt) {
-  openCustModal('deposit1', reqAmt.toFixed(2), String(order.id));
-  return;
-}
+  const approvedForThisOrder = Number(
+    luckyOrderApprovedFunds[String(order.id)] || 0
+  );
+
+  if (reqAmt <= 0 || approvedForThisOrder < reqAmt) {
+    openCustModal("deposit1", reqAmt.toFixed(2), String(order.id));
+    return;
+  }
+
+  if (window.__luckyCompleteLock) return;
+  window.__luckyCompleteLock = true;
 
   try {
-   const updatedBal = await creditLedgerEntry(
-      u.id,
-      comm
+    // Credit commission to ledger
+    const updatedBal = await creditLedgerEntry(u.id, comm);
+
+    // Re-fetch current user state
+    const currentUser =
+      (state.users || []).find(x => x.id === u.id) || u;
+
+    // Update task count
+    const nextCompletedCount = Math.min(
+      Number(currentUser.totalTasks || 25),
+      Number(currentUser.completedTasks || 0) + 1
     );
 
-    u.completedTasks = Math.min(Number(u.totalTasks || 25), Number(u.completedTasks || 0) + 1);
-    if (Number.isFinite(Number(updatedBal))) {
-      u.balance = Number(updatedBal);
-    }
-    u.todayEarn = Number(u.todayEarn || 0) + comm;
-    u.productRevealed = false;
-    u.pendingTaskCommission = null;
+    // Update today's commission
+    const nextTodayEarn = Number(
+      (Number(currentUser.todayEarn || 0) + comm).toFixed(2)
+    );
 
+    currentUser.completedTasks = nextCompletedCount;
+    currentUser.tasksCompleted = nextCompletedCount;
+
+    currentUser.todayEarn = nextTodayEarn;
+    currentUser.todayCommission = nextTodayEarn;
+
+    currentUser.productRevealed = false;
+    currentUser.pendingTaskCommission = null;
+    currentUser._taskSyncUntil = Date.now() + 8000;
+
+    if (Number.isFinite(Number(updatedBal))) {
+      currentUser.balance = Number(updatedBal);
+    }
+
+    // Add completed Lucky Order to history
     state.ordersHistory.unshift({
       userId: u.id,
-      taskNum: Number(order.taskNum || u.completedTasks),
+      taskNum: nextCompletedCount,
       name: (order.product || "Lucky Order") + " (Lucky)",
       store: "VIP Lucky",
       comm: comm,
-      img: order.img || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80"
+      img: order.img ||
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80"
     });
 
+    // Sync task count and today's commission to Supabase metadata
+    const { data: profMetaRow, error: metaReadError } = await sb
+      .from("profiles")
+      .select("metadata")
+      .eq("id", u.id)
+      .maybeSingle();
+
+    if (metaReadError) throw metaReadError;
+
+    const nextMeta = {
+      ...(profMetaRow?.metadata || {}),
+      completedTasks: nextCompletedCount,
+      tasksCompleted: nextCompletedCount,
+      todayEarn: nextTodayEarn,
+      todayCommission: nextTodayEarn,
+      productRevealed: false,
+      pendingTaskCommission: null
+    };
+
+    delete nextMeta.balance;
+    delete nextMeta.id;
+    delete nextMeta.email;
+    delete nextMeta.loginPassword;
+
+    const { error: metaUpdateError } = await sb
+      .from("profiles")
+      .update({ metadata: nextMeta })
+      .eq("id", u.id);
+
+    if (metaUpdateError) throw metaUpdateError;
+
+    // Mark Lucky Order completed
     if (order.id && u.id) {
-      demoLuckyOrders[order.id] = { ...order, status: "Approved", completedAt: Date.now() };
+      demoLuckyOrders[order.id] = {
+        ...order,
+        status: "Approved",
+        completedAt: Date.now()
+      };
+
       const { error } = await sb
         .from("lucky_orders")
-        .update({ status: "Approved" })
+        .update({
+          status: "Approved"
+        })
         .eq("id", order.id)
         .eq("user_id", u.id);
-      if (error) console.warn("Lucky order update warning:", error.message);
+
+      if (error) {
+        console.warn("Lucky order update warning:", error.message);
+      }
     }
 
     renderAll();
-    if (typeof saveState === "function") saveState();
-    alert(`Order Grabbed & Completed! +$${comm.toFixed(2)} commission added.`);
+
+    if (typeof saveState === "function") {
+      saveState();
+    }
+
+    alert(
+      `Lucky Order Completed! Task ${nextCompletedCount} counted. +$${comm.toFixed(2)} commission added to today's earnings.`
+    );
+
   } catch (err) {
-    console.error("Complete lucky order error:", err);
-    alert(err.message || "Could not complete lucky order.");
+    console.error("Complete Lucky Order error:", err);
+    alert(err.message || "Could not complete Lucky Order.");
+  } finally {
+    window.__luckyCompleteLock = false;
   }
 }
     async function updateCustLoginPassInline() {
