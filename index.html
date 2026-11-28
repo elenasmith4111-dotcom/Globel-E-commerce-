@@ -3568,6 +3568,8 @@ function applyRouting() {
 
 window.addEventListener("hashchange", applyRouting);
 window.addEventListener("popstate", applyRouting);
+// Render the requested route immediately; do not wait for auth callbacks.
+applyRouting();
 window.addEventListener("DOMContentLoaded", () => {
   generateLoginCaptcha();
   renderLiveFeed();
