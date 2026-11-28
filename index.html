@@ -2810,6 +2810,7 @@ let globalStateChannel = null;
 let customerProfilesChannel = null;
 let profileChannel = null;
 let adminLuckyOrdersChannel = null;
+let customerTxLiveChannel = null;
 
 async function startRealtimeSync() {
   const { data: authData, error: authError } = await sb.auth.getUser();
@@ -2832,13 +2833,14 @@ async function startRealtimeSync() {
   }
 
   // Remove channels from any previous session before creating fresh ones.
-  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel]) {
+  for (const channel of [globalStateChannel, customerProfilesChannel, profileChannel, adminLuckyOrdersChannel, customerTxLiveChannel]) {
     if (channel) await sb.removeChannel(channel);
   }
   globalStateChannel = null;
   customerProfilesChannel = null;
   profileChannel = null;
   adminLuckyOrdersChannel = null;
+  customerTxLiveChannel = null;
 
   if (myProfile.role === "admin") {
     const loadGlobalState = async () => {
@@ -2965,7 +2967,13 @@ async function startRealtimeSync() {
 
   await refreshCustomerTx();
 
-  sb.channel("customer-tx-live-" + user.id)
+  // Keep this channel single-instance; auth events may invoke this function repeatedly.
+  const customerTxTopic = "realtime:customer-tx-live-" + user.id;
+  if (sb.getChannels) {
+    const existingCustomerTx = sb.getChannels().find(ch => ch.topic === customerTxTopic);
+    if (existingCustomerTx) await sb.removeChannel(existingCustomerTx);
+  }
+  customerTxLiveChannel = sb.channel("customer-tx-live-" + user.id)
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "deposit_requests", filter: "user_id=eq." + user.id },
